@@ -1,0 +1,207 @@
+name: android-demo
+
+# Proves the emulator behaves like a usable phone: installs a real app, puts a
+# video on the device, tries to play it, and commits what the screen actually
+# showed. Evidence lands in diagnostics/ so it is readable without logging in.
+#
+# Path-filtered so it only runs when the demo itself changes.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android-headless/demo/**"
+      - ".github/workflows/android-demo.yml"
+
+permissions:
+  contents: write  # the evidence step commits its report
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Make /dev/kvm accessible
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install emulator runtime libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2t64 || \
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2
+
+      - name: Install SDK and system image
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/clt.zip" \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q -o "$RUNNER_TEMP/clt.zip" -d "$ANDROID_HOME/cmdline-tools"
+          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager --install platform-tools emulator \
+            "system-images;android-34;google_apis;x86_64"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/avd" "$RUNNER_TEMP/android-user"
+          echo "ANDROID_AVD_HOME=$RUNNER_TEMP/avd" >> "$GITHUB_ENV"
+          echo "ANDROID_USER_HOME=$RUNNER_TEMP/android-user" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Create AVD
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
+          echo no | avdmanager create avd -n headless \
+            -k "system-images;android-34;google_apis;x86_64" --device pixel_6 --force
+          if [ ! -f "$ANDROID_AVD_HOME/headless.ini" ] && \
+             [ -f "$ANDROID_USER_HOME/avd/headless.ini" ]; then
+            cp -r "$ANDROID_USER_HOME/avd/." "$ANDROID_AVD_HOME/"
+          fi
+          test -f "$ANDROID_AVD_HOME/headless.ini"
+
+      - name: Boot and run the demo
+        run: |
+          log="$RUNNER_TEMP/demo.log"
+          : > "$log"
+          set -Eeuo pipefail
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+          out="android-headless/demo/out"
+          mkdir -p "$out"
+
+          nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
+            -no-snapshot-save -no-snapshot-load -no-metrics \
+            -gpu swiftshader_indirect >>"$log" 2>&1 &
+          adb wait-for-device
+          deadline=$((SECONDS + 420))
+          until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+            [ "$SECONDS" -ge "$deadline" ] && { echo "boot timeout" >>"$log"; exit 1; }
+            sleep 3
+          done
+          for s in window_animation_scale transition_animation_scale animator_duration_scale; do
+            adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
+          done
+          echo "booted android $(adb shell getprop ro.build.version.release | tr -d '\r')" >>"$log"
+
+          echo "=== A: media/browser apps already in this image ===" >>"$log"
+          adb shell pm list packages 2>/dev/null \
+            | grep -Ei 'gallery|photo|video|chrome|browser|youtube|media|player|vlc' \
+            >>"$log" 2>&1 || true
+
+          echo "=== B: put a real video on the device ===" >>"$log"
+          vid=""
+          for dest in /sdcard/Download/ /sdcard/Movies/ /sdcard/ /data/local/tmp/; do
+            if adb push android-headless/demo/test-video.mp4 "$dest" >>"$log" 2>&1; then
+              vid="${dest%/}/test-video.mp4"
+              echo "pushed to $vid" >>"$log"
+              break
+            fi
+            echo "push to $dest failed" >>"$log"
+          done
+          [ -n "$vid" ] || echo "!! could not place the video anywhere" >>"$log"
+          adb shell ls -la /sdcard/Download 2>&1 | tail -5 >>"$log" || true
+
+          echo "=== C: ask the system to play it ===" >>"$log"
+          if [ -n "$vid" ]; then
+            adb shell am start -a android.intent.action.VIEW \
+              -d "file://$vid" -t video/mp4 >>"$log" 2>&1 || true
+          fi
+          sleep 6
+          adb exec-out screencap -p > "$out/01-system-player.png" 2>>"$log" || true
+          adb shell dumpsys activity activities 2>/dev/null \
+            | grep -m3 -E 'topResumedActivity|ResumedActivity' >>"$log" 2>&1 || true
+          adb shell dumpsys media_session 2>/dev/null | grep -m5 -i 'state=' >>"$log" 2>&1 || true
+
+          echo "=== D: install a real video app from F-Droid (VLC) ===" >>"$log"
+          meta=$(curl -fsS --max-time 30 https://f-droid.org/api/v1/packages/org.videolan.vlc || true)
+          install_ok=no
+          for code in $(printf '%s' "$meta" \
+                        | grep -o '"versionCode":[0-9]*' | cut -d: -f2 | head -4); do
+            url="https://f-droid.org/repo/org.videolan.vlc_${code}.apk"
+            echo "trying $url" >>"$log"
+            if curl -fsS --max-time 150 -o "$RUNNER_TEMP/vlc.apk" "$url" 2>>"$log" \
+               && adb install -r "$RUNNER_TEMP/vlc.apk" >>"$log" 2>&1; then
+              install_ok=yes; echo "installed versionCode=$code" >>"$log"; break
+            fi
+          done
+
+          if [ "$install_ok" = yes ] && [ -n "$vid" ]; then
+            echo "=== E: play the video in VLC ===" >>"$log"
+            adb shell am start -a android.intent.action.VIEW \
+              -d "file://$vid" -t video/mp4 >>"$log" 2>&1 || true
+            sleep 12
+            adb exec-out screencap -p > "$out/02-vlc-playing.png" 2>>"$log" || true
+            adb shell dumpsys activity activities 2>/dev/null \
+              | grep -m3 -E 'topResumedActivity|ResumedActivity' >>"$log" 2>&1 || true
+            adb shell dumpsys media_session 2>/dev/null | grep -m5 -i 'state=' >>"$log" 2>&1 || true
+          else
+            echo "skipping VLC playback (install_ok=$install_ok vid=$vid)" >>"$log"
+          fi
+
+          echo "=== F: media/decoder lines in logcat ===" >>"$log"
+          adb logcat -d 2>/dev/null | grep -Ei 'MediaCodec|c2\.|OMX|VideoDecoder|OMXClient' \
+            | tail -25 >>"$log" 2>&1 || true
+
+          echo "=== G: captured files ===" >>"$log"
+          ls -la "$out" >>"$log" 2>&1 || true
+          cat "$log"
+
+      - name: Publish demo evidence
+        if: always()
+        run: |
+          file="diagnostics/demo-${GITHUB_RUN_ID}.txt"
+          mkdir -p "$(dirname "$file")"
+          {
+            echo "## android-demo run $GITHUB_RUN_ID"
+            echo "job status: ${{ job.status }}"
+            date -u
+            echo
+            echo "### captured files"
+            ls -la android-headless/demo/out/ 2>&1 || true
+            echo
+            echo "### checksums"
+            md5sum android-headless/demo/out/* 2>&1 || true
+            echo
+            echo "### screenshot dimensions"
+          } > "$file"
+          file android-headless/demo/out/*.png >>"$file" 2>&1 || echo "(no screenshots)" >>"$file"
+          {
+            echo
+            echo "### demo.log"
+            tail -180 "$RUNNER_TEMP/demo.log" 2>/dev/null || echo "(none)"
+          } >> "$file"
+          echo "=== evidence ==="; cat "$file"
+          git config user.email "ci@users.noreply.github.com"
+          git config user.name  "android-ci"
+          git add "$file"
+          git commit -m "CI demo evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
+          git push origin HEAD:main || echo "push of evidence failed"
+
+      - name: Upload captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-captures
+          path: android-headless/demo/out/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -25,6 +25,20 @@ jobs:
     timeout-minutes: 105
 
     steps:
+      # Hard stop. On a public repository, Actions logs are readable by anyone,
+      # so the session address printed below would be public -- and anyone who
+      # has it gets a shell on this runner holding your repo token. There is no
+      # way to open this session safely on a public repo, so refuse outright.
+      - name: Refuse to run on a public repository
+        if: ${{ !github.event.repository.private }}
+        run: |
+          echo "::error::This workflow opens an interactive shell into the runner."
+          echo "This repository is PUBLIC, and Actions logs on public repositories are"
+          echo "readable by anyone, so the session address would be public too."
+          echo "Fix: make the repository private (Settings -> General -> Danger Zone),"
+          echo "then run this workflow again."
+          exit 1
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
