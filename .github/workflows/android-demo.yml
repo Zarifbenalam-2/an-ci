@@ -164,13 +164,15 @@ jobs:
           fi
 
           say "E0: clear the way for the YouTube app"
-          # A permission dialog was covering YouTube, and Chrome's first-run page
-          # kept grabbing focus. Pre-grant so no dialog appears, and stop Chrome.
+          # A permission dialog was covering YouTube, the notification shade left
+          # over from the swipe was covering the screen, and Chrome's first-run
+          # page kept grabbing focus. Deal with all three.
+          adb shell cmd statusbar collapse >>"$log" 2>&1 || true
           adb shell pm grant com.google.android.youtube android.permission.POST_NOTIFICATIONS \
             >>"$log" 2>&1 || true
           adb shell am force-stop com.android.chrome >>"$log" 2>&1 || true
           adb shell am force-stop com.google.android.apps.youtube.music >>"$log" 2>&1 || true
-          sleep 2
+          sleep 3
 
           say "E: open a real video in the YouTube app"
           # Bind the URL to YouTube specifically (-p). Without it, Android gives
@@ -236,9 +238,12 @@ jobs:
           echo "=== evidence ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"
           git config user.name  "android-ci"
-          # Commit the screenshots too, not just the text report, so the captures
-          # are viewable straight from the repo.
-          git add "$file" android-headless/demo/out/ 2>/dev/null || git add "$file"
+          # Copy the captures somewhere git does not ignore, then commit them, so the
+          # screenshots are viewable straight from the repo.
+          dest="diagnostics/captures/${GITHUB_RUN_ID}"
+          mkdir -p "$dest"
+          cp android-headless/demo/out/*.png "$dest/" 2>/dev/null || true
+          git add "$file" "$dest" 2>/dev/null || git add "$file"
           git commit -m "CI demo evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
           # Two workflows can fire on one push and race for main, so retry with a
           # rebase instead of silently losing the report.

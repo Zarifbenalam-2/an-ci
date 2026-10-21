@@ -193,6 +193,16 @@ jobs:
           # software-rendered emulator the YouTube app can make adb calls block
           # forever, which is what hung an earlier run until the job ceiling
           # killed it and nothing was reported.
+          echo "+ clear the way for youtube" >>"$log"
+          # The notification shade opened earlier still covers the screen (which
+          # is why two captures came out byte-identical), and Chrome's first-run
+          # page keeps stealing focus. Clear both, and pre-grant so YouTube's own
+          # permission dialog never appears on top.
+          timeout 30 adb shell cmd statusbar collapse >>"$log" 2>&1 || true
+          timeout 30 adb shell am force-stop com.android.chrome >>"$log" 2>&1 || true
+          timeout 30 adb shell pm grant com.google.android.youtube \
+            android.permission.POST_NOTIFICATIONS >>"$log" 2>&1 || true
+          sleep 3
           echo "+ youtube" >>"$log"
           timeout 90 adb shell am start -W -p com.google.android.youtube \
             -a android.intent.action.VIEW \
@@ -250,9 +260,13 @@ jobs:
           echo "=== evidence ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"
           git config user.name  "android-ci"
-          # Commit the captures as well as the report, so the screenshots are
-          # viewable straight from the repository.
-          git add "$file" android-headless/runs/ 2>/dev/null || git add "$file"
+          # Copy the captures somewhere git does not ignore, then commit them, so
+          # the screenshots are viewable straight from the repository. (Plain
+          # `git add` of android-headless/runs/ is a no-op: `runs/` is ignored.)
+          dest="diagnostics/captures/${GITHUB_RUN_ID}"
+          mkdir -p "$dest"
+          cp android-headless/runs/*.png "$dest/" 2>/dev/null || true
+          git add "$file" "$dest" 2>/dev/null || git add "$file"
           git commit -m "CI evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
           # Another workflow can fire on the same push and race for main, so retry
           # with a rebase instead of silently losing the report.
