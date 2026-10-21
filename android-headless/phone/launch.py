@@ -165,6 +165,61 @@ def open_tunnel(vm: str) -> subprocess.Popen:
 
 # --- local host -------------------------------------------------------------
 
+def ensure_jdk() -> str | None:
+    """The SDK's sdkmanager/avdmanager are Java programs. Return a PATH dir with
+    java in it, or None if java is already available."""
+    if shutil.which("java"):
+        return None
+    found = sorted(TOOLS.glob("jdk-*/bin/java.exe")) + sorted(TOOLS.glob("jdk-*/bin/java"))
+    if found:
+        return str(found[0].parent)
+    url = ("https://api.adoptium.net/v3/binary/latest/17/ga/windows/x64/jdk/hotspot/normal/eclipse?project=jdk"
+           if os.name == "nt" else
+           "https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse?project=jdk")
+    log("fetching a portable JDK 17 (the SDK's tools are Java programs)")
+    if "windows" in url:
+        name = "jdk-portable.zip"
+        archive = download(url, TOOLS / "jdk-portable.zip")
+        with zipfile.ZipFile(archive) as zf:
+            zf.extractall(TOOLS)
+        exe = sorted(TOOLS.glob("jdk-*/bin/java.exe"))[0]
+    else:
+        import tarfile
+        archive = download(url, TOOLS / "jdk-portable.tar.gz")
+        import tarfile
+        with tarfile.open(archive) as tf:
+            tf.extractall(TOOLS)
+        exe = sorted(TOOLS.glob("jdk-*/bin/java"))[0]
+        exe.chmod(0o755)
+    log(f"portable JDK ready: {exe.parent}")
+    return str(exe.parent)
+
+
+def ensure_local_toolchain() -> None:
+    """Make sure a local Android SDK + emulator exist, installing if not."""
+    sdk = Path(os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
+               or (Path.home() / "Android" / "Sdk"))
+    emulator = sdk / "emulator" / ("emulator.exe" if os.name == "nt" else "emulator")
+    if emulator.exists():
+        return
+
+    log("no local Android SDK found -- installing one into phone/tools/ (portable, no admin)")
+    log("this is a one-time ~10 GB download and takes 10-20 minutes")
+    env = dict(os.environ)
+    if java_bin := ensure_jdk():
+        env["PATH"] = java_bin + os.pathsep + env.get("PATH", "")
+    script = HERE.parent / "setup_sdk.py"
+    env["ANDROID_HOME"] = str(TOOLS / "android-sdk")
+    result = subprocess.run([sys.executable, str(HERE.parent / "setup_sdk.py")], env=env)
+    if result.returncode != 0:
+        sys.exit(
+            "could not install the local SDK. The usual cause is a missing JDK 17 --\n"
+            "  install one (e.g. winget install --id EclipseAdoptium.Temurin.17.JDK)\n"
+            "  then run this again."
+        )
+    os.environ["ANDROID_HOME"] = env["ANDROID_HOME"]
+
+
 def ensure_local_device(adb: str) -> None:
     """Boot the local AVD if nothing is attached yet."""
     out = run([adb, "devices"]).stdout
@@ -172,15 +227,14 @@ def ensure_local_device(adb: str) -> None:
         log("a local emulator is already attached")
         return
 
+    ensure_local_toolchain()
+
     sdk = Path(os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
                or (Path.home() / "Android" / "Sdk"))
     emulator = sdk / "emulator" / ("emulator.exe" if os.name == "nt" else "emulator")
     if not emulator.exists():
-        sys.exit(
-            f"no local emulator at {emulator}.\n"
-            f"  Either run `python android-headless/setup_sdk.py` to install the SDK locally,\n"
-            f"  or use remote mode:  python phone/launch.py remote --vm user@host"
-        )
+        sys.exit(f"no emulator at {emulator} even after provisioning")
+
     log("booting the local emulator (no window; scrcpy provides the view)")
     subprocess.Popen(
         [str(emulator), "-avd", os.environ.get("AVD_NAME", "headless"),
