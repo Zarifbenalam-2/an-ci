@@ -158,7 +158,11 @@ jobs:
           mkdir -p "$out"
 
           adb logcat -c >>"$log" 2>&1 || true
-          adb shell screenrecord --time-limit 120 --bit-rate 4M /sdcard/run.mp4 >>"$log" 2>&1 &
+          # /sdcard is not shell-writable on this image ("Operation not
+          # permitted"); /data/local/tmp is.
+          rec=/data/local/tmp/run.mp4
+          adb shell rm -f "$rec" >>"$log" 2>&1 || true
+          adb shell screenrecord --time-limit 120 --bit-rate 4M "$rec" >>"$log" 2>&1 &
           sleep 2
 
           echo "+ adbctl size" >>"$log"
@@ -181,7 +185,8 @@ jobs:
 
           adb shell pkill -INT screenrecord >>"$log" 2>&1 || true
           sleep 3
-          adb pull /sdcard/run.mp4 "$out/run.mp4" >>"$log" 2>&1 || true
+          adb shell ls -la "$rec" >>"$log" 2>&1 || true
+          adb pull "$rec" "$out/run.mp4" >>"$log" 2>&1 || true
           adb logcat -d > "$out/logcat.txt" 2>&1 || true
 
           adb shell dumpsys window 2>/dev/null | grep -E 'mCurrentFocus|mFocusedApp' >>"$log" || true
