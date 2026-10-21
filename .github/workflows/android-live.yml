@@ -29,6 +29,9 @@ name: android-live
 on:
   workflow_dispatch:
     inputs:
+      authkey:
+        description: Tailscale auth key (reusable + ephemeral). Used for this run only.
+        required: true
       minutes:
         description: How long to keep the phone online (max ~340)
         required: false
@@ -111,20 +114,42 @@ jobs:
       # started here together.
       - name: Boot the phone and publish it on your tailnet
         env:
-          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+          TS_AUTHKEY: ${{ inputs.authkey }}
           MINUTES: ${{ inputs.minutes }}
         run: |
           set -Eeuo pipefail
+          # The key arrives as a dispatch input, so it is not a stored secret --
+          # mask it before anything can print it.
+          echo "::add-mask::$TS_AUTHKEY"
           log="$RUNNER_TEMP/live.log"
           : > "$log"
           export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+
+          # Progress beacon: this step's log is unavailable while it runs, so
+          # milestones are pushed into the repo where they can be read any time.
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          mkdir -p .session
+          echo "live run $GITHUB_RUN_ID started $(date -u +%H:%M:%SZ)" > .session/live-status.txt
+          beacon() {
+            git checkout -B session-push HEAD >/dev/null 2>&1 || true
+            git add .session >/dev/null 2>&1 || true
+            git -c commit.gpgsign=false commit -q -m "live beacon: $1" || true
+            for a in 1 2 3; do
+              git fetch -q origin main && git rebase -q origin/main \
+                && git push -q origin HEAD:main && return 0
+              sleep 3
+            done
+            return 0
+          }
+          fail() { beacon "FAILED: $1"; echo "!!! $1"; exit 1; }
 
           echo "--- joining the tailnet ---" | tee -a "$log"
           curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1
           sudo tailscale up --authkey "$TS_AUTHKEY" --hostname "android-phone" \
             --ephemeral --accept-dns=false >>"$log" 2>&1
           tsip=$(tailscale ip -4 | head -1)
-          echo "tailnet address: $tsip" | tee -a "$log"
+          beacon "on the tailnet as android-phone at $tsip"
 
           echo "--- booting the emulator ---" | tee -a "$log"
           nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
@@ -134,7 +159,8 @@ jobs:
           deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
             if [ "$SECONDS" -ge "$deadline" ]; then
-              echo "boot timed out"; tail -40 "$log"; exit 1
+              echo "boot timed out"; tail -40 "$log"
+              fail "boot timed out: $(tail -3 "$log" | tr '\n' ' ' | cut -c1-200)"
             fi
             sleep 3
           done
@@ -142,15 +168,24 @@ jobs:
             adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
           done
           echo "booted android $(adb shell getprop ro.build.version.release | tr -d '\r')" | tee -a "$log"
+          beacon "android booted at $tsip"
 
           echo "--- publishing the emulator's adb port on the tailnet ---" | tee -a "$log"
-          sudo apt-get install -y -qq socat >>"$log" 2>&1
           # The emulator listens on the runner's localhost only, so relay it onto
           # the tailnet interface. Reachable by your devices, nobody else.
-          nohup socat TCP-LISTEN:5555,fork,reuseaddr,bind="$tsip" TCP:127.0.0.1:5555 \
-            >>"$log" 2>&1 &
-          sleep 3
+          # Time-boxed: an apt mirror stall must not eat the whole session.
+          if timeout 180 sudo apt-get install -y -qq socat >>"$log" 2>&1; then
+            nohup timeout 86400 socat TCP-LISTEN:5555,fork,reuseaddr,bind="$tsip" \
+              TCP:127.0.0.1:5555 >>"$log" 2>&1 &
+          fi
+          sleep 5
+          if ! ss -ltn 2>/dev/null | grep -q 5555; then
+            # fallback: let tailscale itself forward the port, no socat needed
+            sudo tailscale serve --bg --tcp 5555 tcp://127.0.0.1:5555 >>"$log" 2>&1 \
+              || beacon "port relay may have failed"
+          fi
           ss -ltn 2>/dev/null | grep 5555 | tee -a "$log" || true
+          beacon "adb port published at $tsip:5555"
 
           echo
           echo "=============================================================="
