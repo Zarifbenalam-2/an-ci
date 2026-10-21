@@ -1,4 +1,5 @@
-To connect to the session locally, run: tmate -S /tmp/tmate-1001/PdhxUf attach
+To connect to the session locally, run: tmate -S /tmp/tmate-1001/iNcCHK attach
+ssh.tmate.io lookup failure. Retrying in 2 seconds (nodename nor servname provided, or not known)
 ssh.tmate.io lookup failure. Retrying in 2 seconds (nodename nor servname provided, or not known)
 ssh.tmate.io lookup failure. Retrying in 2 seconds (nodename nor servname provided, or not known)
 ssh.tmate.io lookup failure. Retrying in 2 seconds (nodename nor servname provided, or not known)
