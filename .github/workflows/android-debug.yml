@@ -140,10 +140,21 @@ jobs:
           }
           fail() { beacon "FAILED: $1"; echo "!!! $1"; exit 1; }
 
-          sudo apt-get install -y -qq tmate
+          # No apt here: apt-get install tmate hung for 18 minutes on one run
+          # (stuck lock / stalled mirror), which is a silly way to lose a job.
+          # tmate ships a static binary; fetching it cannot hang on dpkg.
+          beacon "fetching tmate"
+          mkdir -p "$RUNNER_TEMP/bin"
+          if ! timeout 180 curl -fsSL -o "$RUNNER_TEMP/tmate.tar.xz" \
+              https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz; then
+            fail "could not download the tmate binary"
+          fi
+          tar -xJf "$RUNNER_TEMP/tmate.tar.xz" -C "$RUNNER_TEMP/bin" --strip-components=1
+          export PATH="$RUNNER_TEMP/bin:$PATH"
+          tmate -V || fail "tmate binary is not runnable"
           # tmate needs a key of its own to reach the relay.
           [ -f "$HOME/.ssh/id_rsa" ] || ssh-keygen -t rsa -b 4096 -N "" -f "$HOME/.ssh/id_rsa" -q
-          beacon "tmate installed"
+          beacon "tmate ready"
 
           nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
             -no-snapshot-save -no-snapshot-load -no-metrics \
