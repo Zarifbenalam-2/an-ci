@@ -189,6 +189,22 @@ jobs:
           adb pull "$rec" "$out/run.mp4" >>"$log" 2>&1 || true
           adb logcat -d > "$out/logcat.txt" 2>&1 || true
 
+          # Bounded YouTube attempt. `timeout` is essential here: on a
+          # software-rendered emulator the YouTube app can make adb calls block
+          # forever, which is what hung an earlier run until the job ceiling
+          # killed it and nothing was reported.
+          echo "+ youtube" >>"$log"
+          timeout 90 adb shell am start -W -p com.google.android.youtube \
+            -a android.intent.action.VIEW \
+            -d "https://www.youtube.com/watch?v=aqz-KE-bpKQ" \
+            >>"$log" 2>&1 || echo "(youtube launch timed out)" >>"$log"
+          sleep 20
+          timeout 60 adb exec-out screencap -p > "$out/03-youtube.png" 2>>"$log" || true
+          timeout 40 adb shell dumpsys window 2>/dev/null \
+            | grep -m1 'mCurrentFocus' >>"$log" 2>&1 || true
+          timeout 40 adb shell dumpsys media_session 2>/dev/null \
+            | grep -m3 'state=' >>"$log" 2>&1 || true
+
           adb shell dumpsys window 2>/dev/null | grep -E 'mCurrentFocus|mFocusedApp' >>"$log" || true
           adb shell dumpsys activity activities 2>/dev/null | grep -m1 'ResumedActivity' >>"$log" || true
 
@@ -234,7 +250,9 @@ jobs:
           echo "=== evidence ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"
           git config user.name  "android-ci"
-          git add "$file"
+          # Commit the captures as well as the report, so the screenshots are
+          # viewable straight from the repository.
+          git add "$file" android-headless/runs/ 2>/dev/null || git add "$file"
           git commit -m "CI evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
           # Another workflow can fire on the same push and race for main, so retry
           # with a rebase instead of silently losing the report.
