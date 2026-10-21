@@ -4,10 +4,9 @@ name: android-device
 # (4 vCPU / 16 GB, /dev/kvm exposed), drives your app with adbctl.py, and returns
 # screenshots, a screen recording and logcat as build artifacts.
 #
-# Trigger by hand from the Actions tab (Run workflow), or on push. Each stage is
-# its own step so a failure names the phase that broke, and a diagnostics step
-# commits what it can read back into the repo so failures are debuggable without
-# logging in.
+# Each stage is its own step so a failure names the phase that broke, and a
+# diagnostics step commits what it can read back into the repo on failure, so
+# failures are debuggable without logging in.
 
 on:
   workflow_dispatch:
@@ -51,7 +50,7 @@ jobs:
           ls -l /dev/kvm || echo "WARNING: /dev/kvm is absent on this runner"
 
       # The emulator links against these at startup; a bare runner can be missing
-      # some of them, which shows up as "error while loading shared libraries".
+      # some, which shows up as "error while loading shared libraries".
       - name: Install emulator runtime libraries
         run: |
           sudo apt-get update -qq
@@ -91,84 +90,102 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
           echo no | avdmanager create avd -n headless \
             -k "system-images;android-34;google_apis;x86_64" \
             --device pixel_6 --force
-          avdmanager list avd
 
-      # Started with nohup so it survives into the following steps. Bounded so a
-      # boot that never completes fails in minutes with a readable log rather
-      # than hanging until the job ceiling.
-      - name: Boot emulator
+          # If the tools ignored ANDROID_AVD_HOME, move the result into it.
+          if [ ! -f "$ANDROID_AVD_HOME/headless.ini" ] && \
+             [ -f "$ANDROID_USER_HOME/avd/headless.ini" ]; then
+            cp -r "$ANDROID_USER_HOME/avd/." "$ANDROID_AVD_HOME/"
+          fi
+
+          echo "--- AVD home: $ANDROID_AVD_HOME ---"
+          ls -la "$ANDROID_AVD_HOME"
+          test -f "$ANDROID_AVD_HOME/headless.ini"
+          echo "--- emulator sees: ---"
+          emulator -list-avds
+
+      # Boot and drive in a single step: no question about whether a background
+      # process survives a step boundary, and every command lands in a log file
+      # that the diagnostics step commits on failure.
+      - name: Boot emulator and drive the device
         run: |
-          set -euo pipefail
+          log="$RUNNER_TEMP/device.log"
+          : > "$log"
+          set -Eeuo pipefail
+          trap 'rc=$?; echo "!!! FAILED rc=$rc at line $LINENO" >>"$log"' ERR
+
           export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
 
-          echo "--- acceleration check ---"
-          emulator -accel-check 2>&1 || true
-          echo "--- AVD home: ${ANDROID_AVD_HOME:-unset} ---"
-          ls -la "$ANDROID_AVD_HOME" 2>&1 || true
-          echo "--- emulator -list-avds ---"
-          emulator -list-avds 2>&1 || true
+          {
+            echo "--- accel-check ---"; emulator -accel-check 2>&1 || true
+            echo "--- emulator -list-avds ---"; emulator -list-avds 2>&1 || true
+            echo "--- launching ---"
+          } >>"$log" 2>&1
 
           nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
             -no-snapshot-save -no-snapshot-load -no-metrics \
-            -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
+            -gpu swiftshader_indirect >>"$log" 2>&1 &
           emu_pid=$!
-          echo "emulator pid=$emu_pid"
+          echo "emulator pid=$emu_pid" >>"$log"
 
           sleep 20
           if ! kill -0 "$emu_pid" 2>/dev/null; then
-            echo "emulator exited within 20s -- log follows"
-            cat "$RUNNER_TEMP/emulator.log"
-            exit 1
+            echo "emulator exited within 20s" >>"$log"
+            cat "$log"; exit 1
           fi
-          echo "--- first 40 log lines ---"; head -40 "$RUNNER_TEMP/emulator.log"
 
           deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
             if [ "$SECONDS" -ge "$deadline" ]; then
-              echo "boot did not complete within 7 minutes -- log follows"
-              cat "$RUNNER_TEMP/emulator.log"
-              adb devices -l || true
-              exit 1
+              echo "boot did not complete within 7 minutes" >>"$log"
+              cat "$log"; exit 1
             fi
             sleep 5
           done
 
           for s in window_animation_scale transition_animation_scale animator_duration_scale; do
-            adb shell settings put global "$s" 0.0 || true
+            adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
           done
-          echo "booted:"; adb devices -l
-          echo "android version: $(adb shell getprop ro.build.version.release | tr -d '\r')"
 
-      - name: Drive the device
-        run: |
-          set -euo pipefail
+          echo "--- adb devices ---" >>"$log"
+          adb devices -l >>"$log" 2>&1
+          adb shell getprop ro.build.version.release >>"$log" 2>&1
+
           out="android-headless/runs"
           mkdir -p "$out"
 
-          adb logcat -c || true
-          adb shell screenrecord --time-limit 120 --bit-rate 4M /sdcard/run.mp4 &
+          adb logcat -c >>"$log" 2>&1 || true
+          adb shell screenrecord --time-limit 120 --bit-rate 4M /sdcard/run.mp4 >>"$log" 2>&1 &
           sleep 2
 
-          python android-headless/adbctl.py size
-          python android-headless/adbctl.py open "${{ inputs.package || 'com.android.settings' }}"
+          echo "+ adbctl size" >>"$log"
+          python android-headless/adbctl.py size >>"$log" 2>&1
+
+          echo "+ adbctl open" >>"$log"
+          python android-headless/adbctl.py open "${{ inputs.package || 'com.android.settings' }}" >>"$log" 2>&1
           sleep 8
-          python android-headless/adbctl.py shot "$out/01-launch.png"
+
+          echo "+ adbctl shot 01" >>"$log"
+          python android-headless/adbctl.py shot "$out/01-launch.png" >>"$log" 2>&1
 
           # Example of scripted interaction: open the notification shade.
-          python android-headless/adbctl.py swipe 540 0 540 1400 --ms 250
+          echo "+ adbctl swipe" >>"$log"
+          python android-headless/adbctl.py swipe 540 0 540 1400 --ms 250 >>"$log" 2>&1
           sleep 2
-          python android-headless/adbctl.py shot "$out/02-shade.png"
 
-          python android-headless/adbctl.py shell getprop ro.build.version.release
+          echo "+ adbctl shot 02" >>"$log"
+          python android-headless/adbctl.py shot "$out/02-shade.png" >>"$log" 2>&1
 
-          adb shell pkill -INT screenrecord || true
+          adb shell pkill -INT screenrecord >>"$log" 2>&1 || true
           sleep 3
-          adb pull /sdcard/run.mp4 "$out/run.mp4" || true
-          adb logcat -d > "$out/logcat.txt" || true
-          echo "--- artifacts ---"; ls -la "$out"
+          adb pull /sdcard/run.mp4 "$out/run.mp4" >>"$log" 2>&1 || true
+          adb logcat -d > "$out/logcat.txt" 2>&1 || true
+
+          echo "--- artifacts ---" >>"$log"; ls -la "$out" >>"$log"
+          cat "$log"
 
       # The default token can push because of `permissions: contents: write`
       # above. This exists so failures are readable without logging in.
@@ -184,9 +201,10 @@ jobs:
             echo "### kvm"; ls -la /dev/kvm 2>&1 || true
             echo "### cpu virt"; egrep -c '(vmx|svm)' /proc/cpuinfo || true
             echo "### ANDROID_HOME"; echo "${ANDROID_HOME:-unset}"
-            echo "### emulator.log"; tail -200 "$RUNNER_TEMP/emulator.log" 2>/dev/null || echo "(none)"
-            echo "### AVD home"; echo "${ANDROID_AVD_HOME:-unset}"; ls -la "$ANDROID_AVD_HOME" 2>&1 || true
+            echo "### AVD home"; echo "${ANDROID_AVD_HOME:-unset}"
+            ls -la "${ANDROID_AVD_HOME:-/nonexistent}" 2>&1 || true
             echo "### emulator -list-avds"; emulator -list-avds 2>&1 || true
+            echo "### device.log"; tail -250 "$RUNNER_TEMP/device.log" 2>/dev/null || echo "(none)"
             echo "### adb devices"; adb devices -l 2>&1 || true
           } > "$file"
           echo "=== diagnostics ==="; cat "$file"
