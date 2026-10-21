@@ -258,7 +258,10 @@ def ensure_local_device(adb: str) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["local", "remote"])
+    ap.add_argument("mode", choices=["local", "remote", "attach"])
+    ap.add_argument("address", nargs="?",
+                    help="for attach: host:port of a device reachable on the network, "
+                         "e.g. the 100.x.y.z:5555 address a workflow printed")
     ap.add_argument("--vm", default=os.environ.get("PHONE_VM"),
                     help="ssh target of the VM, e.g. ubuntu@1.2.3.4 (or set PHONE_VM)")
     ap.add_argument("--serial", help="attach to an already-connected device instead")
@@ -278,7 +281,15 @@ def main() -> int:
     serial = args.serial
 
     try:
-        if args.mode == "remote":
+        if args.mode == "attach":
+            target = args.address or args.serial
+            if not target:
+                sys.exit("attach needs an address, e.g.  "
+                         "python phone/launch.py attach 100.64.1.2:5555")
+            log(f"attaching to {target} over the network")
+            run([adb, "connect", target])
+            serial = target
+        elif args.mode == "remote":
             if not args.vm:
                 sys.exit("remote mode needs --vm user@host (or set PHONE_VM)")
             ensure_remote_device(args.vm, args.skip_start)

@@ -1,0 +1,178 @@
+name: android-live
+
+# Boots an Android emulator on a runner and puts it on YOUR OWN private network,
+# so you can open a live, mouse-controllable window of it on your PC.
+#
+# Why a tunnel at all: the runner has no inbound network route, so nothing on
+# your PC can reach the emulator directly. Tailscale gives the runner an address
+# that only YOUR devices can reach, authenticated by your own tailnet. That
+# matters because Actions logs are readable by anyone on a public repo -- so this
+# design never depends on keeping a URL secret.
+#
+# Setup, once:
+#   1. Free Tailscale account, and install the Tailscale app on your PC.
+#   2. Tailscale admin -> Settings -> Keys -> Generate auth key.
+#      Choose: reusable, ephemeral. Copy it.
+#   3. Repo -> Settings -> Secrets and variables -> Actions -> New secret,
+#      name it TS_AUTHKEY, paste the key.
+#
+# Then run this workflow. It prints a 100.x.y.z address. On your PC:
+#
+#   adb connect 100.x.y.z:5555
+#   scrcpy -s 100.x.y.z:5555
+#
+# ...which gives you the live phone window. The portable adb and scrcpy that
+# phone/launch.py downloads work for this; nothing needs installing system-wide.
+
+on:
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: How long to keep the phone online (max ~340)
+        required: false
+        default: "110"
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    # GitHub's hard ceiling is 360 minutes per job. Leave room for setup.
+    timeout-minutes: 355
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Hard stop: on a public repo the logs are world-readable, and anything
+      # printed here would be too. Refuse rather than leak.
+      - name: Refuse to run on a public repository
+        if: ${{ !github.event.repository.private }}
+        run: |
+          echo "::error::This workflow publishes a live device. On a PUBLIC repository"
+          echo "the address would be publicly readable. Make the repository private first:"
+          echo "Settings -> General -> Danger Zone -> Change visibility -> Private."
+          exit 1
+
+      - name: Make /dev/kvm accessible
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install emulator runtime libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2t64 || \
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2
+
+      - name: Install SDK and system image
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/clt.zip" \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q -o "$RUNNER_TEMP/clt.zip" -d "$ANDROID_HOME/cmdline-tools"
+          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager --install platform-tools emulator \
+            "system-images;android-34;google_apis;x86_64"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/avd" "$RUNNER_TEMP/android-user"
+          echo "ANDROID_AVD_HOME=$RUNNER_TEMP/avd" >> "$GITHUB_ENV"
+          echo "ANDROID_USER_HOME=$RUNNER_TEMP/android-user" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Create AVD
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
+          echo no | avdmanager create avd -n headless \
+            -k "system-images;android-34;google_apis;x86_64" --device pixel_6 --force
+          if [ ! -f "$ANDROID_AVD_HOME/headless.ini" ] && \
+             [ -f "$ANDROID_USER_HOME/avd/headless.ini" ]; then
+            cp -r "$ANDROID_USER_HOME/avd/." "$ANDROID_AVD_HOME/"
+          fi
+          test -f "$ANDROID_AVD_HOME/headless.ini"
+
+      # Everything that must stay alive lives in this ONE step. A background
+      # process does not reliably survive a step boundary on hosted runners, so
+      # the tailnet, the emulator, the port relay and the hold-open loop are all
+      # started here together.
+      - name: Boot the phone and publish it on your tailnet
+        env:
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+          MINUTES: ${{ inputs.minutes }}
+        run: |
+          set -Eeuo pipefail
+          log="$RUNNER_TEMP/live.log"
+          : > "$log"
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+
+          echo "--- joining the tailnet ---" | tee -a "$log"
+          curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1
+          sudo tailscale up --authkey "$TS_AUTHKEY" --hostname "android-phone" \
+            --ephemeral --accept-dns=false >>"$log" 2>&1
+          tsip=$(tailscale ip -4 | head -1)
+          echo "tailnet address: $tsip" | tee -a "$log"
+
+          echo "--- booting the emulator ---" | tee -a "$log"
+          nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
+            -no-snapshot-save -no-snapshot-load -no-metrics \
+            -gpu swiftshader_indirect >>"$log" 2>&1 &
+          adb wait-for-device
+          deadline=$((SECONDS + 420))
+          until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "boot timed out"; tail -40 "$log"; exit 1
+            fi
+            sleep 3
+          done
+          for s in window_animation_scale transition_animation_scale animator_duration_scale; do
+            adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
+          done
+          echo "booted android $(adb shell getprop ro.build.version.release | tr -d '\r')" | tee -a "$log"
+
+          echo "--- publishing the emulator's adb port on the tailnet ---" | tee -a "$log"
+          sudo apt-get install -y -qq socat >>"$log" 2>&1
+          # The emulator listens on the runner's localhost only, so relay it onto
+          # the tailnet interface. Reachable by your devices, nobody else.
+          nohup socat TCP-LISTEN:5555,fork,reuseaddr,bind="$tsip" TCP:127.0.0.1:5555 \
+            >>"$log" 2>&1 &
+          sleep 3
+          ss -ltn 2>/dev/null | grep 5555 | tee -a "$log" || true
+
+          echo
+          echo "=============================================================="
+          echo "  PHONE IS LIVE for ${MINUTES} minutes."
+          echo
+          echo "  On your PC (Tailscale app running):"
+          echo "      adb connect ${tsip}:5555"
+          echo "      scrcpy -s ${tsip}:5555"
+          echo
+          echo "  Or with the portable tools this repo downloads:"
+          echo "      python android-headless/phone/launch.py attach ${tsip}:5555"
+          echo "=============================================================="
+          echo
+
+          end=$((SECONDS + MINUTES * 60))
+          while [ "$SECONDS" -lt "$end" ]; do
+            if ! kill -0 "$(pgrep -f 'qemu-system|emulator -avd' | head -1)" 2>/dev/null; then
+              echo "emulator is gone; ending the session early"
+              break
+            fi
+            sleep 30
+          done
+          echo "session window closed"
+          tail -20 "$log"
