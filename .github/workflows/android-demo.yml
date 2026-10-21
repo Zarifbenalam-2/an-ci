@@ -119,16 +119,21 @@ jobs:
             | grep -Ei 'youtube|chrome|gallery|photo|media|vlc' >>"$log" 2>&1 || true
 
           say "B: put a real video on the device"
+          say "B0: what /sdcard looks like on this image"
+          adb shell ls -la /sdcard >>"$log" 2>&1 || true
+          adb shell mount 2>/dev/null | grep -iE 'sdcard|fuse|emulated' >>"$log" 2>&1 || true
+          adb shell mkdir -p /sdcard/Download >>"$log" 2>&1 || true
+          # Push to an explicit file path: a bare directory path with a trailing
+          # slash makes adb try to create the directory as a file.
           vid=""
-          for dest in /sdcard/Download/ /sdcard/Movies/ /sdcard/; do
+          for dest in /sdcard/Download/test-video.mp4 \
+                      /sdcard/Movies/test-video.mp4 \
+                      /data/local/tmp/test-video.mp4; do
             if adb push android-headless/demo/test-video.mp4 "$dest" >>"$log" 2>&1; then
-              vid="${dest%/}/test-video.mp4"
-              echo "pushed to $vid" >>"$log"
-              break
+              vid="$dest"; echo "pushed to $vid" >>"$log"; break
             fi
           done
           [ -n "$vid" ] || echo "!! could not place the video" >>"$log"
-          adb shell ls -la /sdcard/Download 2>&1 | tail -4 >>"$log" || true
 
           say "C: install VLC from F-Droid"
           meta=$(curl -fsS --max-time 30 https://f-droid.org/api/v1/packages/org.videolan.vlc || true)
@@ -157,15 +162,21 @@ jobs:
           fi
 
           say "E: open a real video in the YouTube app"
-          adb shell am start -W -a android.intent.action.VIEW \
-            -d "$VIDEO_URL" >>"$log" 2>&1 || true
-          sleep 15
+          # Bind the URL to YouTube specifically (-p). Without it, Android gives
+          # http(s) links to Chrome, which then sits on its first-run consent
+          # page and never loads the page.
+          adb shell am start -W -p com.google.android.youtube \
+            -a android.intent.action.VIEW -d "$VIDEO_URL" >>"$log" 2>&1 || true
+          sleep 20
           adb exec-out screencap -p > "$out/02-youtube-app.png" 2>>"$log" || true
+          adb shell dumpsys window 2>/dev/null \
+            | grep -m1 'mCurrentFocus' >>"$log" 2>&1 || true
           adb shell dumpsys activity activities 2>/dev/null \
             | grep -m2 'topResumedActivity' >>"$log" 2>&1 || true
           adb shell dumpsys media_session 2>/dev/null | grep -m4 'state=' >>"$log" 2>&1 || true
-          adb shell dumpsys window 2>/dev/null \
-            | grep -m1 'mCurrentFocus' >>"$log" 2>&1 || true
+          say "E2: any YouTube complaints in logcat"
+          adb logcat -d 2>/dev/null | grep -iE 'youtube|WatchWhile|GmsClient' \
+            | tail -15 >>"$log" 2>&1 || true
 
           say "F: same URL in Chrome (fallback path)"
           adb shell am start -W -n com.android.chrome/com.google.android.apps.chrome.Main \
