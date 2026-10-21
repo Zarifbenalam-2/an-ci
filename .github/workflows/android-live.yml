@@ -10,11 +10,13 @@ name: android-live
 # design never depends on keeping a URL secret.
 #
 # Setup, once:
-#   1. Free Tailscale account, and install the Tailscale app on your PC.
-#   2. Tailscale admin -> Settings -> Keys -> Generate auth key.
-#      Choose: reusable, ephemeral. Copy it.
-#   3. Repo -> Settings -> Secrets and variables -> Actions -> New secret,
-#      name it TS_AUTHKEY, paste the key.
+#   1. Free Tailscale account, and install the Tailscale app on your PC
+#      (double-click Tailscale.cmd in this repo to do both).
+#   2. Run THIS workflow, pasting an auth key into the "authkey" box.
+#      No repo secret is involved: the key lives only for this one run, is
+#      masked in the logs, and is stored nowhere. Generate keys at
+#      https://login.tailscale.com/admin/settings/keys (reusable, ephemeral),
+#      and revoke a key once you no longer need it.
 #
 # Then run this workflow. It prints a 100.x.y.z address. On your PC:
 #

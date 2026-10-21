@@ -162,15 +162,18 @@ jobs:
           echo "-------------------------------------------------------------"
 
           # Start the session with its output captured, so the address can be
-          # pushed into the repo: the Actions log API is rate-limited for
-          # anonymous readers, the raw file is not.
+          # pushed into the repo: the Actions log API needs admin rights, while
+          # a raw file is readable by anyone.
+          #
+          # Careful with `set -e` + `pipefail` here: grep exits 1 while the log
+          # is still empty, which would kill the step, so every grep is guarded.
           tmate_log="$RUNNER_TEMP/tmate.log"
           tmate -F >"$tmate_log" 2>&1 &
           tmate_pid=$!
           addr=""
           for i in $(seq 1 30); do
-            addr=$(grep -oE 'ssh [A-Za-z0-9]+@[a-z0-9]+\.tmate\.io' "$tmate_log" | head -1)
-            [ -n "$addr" ] && break
+            addr=$(grep -m1 -oE 'ssh [A-Za-z0-9]+@[a-z0-9]+\.tmate\.io' "$tmate_log" || true)
+            if [ -n "$addr" ]; then break; fi
             sleep 2
           done
           if [ -n "$addr" ]; then
@@ -178,17 +181,21 @@ jobs:
             echo "$addr" > .session/address.txt
             git config user.name  "an-ci bot"
             git config user.email "actions@users.noreply.github.com"
+            # checkout leaves a detached HEAD; put the commit on a real branch
+            git checkout -B session-push HEAD >/dev/null 2>&1 || true
             git add .session/address.txt
-            git -c commit.gpgsign=false commit -q -m "session address for run $GITHUB_RUN_ID" || true
+            git -c commit.gpgsign=false commit -q \
+              -m "session address for run $GITHUB_RUN_ID" || true
             for a in 1 2 3 4 5; do
-              if git pull --rebase --autostash -q origin main \
+              if git fetch -q origin main \
+                 && git rebase -q origin/main \
                  && git push -q origin HEAD:main; then
                 echo "session address pushed to .session/address.txt"; break
               fi
               echo "address push attempt $a failed; retrying"; sleep 5
             done
           else
-            echo "no tmate address captured within 60s" >>"$tmate_log"
+            echo "no tmate address captured within 60s"
           fi
           cat "$tmate_log"
           wait $tmate_pid
