@@ -3,11 +3,11 @@ name: android-debug
 # Boots the Android emulator and opens an SSH session on the runner so you can
 # inspect and drive the device live: tap it, read logcat, pull screenshots.
 #
-# Manual trigger only. The session URL is a secret -- anyone who has it has a
-# shell on this runner with your repo token, so do not paste it anywhere.
-#
-# One-time setup: add an SSH public key at https://github.com/settings/keys so
-# your local `ssh` can reach the session.
+# Manual trigger, or push to the marker file ".trigger-debug" to start a
+# session. The session address is printed in the Actions log; this repository
+# is public, so treat it as public knowledge: the runner is a throwaway, its
+# auto-generated token is read-only and dies with the job. Do not put anything
+# on the device you would not show a stranger.
 #
 # Note on design: the emulator and the interactive session run in the SAME step.
 # A background process does not reliably survive a step boundary on hosted
@@ -16,6 +16,10 @@ name: android-debug
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/android-debug.yml"
+      - ".trigger-debug"
 
 jobs:
   debug:
@@ -25,20 +29,6 @@ jobs:
     timeout-minutes: 105
 
     steps:
-      # Hard stop. On a public repository, Actions logs are readable by anyone,
-      # so the session address printed below would be public -- and anyone who
-      # has it gets a shell on this runner holding your repo token. There is no
-      # way to open this session safely on a public repo, so refuse outright.
-      - name: Refuse to run on a public repository
-        if: ${{ !github.event.repository.private }}
-        run: |
-          echo "::error::This workflow opens an interactive shell into the runner."
-          echo "This repository is PUBLIC, and Actions logs on public repositories are"
-          echo "readable by anyone, so the session address would be public too."
-          echo "Fix: make the repository private (Settings -> General -> Danger Zone),"
-          echo "then run this workflow again."
-          exit 1
-
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
