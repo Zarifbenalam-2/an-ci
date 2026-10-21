@@ -31,7 +31,7 @@ permissions:
 jobs:
   device:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +48,19 @@ jobs:
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || echo "WARNING: /dev/kvm is absent on this runner"
+
+      # The emulator links against these at startup; a bare runner can be missing
+      # some of them, which shows up as "error while loading shared libraries".
+      - name: Install emulator runtime libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2t64 || \
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2
 
       - name: Install SDK and system image
         run: |
@@ -66,8 +79,8 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "ANDROID_HOME=$ANDROID_HOME" | tee -a /dev/stderr
 
       - name: Create AVD
         run: |
@@ -78,21 +91,47 @@ jobs:
             --device pixel_6 --force
           avdmanager list avd
 
-      # Started with nohup so it survives into the following steps.
+      # Started with nohup so it survives into the following steps. Bounded so a
+      # boot that never completes fails in minutes with a readable log rather
+      # than hanging until the job ceiling.
       - name: Boot emulator
         run: |
           set -euo pipefail
           export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
-          nohup emulator -avd headless -no-window -no-audio -no-boot-anim -no-snapshot \
+
+          echo "--- acceleration check ---"
+          emulator -accel-check 2>&1 || true
+
+          nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
+            -no-snapshot-save -no-snapshot-load -no-metrics \
             -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
-          adb wait-for-device
+          emu_pid=$!
+          echo "emulator pid=$emu_pid"
+
+          sleep 20
+          if ! kill -0 "$emu_pid" 2>/dev/null; then
+            echo "emulator exited within 20s -- log follows"
+            cat "$RUNNER_TEMP/emulator.log"
+            exit 1
+          fi
+          echo "--- first 40 log lines ---"; head -40 "$RUNNER_TEMP/emulator.log"
+
+          deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
-            sleep 3
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "boot did not complete within 7 minutes -- log follows"
+              cat "$RUNNER_TEMP/emulator.log"
+              adb devices -l || true
+              exit 1
+            fi
+            sleep 5
           done
+
           for s in window_animation_scale transition_animation_scale animator_duration_scale; do
             adb shell settings put global "$s" 0.0 || true
           done
-          adb devices -l
+          echo "booted:"; adb devices -l
+          echo "android version: $(adb shell getprop ro.build.version.release | tr -d '\r')"
 
       - name: Drive the device
         run: |
@@ -133,17 +172,18 @@ jobs:
             echo "## android-device failure, run $GITHUB_RUN_ID"
             date -u
             echo "### disk"; df -h || true
-            echo "### kvm"; ls -la /dev/kvm || true
-            echo "### ANDROID_HOME"; echo "$ANDROID_HOME"; ls -la "$ANDROID_HOME" 2>&1 | head -30
-            echo "### emulator.log"; tail -150 "$RUNNER_TEMP/emulator.log" 2>/dev/null || echo "(none)"
+            echo "### kvm"; ls -la /dev/kvm 2>&1 || true
+            echo "### cpu virt"; egrep -c '(vmx|svm)' /proc/cpuinfo || true
+            echo "### ANDROID_HOME"; echo "${ANDROID_HOME:-unset}"
+            echo "### emulator.log"; tail -200 "$RUNNER_TEMP/emulator.log" 2>/dev/null || echo "(none)"
             echo "### adb devices"; adb devices -l 2>&1 || true
           } > "$file"
+          echo "=== diagnostics ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"
           git config user.name  "android-ci"
           git add "$file"
           git commit -m "CI diagnostics for run $GITHUB_RUN_ID" || echo "nothing to commit"
-          git push || echo "push of diagnostics failed; log preserved in step output"
-          echo "=== diagnostics ==="; cat "$file"
+          git push origin HEAD:main || echo "push of diagnostics failed"
 
       - name: Upload frames
         if: always()
