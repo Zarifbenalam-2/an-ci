@@ -44,15 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Hard stop: on a public repo the logs are world-readable, and anything
-      # printed here would be too. Refuse rather than leak.
-      - name: Refuse to run on a public repository
-        if: ${{ !github.event.repository.private }}
-        run: |
-          echo "::error::This workflow publishes a live device. On a PUBLIC repository"
-          echo "the address would be publicly readable. Make the repository private first:"
-          echo "Settings -> General -> Danger Zone -> Change visibility -> Private."
-          exit 1
+      # No public-repo gate here, deliberately. The address this workflow prints
+      # is a tailnet address: it is useless to anyone not joined to your tailnet,
+      # so its secrecy is not what protects the device. The only secret is
+      # TS_AUTHKEY, which lives in Actions secrets and is never printed. (The
+      # tmate-based workflow is different -- there a URL *is* the password, which
+      # is why that one is still gated.)
 
       - name: Make /dev/kvm accessible
         run: |
@@ -175,4 +172,6 @@ jobs:
             sleep 30
           done
           echo "session window closed"
-          tail -20 "$log"
+          # Do NOT dump live.log here: it captures the tailscale command line,
+          # and on a public repo the log is world-readable.
+          echo "device was reachable at ${tsip}:5555"

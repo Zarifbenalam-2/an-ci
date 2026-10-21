@@ -153,6 +153,20 @@ jobs:
           cat "$log"
           echo "-------------------------------------------------------------"
           echo "Session address is printed by tmate next. Keep it secret."
+          echo
+          echo "Two ways to use it from your PC:"
+          echo
+          echo "  A) A shell on the runner (tap it with adb commands):"
+          echo "       ssh <session-address>"
+          echo
+          echo "  B) A LIVE WINDOW, with nothing installed on your PC."
+          echo "     ssh can forward the device's port to your machine:"
+          echo "       ssh -N -L 5555:localhost:5555 <session-address>   # leave this open"
+          echo "       # then, in a second window, using the portable tools:"
+          echo "       adb connect localhost:5555"
+          echo "       scrcpy -s localhost:5555"
+          echo "     (port forwarding over the tmate session is untested; if it is"
+          echo "      refused, option A always works.)"
           echo "-------------------------------------------------------------"
           tmate -F
 
