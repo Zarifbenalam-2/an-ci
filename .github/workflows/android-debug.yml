@@ -1,29 +1,28 @@
 name: android-debug
 
 # Boots the Android emulator and opens an SSH session on the runner so you can
-# inspect and drive the device live -- tap it, read logcat, pull screenshots and
-# video, all against the real hardware-accelerated AVD.
+# inspect and drive the device live: tap it, read logcat, pull screenshots.
 #
-# Manual trigger only, and the session is locked to the person who triggered it.
-# A public tmate session would hand a stranger a shell with your repo token.
+# Manual trigger only. The session URL is a secret -- anyone who has it has a
+# shell on this runner with your repo token, so do not paste it anywhere.
 #
-# One-time setup: add an SSH public key at https://github.com/settings/keys.
-# `limit-access-to-actor` matches your key against the triggering account and
-# refuses everyone else, so the key must exist before this will let you in.
+# One-time setup: add an SSH public key at https://github.com/settings/keys so
+# your local `ssh` can reach the session.
+#
+# Note on design: the emulator and the interactive session run in the SAME step.
+# A background process does not reliably survive a step boundary on hosted
+# runners, so booting in one step and opening the session in the next leaves you
+# connected to a machine whose device has already been killed.
 
 on:
   workflow_dispatch:
-    inputs:
-      minutes:
-        description: How long to hold the session open
-        required: false
-        default: "90"
 
 jobs:
   debug:
     runs-on: ubuntu-latest
-    # Headroom over the session length so the job isn't killed mid-debug.
-    timeout-minutes: ${{ fromJSON(inputs.minutes) + 15 }}
+    # Literal, not an expression: GitHub's workflow validator rejects a
+    # ${{ }} value for timeout-minutes and marks the whole file invalid.
+    timeout-minutes: 105
 
     steps:
       - uses: actions/checkout@v4
@@ -40,91 +39,113 @@ jobs:
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || echo "WARNING: /dev/kvm is absent on this runner"
+
+      - name: Install emulator runtime libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2t64 || \
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2
 
       - name: Install SDK and system image
         run: |
           set -euo pipefail
           export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
           mkdir -p "$ANDROID_HOME/cmdline-tools"
-          curl -fsSL -o /tmp/clt.zip \
+          curl -fsSL -o "$RUNNER_TEMP/clt.zip" \
             https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip -q -o /tmp/clt.zip -d "$ANDROID_HOME/cmdline-tools"
+          unzip -q -o "$RUNNER_TEMP/clt.zip" -d "$ANDROID_HOME/cmdline-tools"
           mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" \
              "$ANDROID_HOME/cmdline-tools/latest"
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager --install platform-tools emulator \
             "system-images;android-34;google_apis;x86_64"
-          # Persist for later steps.
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          # avdmanager and the emulator disagree about the default AVD directory.
+          mkdir -p "$RUNNER_TEMP/avd" "$RUNNER_TEMP/android-user"
+          echo "ANDROID_AVD_HOME=$RUNNER_TEMP/avd" >> "$GITHUB_ENV"
+          echo "ANDROID_USER_HOME=$RUNNER_TEMP/android-user" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
       - name: Create AVD
         run: |
           set -euo pipefail
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-          echo no | avdmanager create avd -n debug \
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
+          echo no | avdmanager create avd -n headless \
             -k "system-images;android-34;google_apis;x86_64" \
             --device pixel_6 --force
+          if [ ! -f "$ANDROID_AVD_HOME/headless.ini" ] && \
+             [ -f "$ANDROID_USER_HOME/avd/headless.ini" ]; then
+            cp -r "$ANDROID_USER_HOME/avd/." "$ANDROID_AVD_HOME/"
+          fi
+          test -f "$ANDROID_AVD_HOME/headless.ini"
+          emulator -list-avds
 
-      # Started with nohup so it survives into the following steps; the whole
-      # point is that the device is still up when you land in the SSH session.
-      - name: Boot emulator in the background
+      # Emulator and session in one step, so the device is still alive when you
+      # arrive. tmate holds the step open and prints the ssh command to use.
+      #
+      # While connected you get a shell on the runner with the device attached:
+      #   adb devices
+      #   adb logcat *:E                        errors, streaming
+      #   adb shell input tap 540 1200          tap the device
+      #   adb shell input swipe 540 1600 540 600 300
+      #   adb install -r /path/to/app.apk
+      #
+      # Seeing it from your PC -- a runner has no display, so stream frames out
+      # over the same ssh connection, in a second terminal:
+      #   ssh -T <session-address> "adb exec-out screencap -p" > frame.png
+      # Loop that for a ~1fps viewer. For motion, record then stream the file:
+      #   in-session:  adb shell screenrecord --time-limit 120 /data/local/tmp/r.mp4
+      #   from your PC: ssh -T <session-address> "adb exec-out cat /data/local/tmp/r.mp4" > r.mp4
+      - name: Boot the device and open the interactive session
         run: |
-          set -euo pipefail
+          log="$RUNNER_TEMP/session.log"
+          : > "$log"
+          set -Eeuo pipefail
+          trap 'rc=$?; echo "!!! FAILED rc=$rc at line $LINENO" >>"$log"' ERR
           export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
-          nohup emulator -avd debug -no-window -no-audio -no-boot-anim -no-snapshot \
-            -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
+
+          sudo apt-get install -y -qq tmate
+          # tmate needs a key of its own to reach the relay.
+          [ -f "$HOME/.ssh/id_rsa" ] || ssh-keygen -t rsa -b 4096 -N "" -f "$HOME/.ssh/id_rsa" -q
+
+          nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
+            -no-snapshot-save -no-snapshot-load -no-metrics \
+            -gpu swiftshader_indirect >>"$log" 2>&1 &
           adb wait-for-device
+
+          deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "boot timed out" >>"$log"; cat "$log"; exit 1
+            fi
             sleep 3
           done
           for s in window_animation_scale transition_animation_scale animator_duration_scale; do
-            adb shell settings put global "$s" 0.0 || true
+            adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
           done
-          adb devices
+          adb devices -l >>"$log" 2>&1
 
-      - name: Open the interactive session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
-          timeout-minutes: ${{ fromJSON(inputs.minutes) }}
+          echo "device is up -- opening the interactive session below"
+          cat "$log"
+          echo "-------------------------------------------------------------"
+          echo "Session address is printed by tmate next. Keep it secret."
+          echo "-------------------------------------------------------------"
+          tmate -F
 
-      # Whatever you debugged, keep the device log around afterwards.
-      - name: Upload emulator log
+      - name: Upload session log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: emulator-log
-          path: ${{ runner.temp }}/emulator.log
+          name: session-log
+          path: ${{ runner.temp }}/session.log
           if-no-files-found: warn
-
-# ---------------------------------------------------------------------------
-# Once connected, you are in a shell on the runner with the device live.
-# ANDROID_HOME already points at the SDK, and adb/emulator are on PATH.
-#
-#   adb devices
-#   adb shell getprop ro.build.version.release
-#   adb logcat -d | tail -200            # what the app just said
-#   adb logcat *:E                       # errors only, streaming
-#   adb install -r /path/to/app.apk
-#   adb shell monkey -p com.your.app -c android.intent.category.LAUNCHER 1
-#
-# Tap and swipe it, exactly as with a local device:
-#   adb shell input tap 540 1200
-#   adb shell input swipe 540 1600 540 600 300
-#
-# SEEING it. There is no display on a runner, so stream frames out over the
-# same SSH connection instead. From your own machine, in a second terminal:
-#
-#   ssh -T <session-address> "adb exec-out screencap -p" > frame.png
-#
-# For motion, record on the device and stream the file back:
-#
-#   # in the session:  adb shell screenrecord --time-limit 120 /sdcard/run.mp4
-#   # from your PC:    ssh -T <session-address> "adb exec-out cat /sdcard/run.mp4" > run.mp4
-#
-# Loop the screencap line to get a ~1 fps viewer while you work.
-#
-# Keep this scoped to building and testing the app in this repo; using the
-# runner as a general-purpose box is what gets accounts banned.
