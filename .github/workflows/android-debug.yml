@@ -24,6 +24,8 @@ on:
 jobs:
   debug:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # pushes the session address to .session/address.txt
     # Literal, not an expression: GitHub's workflow validator rejects a
     # ${{ }} value for timeout-minutes and marks the whole file invalid.
     timeout-minutes: 105
@@ -158,7 +160,38 @@ jobs:
           echo "     (port forwarding over the tmate session is untested; if it is"
           echo "      refused, option A always works.)"
           echo "-------------------------------------------------------------"
-          tmate -F
+
+          # Start the session with its output captured, so the address can be
+          # pushed into the repo: the Actions log API is rate-limited for
+          # anonymous readers, the raw file is not.
+          tmate_log="$RUNNER_TEMP/tmate.log"
+          tmate -F >"$tmate_log" 2>&1 &
+          tmate_pid=$!
+          addr=""
+          for i in $(seq 1 30); do
+            addr=$(grep -oE 'ssh [A-Za-z0-9]+@[a-z0-9]+\.tmate\.io' "$tmate_log" | head -1)
+            [ -n "$addr" ] && break
+            sleep 2
+          done
+          if [ -n "$addr" ]; then
+            mkdir -p .session
+            echo "$addr" > .session/address.txt
+            git config user.name  "an-ci bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add .session/address.txt
+            git -c commit.gpgsign=false commit -q -m "session address for run $GITHUB_RUN_ID" || true
+            for a in 1 2 3 4 5; do
+              if git pull --rebase --autostash -q origin main \
+                 && git push -q origin HEAD:main; then
+                echo "session address pushed to .session/address.txt"; break
+              fi
+              echo "address push attempt $a failed; retrying"; sleep 5
+            done
+          else
+            echo "no tmate address captured within 60s" >>"$tmate_log"
+          fi
+          cat "$tmate_log"
+          wait $tmate_pid
 
       - name: Upload session log
         if: always()
