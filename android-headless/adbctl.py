@@ -228,6 +228,57 @@ class AndroidDevice:
     def forward(self, local: int, remote: int) -> str:
         return self.run(["forward", f"tcp:{local}", f"tcp:{remote}"])
 
+    # -- file transfer ----------------------------------------------------
+
+    def push(self, local: str | Path, remote: str = "/sdcard/Download/") -> str:
+        """Copy a file from this machine onto the device."""
+        src = Path(local)
+        if not src.exists():
+            raise FileNotFoundError(src)
+        # A directory target only works if it already exists on the device.
+        dest = remote
+        if dest.endswith("/"):
+            dest += src.name
+        return self.run(["push", str(src), dest])
+
+    def pull(self, remote: str, local: str | Path) -> str:
+        """Copy a file off the device onto this machine."""
+        dest = Path(local)
+        if dest.is_dir():
+            dest = dest / Path(remote).name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        return self.run(["pull", remote, str(dest)])
+
+    def install_apk(self, apk: str | Path) -> str:
+        """Install an APK from this machine, replacing any existing build."""
+        return self.install(apk, replace=True)
+
+    # -- live view --------------------------------------------------------
+
+    def scrcpy_path(self) -> str:
+        """Locate scrcpy: PATH first, then the copy phone/launch.py downloads."""
+        found = shutil.which("scrcpy") or shutil.which("scrcpy.exe")
+        if found:
+            return found
+        tools = Path(__file__).resolve().parent / "phone" / "tools"
+        for candidate in sorted(tools.glob("scrcpy-win*/scrcpy.exe"), reverse=True):
+            return str(candidate)
+        raise FileNotFoundError(
+            "scrcpy not found. Run `python phone/launch.py` once to fetch a portable copy."
+        )
+
+    def view(self, max_size: int = 1024, extra: list[str] | None = None) -> int:
+        """Open a live, mouse-controllable window onto the device, like BlueStacks.
+
+        scrcpy mirrors the screen over adb and forwards mouse/keyboard back, so
+        the same connection that scripts use is also the one you click on.
+        """
+        cmd = [self.scrcpy_path(), "--adb", self.adb, "--max-size", str(max_size)]
+        if self.serial:
+            cmd += ["-s", self.serial]
+        cmd += extra or []
+        return subprocess.run(cmd, check=False).returncode
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
@@ -269,6 +320,20 @@ def main() -> None:
     p = sub.add_parser("shell")
     p.add_argument("command")
 
+    p = sub.add_parser("push", help="copy a file from here onto the device")
+    p.add_argument("local")
+    p.add_argument("remote", nargs="?", default="/sdcard/Download/")
+
+    p = sub.add_parser("pull", help="copy a file off the device onto here")
+    p.add_argument("remote")
+    p.add_argument("local")
+
+    p = sub.add_parser("install-apk")
+    p.add_argument("apk")
+
+    p = sub.add_parser("view", help="live mouse-controllable window (scrcpy)")
+    p.add_argument("--max-size", type=int, default=1024)
+
     p = sub.add_parser("show")
     p.add_argument("--max-size", type=int, default=1024)
 
@@ -307,11 +372,15 @@ def main() -> None:
             print(dev.start_app(args.target))
     elif args.cmd == "shell":
         print(dev.shell(args.command))
-    elif args.cmd == "show":
-        scrcpy = shutil.which("scrcpy")
-        if not scrcpy:
-            sys.exit("scrcpy not on PATH — install it from https://github.com/Genymobile/scrcpy")
-        subprocess.run([scrcpy, "--max-size", str(args.max_size)])
+    elif args.cmd == "push":
+        print(dev.push(args.local, args.remote))
+    elif args.cmd == "pull":
+        print(dev.pull(args.remote, args.local))
+    elif args.cmd == "install-apk":
+        print(dev.install_apk(args.apk))
+    elif args.cmd in ("view", "show"):
+        # `show` is the older spelling; both do the same thing.
+        sys.exit(dev.view(max_size=args.max_size))
 
 
 if __name__ == "__main__":

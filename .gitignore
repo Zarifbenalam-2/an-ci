@@ -8,3 +8,6 @@ runs/
 *.mp4
 frame*.png
 screen.png
+
+# Portable adb/scrcpy downloaded by phone/launch.py
+android-headless/phone/tools/
