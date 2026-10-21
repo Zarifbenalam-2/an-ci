@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+
+# Workflow artifacts and local captures
+runs/
+*.apk
+*.mp4
+frame*.png
+screen.png

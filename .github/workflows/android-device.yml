@@ -1,0 +1,100 @@
+name: android-device
+
+# Boots a hardware-accelerated Android emulator on a stock ubuntu-latest runner
+# (4 vCPU / 16 GB, /dev/kvm exposed), drives your app with adbctl.py, and returns
+# screenshots as build artifacts.
+#
+# Trigger by hand from the Actions tab (Run workflow), or on push.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: App package to launch once the device is up
+        required: false
+        default: com.android.settings
+      api-level:
+        description: Android API level
+        required: false
+        default: "34"
+  push:
+    paths:
+      - "android-headless/**"
+      - ".github/workflows/android-device.yml"
+
+jobs:
+  device:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The emulator needs read/write access to /dev/kvm. This udev rule is the
+      # documented fix; without it the emulator silently falls back to software
+      # rendering and takes many minutes to boot (or times out).
+      - name: Make /dev/kvm accessible
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # This action installs the SDK + system image, starts the AVD, waits for
+      # boot, runs `script` against the live device, then tears everything down.
+      # It exports ANDROID_HOME/ANDROID_SDK_ROOT, which is where adbctl.py looks
+      # for adb, so no extra wiring is needed.
+      - name: Drive the device
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ inputs.api-level || '34' }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: >-
+            -no-window -no-audio -no-boot-anim -no-snapshot
+            -gpu swiftshader_indirect
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            out="android-headless/runs"
+            mkdir -p "$out"
+
+            python android-headless/adbctl.py wait --timeout 300
+            python android-headless/adbctl.py size
+
+            # Record the screen and the log buffer for the whole run, so the
+            # result is reviewable afterwards without an interactive session.
+            adb logcat -c || true
+            adb shell screenrecord --time-limit 120 --bit-rate 4M /sdcard/run.mp4 &
+            sleep 2
+
+            python android-headless/adbctl.py open "${{ inputs.package || 'com.android.settings' }}"
+            sleep 8
+            python android-headless/adbctl.py shot "$out/01-launch.png"
+
+            # Example of scripted interaction: open the notification shade.
+            python android-headless/adbctl.py swipe 540 0 540 1400 --ms 250
+            sleep 2
+            python android-headless/adbctl.py shot "$out/02-shade.png"
+
+            python android-headless/adbctl.py shell getprop ro.build.version.release
+
+            adb shell pkill -INT screenrecord || true
+            sleep 3
+            adb pull /sdcard/run.mp4 "$out/run.mp4" || true
+            adb logcat -d > "$out/logcat.txt" || true
+            echo "--- artifacts ---"; ls -la "$out"
+
+      - name: Upload frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: device-frames
+          path: android-headless/runs/
+          if-no-files-found: warn
+          retention-days: 14
