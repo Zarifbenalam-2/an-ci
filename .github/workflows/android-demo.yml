@@ -150,8 +150,10 @@ jobs:
 
           if [ "$vlc_ok" = yes ] && [ -n "$vid" ]; then
             say "D: play the local video in VLC"
-            adb shell am start -W -a android.intent.action.VIEW \
-              -d "file://$vid" -t video/mp4 >>"$log" 2>&1 || true
+            # -p binds to VLC; without it Android shows an app-chooser dialog
+            # (ResolverActivity) and nothing ever plays.
+            adb shell am start -W -p org.videolan.vlc \
+              -a android.intent.action.VIEW -d "file://$vid" -t video/mp4 >>"$log" 2>&1 || true
             sleep 12
             adb exec-out screencap -p > "$out/01-vlc-local-video.png" 2>>"$log" || true
             adb shell dumpsys activity activities 2>/dev/null \
@@ -160,6 +162,15 @@ jobs:
           else
             echo "skipped VLC playback (vlc_ok=$vlc_ok vid=$vid)" >>"$log"
           fi
+
+          say "E0: clear the way for the YouTube app"
+          # A permission dialog was covering YouTube, and Chrome's first-run page
+          # kept grabbing focus. Pre-grant so no dialog appears, and stop Chrome.
+          adb shell pm grant com.google.android.youtube android.permission.POST_NOTIFICATIONS \
+            >>"$log" 2>&1 || true
+          adb shell am force-stop com.android.chrome >>"$log" 2>&1 || true
+          adb shell am force-stop com.google.android.apps.youtube.music >>"$log" 2>&1 || true
+          sleep 2
 
           say "E: open a real video in the YouTube app"
           # Bind the URL to YouTube specifically (-p). Without it, Android gives
@@ -225,7 +236,9 @@ jobs:
           echo "=== evidence ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"
           git config user.name  "android-ci"
-          git add "$file"
+          # Commit the screenshots too, not just the text report, so the captures
+          # are viewable straight from the repo.
+          git add "$file" android-headless/demo/out/ 2>/dev/null || git add "$file"
           git commit -m "CI demo evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
           # Two workflows can fire on one push and race for main, so retry with a
           # rebase instead of silently losing the report.
