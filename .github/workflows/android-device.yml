@@ -2,9 +2,12 @@ name: android-device
 
 # Boots a hardware-accelerated Android emulator on a stock ubuntu-latest runner
 # (4 vCPU / 16 GB, /dev/kvm exposed), drives your app with adbctl.py, and returns
-# screenshots as build artifacts.
+# screenshots, a screen recording and logcat as build artifacts.
 #
-# Trigger by hand from the Actions tab (Run workflow), or on push.
+# Trigger by hand from the Actions tab (Run workflow), or on push. Each stage is
+# its own step so a failure names the phase that broke, and a diagnostics step
+# commits what it can read back into the repo so failures are debuggable without
+# logging in.
 
 on:
   workflow_dispatch:
@@ -22,6 +25,9 @@ on:
       - "android-headless/**"
       - ".github/workflows/android-device.yml"
 
+permissions:
+  contents: write  # only used by the failure-diagnostics step, which pushes a log
+
 jobs:
   device:
     runs-on: ubuntu-latest
@@ -34,9 +40,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      # The emulator needs read/write access to /dev/kvm. This udev rule is the
-      # documented fix; without it the emulator silently falls back to software
-      # rendering and takes many minutes to boot (or times out).
+      # The emulator needs read/write access to /dev/kvm. Without this rule it
+      # silently falls back to software rendering and may never finish booting.
       - name: Make /dev/kvm accessible
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
@@ -44,51 +49,101 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # This action installs the SDK + system image, starts the AVD, waits for
-      # boot, runs `script` against the live device, then tears everything down.
-      # It exports ANDROID_HOME/ANDROID_SDK_ROOT, which is where adbctl.py looks
-      # for adb, so no extra wiring is needed.
-      - name: Drive the device
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ inputs['api-level'] || '34' }}
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          emulator-options: >-
-            -no-window -no-audio -no-boot-anim -no-snapshot
-            -gpu swiftshader_indirect
-          disable-animations: true
-          script: |
-            set -euo pipefail
-            out="android-headless/runs"
-            mkdir -p "$out"
+      - name: Install SDK and system image
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/clt.zip" \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q -o "$RUNNER_TEMP/clt.zip" -d "$ANDROID_HOME/cmdline-tools"
+          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" \
+             "$ANDROID_HOME/cmdline-tools/latest"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager --install platform-tools emulator \
+            "system-images;android-34;google_apis;x86_64"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "ANDROID_HOME=$ANDROID_HOME" | tee -a /dev/stderr
 
-            python android-headless/adbctl.py wait --timeout 300
-            python android-headless/adbctl.py size
+      - name: Create AVD
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          echo no | avdmanager create avd -n headless \
+            -k "system-images;android-34;google_apis;x86_64" \
+            --device pixel_6 --force
+          avdmanager list avd
 
-            # Record the screen and the log buffer for the whole run, so the
-            # result is reviewable afterwards without an interactive session.
-            adb logcat -c || true
-            adb shell screenrecord --time-limit 120 --bit-rate 4M /sdcard/run.mp4 &
-            sleep 2
-
-            python android-headless/adbctl.py open "${{ inputs.package || 'com.android.settings' }}"
-            sleep 8
-            python android-headless/adbctl.py shot "$out/01-launch.png"
-
-            # Example of scripted interaction: open the notification shade.
-            python android-headless/adbctl.py swipe 540 0 540 1400 --ms 250
-            sleep 2
-            python android-headless/adbctl.py shot "$out/02-shade.png"
-
-            python android-headless/adbctl.py shell getprop ro.build.version.release
-
-            adb shell pkill -INT screenrecord || true
+      # Started with nohup so it survives into the following steps.
+      - name: Boot emulator
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+          nohup emulator -avd headless -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
+          adb wait-for-device
+          until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
             sleep 3
-            adb pull /sdcard/run.mp4 "$out/run.mp4" || true
-            adb logcat -d > "$out/logcat.txt" || true
-            echo "--- artifacts ---"; ls -la "$out"
+          done
+          for s in window_animation_scale transition_animation_scale animator_duration_scale; do
+            adb shell settings put global "$s" 0.0 || true
+          done
+          adb devices -l
+
+      - name: Drive the device
+        run: |
+          set -euo pipefail
+          out="android-headless/runs"
+          mkdir -p "$out"
+
+          adb logcat -c || true
+          adb shell screenrecord --time-limit 120 --bit-rate 4M /sdcard/run.mp4 &
+          sleep 2
+
+          python android-headless/adbctl.py size
+          python android-headless/adbctl.py open "${{ inputs.package || 'com.android.settings' }}"
+          sleep 8
+          python android-headless/adbctl.py shot "$out/01-launch.png"
+
+          # Example of scripted interaction: open the notification shade.
+          python android-headless/adbctl.py swipe 540 0 540 1400 --ms 250
+          sleep 2
+          python android-headless/adbctl.py shot "$out/02-shade.png"
+
+          python android-headless/adbctl.py shell getprop ro.build.version.release
+
+          adb shell pkill -INT screenrecord || true
+          sleep 3
+          adb pull /sdcard/run.mp4 "$out/run.mp4" || true
+          adb logcat -d > "$out/logcat.txt" || true
+          echo "--- artifacts ---"; ls -la "$out"
+
+      # The default token can push because of `permissions: contents: write`
+      # above. This exists so failures are readable without logging in.
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          file="diagnostics/run-${GITHUB_RUN_ID}.txt"
+          mkdir -p "$(dirname "$file")"
+          {
+            echo "## android-device failure, run $GITHUB_RUN_ID"
+            date -u
+            echo "### disk"; df -h || true
+            echo "### kvm"; ls -la /dev/kvm || true
+            echo "### ANDROID_HOME"; echo "$ANDROID_HOME"; ls -la "$ANDROID_HOME" 2>&1 | head -30
+            echo "### emulator.log"; tail -150 "$RUNNER_TEMP/emulator.log" 2>/dev/null || echo "(none)"
+            echo "### adb devices"; adb devices -l 2>&1 || true
+          } > "$file"
+          git config user.email "ci@users.noreply.github.com"
+          git config user.name  "android-ci"
+          git add "$file"
+          git commit -m "CI diagnostics for run $GITHUB_RUN_ID" || echo "nothing to commit"
+          git push || echo "push of diagnostics failed; log preserved in step output"
+          echo "=== diagnostics ==="; cat "$file"
 
       - name: Upload frames
         if: always()
@@ -96,5 +151,5 @@ jobs:
         with:
           name: device-frames
           path: android-headless/runs/
-          if-no-files-found: warn
+          if-no-files-found: ignore
           retention-days: 14
