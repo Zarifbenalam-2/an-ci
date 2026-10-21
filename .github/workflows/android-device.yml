@@ -213,18 +213,9 @@ jobs:
             echo "### screenshot dimensions"
           } > "$file"
 
-          python - >>"$file" 2>&1 <<'PY'
-import glob, struct, os
-found = False
-for p in sorted(glob.glob('android-headless/runs/*.png')):
-    found = True
-    with open(p, 'rb') as fh:
-        data = fh.read()
-    w, h = struct.unpack('>II', data[16:24])
-    print(f"{os.path.basename(p)}: {w}x{h}, {len(data):,} bytes")
-if not found:
-    print("(no screenshots captured)")
-PY
+          # `file` reports PNG dimensions directly, which is a cheap way to prove
+          # the screenshots are real captures of the expected screen size.
+          file android-headless/runs/*.png >>"$file" 2>&1 || echo "(no screenshots captured)" >>"$file"
 
           {
             echo
