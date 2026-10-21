@@ -107,6 +107,11 @@ jobs:
           for s in window_animation_scale transition_animation_scale animator_duration_scale; do
             adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
           done
+          # A sleeping or locked screen screenshots as a near-blank frame, which
+          # would look like the apps failed to render when they did not.
+          adb shell input keyevent 224 >>"$log" 2>&1 || true   # KEYCODE_WAKEUP
+          adb shell wm dismiss-keyguard >>"$log" 2>&1 || true
+          sleep 2
           echo "booted android $(adb shell getprop ro.build.version.release | tr -d '\r')" >>"$log"
 
           say "A: media apps already in this image"
@@ -211,7 +216,15 @@ jobs:
           git config user.name  "android-ci"
           git add "$file"
           git commit -m "CI demo evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
-          git push origin HEAD:main || echo "push of evidence failed"
+          # Two workflows can fire on one push and race for main, so retry with a
+          # rebase instead of silently losing the report.
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase --autostash -q origin main && git push -q origin HEAD:main; then
+              echo "evidence pushed (attempt $attempt)"; exit 0
+            fi
+            echo "push attempt $attempt failed; retrying"; sleep 5
+          done
+          echo "could not push evidence after 5 attempts"
 
       - name: Upload captures
         if: always()
