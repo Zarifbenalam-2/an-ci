@@ -1,0 +1,106 @@
+## android-demo run 39569854954
+job status: success
+Wed Oct 21 08:33:37 UTC 2026
+
+### captured files
+total 264
+drwxr-xr-x 2 runner runner   4096 Oct 21 08:33 .
+drwxr-xr-x 3 runner runner   4096 Oct 21 08:31 ..
+-rw-r--r-- 1 runner runner 128208 Oct 21 08:33 02-youtube-app.png
+-rw-r--r-- 1 runner runner 128360 Oct 21 08:33 03-chrome-youtube.png
+
+### checksums
+6213aa0c2bd45a5a50abedc53f5916dd  android-headless/demo/out/02-youtube-app.png
+0e7b3d8d5c3f385161ea0f9444a2c292  android-headless/demo/out/03-chrome-youtube.png
+
+### screenshot dimensions
+android-headless/demo/out/02-youtube-app.png:    PNG image data, 1080 x 2400, 8-bit/color RGBA, non-interlaced
+android-headless/demo/out/03-chrome-youtube.png: PNG image data, 1080 x 2400, 8-bit/color RGBA, non-interlaced
+
+### demo.log
+booted android 14
+
+=== A: media apps already in this image ===
+package:com.google.android.providers.media.module
+package:com.android.providers.media
+package:com.google.android.apps.youtube.music
+package:com.android.chrome
+package:com.google.android.apps.photos
+package:com.google.android.youtube
+
+=== B: put a real video on the device ===
+android-headless/demo/test-video.mp4: 1 file pushed, 0 skipped. 162.8 MB/s (43046 bytes in 0.000s)
+adb: error: failed to copy 'android-headless/demo/test-video.mp4' to '/sdcard/Download/': remote couldn't create file: Is a directory
+android-headless/demo/test-video.mp4: 1 file pushed, 0 skipped. 163.6 MB/s (43046 bytes in 0.000s)
+adb: error: failed to copy 'android-headless/demo/test-video.mp4' to '/sdcard/Movies/': remote couldn't create file: Is a directory
+android-headless/demo/test-video.mp4: 1 file pushed, 0 skipped. 220.3 MB/s (43046 bytes in 0.000s)
+adb: error: failed to copy 'android-headless/demo/test-video.mp4' to '/sdcard/test-video.mp4': remote couldn't create file: Operation not permitted
+!! could not place the video
+ls: /sdcard/Download: No such file or directory
+
+=== C: install VLC from F-Droid ===
+trying org.videolan.vlc_13070208.apk
+Performing Streamed Install
+Success
+installed versionCode=13070208
+skipped VLC playback (vlc_ok=yes vid=)
+
+=== E: open a real video in the YouTube app ===
+Starting: Intent { act=android.intent.action.VIEW dat=https://www.youtube.com/... }
+Status: ok
+LaunchState: UNKNOWN (0)
+Activity: com.google.android.permissioncontroller/com.android.permissioncontroller.permission.ui.GrantPermissionsActivity
+WaitTime: 4009
+Complete
+    topResumedActivity=ActivityRecord{a708fc2 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity t9}
+    state=null
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=33750, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=33800, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=36801, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+  mCurrentFocus=Window{41c3ad6 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+
+=== F: same URL in Chrome (fallback path) ===
+Starting: Intent { act=android.intent.action.VIEW dat=https://www.youtube.com/... cmp=com.android.chrome/com.google.android.apps.chrome.Main }
+Status: ok
+LaunchState: WARM
+Activity: com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity
+TotalTime: 771
+WaitTime: 778
+Complete
+    topResumedActivity=ActivityRecord{4cca133 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity t10}
+
+=== G: decoder activity ===
+10-21 08:32:27.808   475   496 D MediaCodecsXmlParser: disabling c2.android.av1.encoder
+10-21 08:32:27.808   475   496 I MediaCodecsXmlParser: codec c2.android.av1.encoder enabled, device sdk 35 >= required 34
+10-21 08:32:34.605  1660  1966 D CCodec  : allocate(c2.goldfish.hevc.decoder)
+10-21 08:32:34.707  1660  1966 I CCodec  : Created component [c2.goldfish.hevc.decoder]
+10-21 08:32:34.726  1660  1966 D CCodec  : [c2.goldfish.hevc.decoder] buffers are bound to CCodec for this session
+
+=== H: captured files ===
+total 264
+drwxr-xr-x 2 runner runner   4096 Oct 21 08:33 .
+drwxr-xr-x 3 runner runner   4096 Oct 21 08:31 ..
+-rw-r--r-- 1 runner runner 128208 Oct 21 08:33 02-youtube-app.png
+-rw-r--r-- 1 runner runner 128360 Oct 21 08:33 03-chrome-youtube.png
+
+### emulator.log (tail)
+INFO         | Boot completed in 38156 ms
+INFO         | Increasing screen off timeout, logcat buffer size to 2M.
+INFO         | Created VkInstance:0x55c1164a1800 for application:'Chromium' engine:''.
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+INFO         | Created VkDevice:0x55c1287a6010 for application:'Chromium' instance:0x55c1164a1800. ASTC emulation:on CPU decoding:off. Protected memory:off
