@@ -4,6 +4,27 @@ A real Android device you control from Python — no Android Studio, no GUI, no 
 no third-party account. This is the legitimate equivalent of "drive the phone programmatically":
 an Android Virtual Device (AVD) on your own machine, reached through `adb`.
 
+## Verified working
+
+The CI workflow has been run green end to end on a stock `ubuntu-latest` runner. What a run
+produces, from the evidence it commits to `diagnostics/`:
+
+| Check | Observed |
+| --- | --- |
+| Emulator boot | `Boot completed in 38492 ms`, device `emulator-5554` online |
+| KVM acceleration | `/dev/kvm` present, 4 virt flags — hardware accelerated, not software |
+| Screen size | `adbctl.py size` → `1080x2400` |
+| App launched | `topResumedActivity=... com.android.settings/.Settings` |
+| Input delivered | swipe → `mCurrentFocus=Window{... NotificationShade}` |
+| Screenshots | `01-launch.png`, `02-shade.png` — real 1080x2400 PNGs, ~147 KB and ~133 KB |
+| Screen recording | `run.mp4`, 361 KB |
+| Device log | `logcat.txt`, ~1.3 MB |
+
+Every run appends a report to `diagnostics/run-<id>.txt` with file sizes, checksums, PNG
+dimensions, the device's focused window and the raw device log — so a run is verifiable without
+logging into GitHub. That path is deliberately excluded from the workflow's `push` filter, so
+these commits cannot retrigger the workflow. Delete the folder any time; it is only evidence.
+
 ## Why this instead of hot-wiring AI Studio
 
 The AI Studio virtual-device preview is an internal RPC surface tied to a live browser login with
