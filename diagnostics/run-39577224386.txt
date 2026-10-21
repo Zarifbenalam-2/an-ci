@@ -1,0 +1,151 @@
+## android-device run 39577224386
+job status: success
+Wed Oct 21 09:31:15 UTC 2026
+
+### captured files
+total 2064
+drwxr-xr-x 2 runner runner    4096 Oct 21 09:31 .
+drwxr-xr-x 6 runner runner    4096 Oct 21 09:30 ..
+-rw-r--r-- 1 runner runner   17799 Oct 21 09:30 01-launch.png
+-rw-r--r-- 1 runner runner  132701 Oct 21 09:30 02-shade.png
+-rw-r--r-- 1 runner runner  128348 Oct 21 09:31 03-youtube.png
+-rw-r--r-- 1 runner runner 1304698 Oct 21 09:30 logcat.txt
+-rw-r--r-- 1 runner runner  508144 Oct 21 09:30 run.mp4
+
+### checksums
+97d0d36828ab8d93bfa96b90b29d67cb  android-headless/runs/01-launch.png
+8ea71cb96c2296e4b59129c58b5d1dfc  android-headless/runs/02-shade.png
+0373bf381ce1ff16939e6aea5adc7421  android-headless/runs/03-youtube.png
+a564fa2e67c75a01ef6597e068d045ca  android-headless/runs/logcat.txt
+722882d817481040a889512794894d8f  android-headless/runs/run.mp4
+
+### screenshot dimensions
+android-headless/runs/01-launch.png:  PNG image data, 1080 x 2400, 8-bit/color RGBA, non-interlaced
+android-headless/runs/02-shade.png:   PNG image data, 1080 x 2400, 8-bit/color RGBA, non-interlaced
+android-headless/runs/03-youtube.png: PNG image data, 1080 x 2400, 8-bit/color RGBA, non-interlaced
+
+### device.log
+INFO         |     enableProtectedMemoryEmulation: false
+INFO         | Graphics Adapter Vendor Google (Google Inc.)
+INFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Google SwiftShader)
+INFO         | Graphics API Version OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)
+INFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_packed_depth_stencil GL_OES_vertex_half_float GL_OES_standard_derivatives GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 
+INFO         | Graphics Device Extensions N/A
+INFO         | Disabling sparse binding feature support
+WARNING      | No adb private key exists
+INFO         | Userspace boot properties:
+INFO         |   androidboot.boot_devices=pci0000:00/0000:00:03.0 pci0000:00/0000:00:06.0
+INFO         |   androidboot.dalvik.vm.heapsize=576m
+INFO         |   androidboot.debug.hwui.renderer=skiagl
+INFO         |   androidboot.debug.sf.nobootanimation=1
+INFO         |   androidboot.hardware=ranchu
+INFO         |   androidboot.hardware.gltransport=pipe
+INFO         |   androidboot.hardware.vulkan=ranchu
+INFO         |   androidboot.logcat=*:V
+INFO         |   androidboot.opengles.version=196608
+INFO         |   androidboot.qemu=1
+INFO         |   androidboot.qemu.avd_name=headless
+INFO         |   androidboot.qemu.camera_hq_edge_processing=0
+INFO         |   androidboot.qemu.camera_protocol_ver=1
+INFO         |   androidboot.qemu.cpuvulkan.version=4206592
+INFO         |   androidboot.qemu.gltransport.drawFlushInterval=800
+INFO         |   androidboot.qemu.gltransport.name=pipe
+INFO         |   androidboot.qemu.hwcodec.avcdec=2
+INFO         |   androidboot.qemu.hwcodec.hevcdec=2
+INFO         |   androidboot.qemu.hwcodec.vpxdec=2
+INFO         |   androidboot.qemu.settings.system.screen_off_timeout=2147483647
+INFO         |   androidboot.qemu.skin=1080x2400
+INFO         |   androidboot.qemu.virtiowifi=1
+INFO         |   androidboot.qemu.vsync=60
+INFO         |   androidboot.serialno=EMULATOR37X2X12X0
+INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2bc5bb30a5c3ff23679ca15d3bcd3
+INFO         |   androidboot.vbmeta.hash_alg=sha256
+INFO         |   androidboot.vbmeta.size=6656
+INFO         |   androidboot.veritymode=enforcing
+WARNING: cannnot unmap ptr 0x7f2836a01000 as it is in the protected range from 0x7f2796a00000 to 0x7f2836c00000
+INFO         | Monitoring duration of emulator setup.
+WARNING      | The emulator now requires a signed jwt token for gRPC access! Use the -grpc flag if you really want an open unprotected grpc port
+INFO         | Using security allow list from: /home/runner/work/_temp/android-sdk/emulator/lib/emulator_access.json
+INFO         | The active JSON Web Key Sets can be found here: /run/user/1001/avd/running/3088/jwks/8ea61a75-00b3-496f-b4e2-fb75289697a6/active.jwk
+INFO         | Scanning /run/user/1001/avd/running/3088/jwks/8ea61a75-00b3-496f-b4e2-fb75289697a6 for jwk keys.
+INFO         | Started GRPC server at 127.0.0.1:8554, security: Local, auth: +token
+INFO         | Advertising in: /run/user/1001/avd/running/pid_3088.ini
+INFO         | Successfully initialized netsim WiFi
+INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
+INFO         | setDisplayActiveConfig: id:0, 1080x2400
+INFO         | emulatorSetupEnvironment: Environment scene is not required
+USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
+WARNING      | Failed to process .ini file /home/runner/.android/emu-update-last-check.ini for reading.
+WARNING      | Failed to process .ini file /home/runner/.android/emu-update-last-check.ini for reading.
+INFO         | Boot completed in 37107 ms
+INFO         | Increasing screen off timeout, logcat buffer size to 2M.
+--- adb devices ---
+List of devices attached
+emulator-5554          device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:1
+
+14
++ adbctl size
+1080x2400
++ adbctl open
+bash arg: -p
+  bash arg: com.android.settings
+  bash arg: -c
+  bash arg: android.intent.category.LAUNCHER
+  bash arg: 1
+Events injected: 1
+## Network stats: elapsed time=229ms (0ms mobile, 0ms wifi, 229ms not connected)
++ adbctl shot 01
+android-headless/runs/01-launch.png
++ adbctl swipe
++ adbctl shot 02
+android-headless/runs/02-shade.png
+-rw------- 1 shell shell 508144 2026-10-21 09:30 /data/local/tmp/run.mp4
+/data/local/tmp/run.mp4: 1 file pulled, 0 skipped. 10.8 MB/s (508144 bytes in 0.045s)
++ clear the way for youtube
++ youtube
+Starting: Intent { act=android.intent.action.VIEW dat=https://www.youtube.com/... pkg=com.google.android.youtube }
+Status: ok
+LaunchState: WARM
+Activity: com.google.android.youtube/com.google.android.apps.youtube.app.watchwhile.MainActivity
+TotalTime: 2800
+WaitTime: 2816
+Complete
+INFO         | Created VkInstance:0x56079e0e6800 for application:'Chromium' engine:''.
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000338000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000437000
+INFO         | Created VkDevice:0x5607b08ca010 for application:'Chromium' instance:0x56079e0e6800. ASTC emulation:on CPU decoding:off. Protected memory:off
+  mCurrentFocus=Window{53137f0 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+    state=null
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=32398, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=32412, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+  mCurrentFocus=Window{53137f0 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+  mFocusedApp=ActivityRecord{52673d u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity t10}
+    topResumedActivity=ActivityRecord{52673d u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity t10}
+--- artifacts ---
+total 2064
+drwxr-xr-x 2 runner runner    4096 Oct 21 09:31 .
+drwxr-xr-x 6 runner runner    4096 Oct 21 09:30 ..
+-rw-r--r-- 1 runner runner   17799 Oct 21 09:30 01-launch.png
+-rw-r--r-- 1 runner runner  132701 Oct 21 09:30 02-shade.png
+-rw-r--r-- 1 runner runner  128348 Oct 21 09:31 03-youtube.png
+-rw-r--r-- 1 runner runner 1304698 Oct 21 09:30 logcat.txt
+-rw-r--r-- 1 runner runner  508144 Oct 21 09:30 run.mp4
+
+### disk
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   65G   80G  45% /
