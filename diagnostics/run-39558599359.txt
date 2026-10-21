@@ -1,0 +1,29 @@
+## android-device failure, run 39558599359
+Wed Oct 21 06:57:54 UTC 2026
+### disk
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   65G   80G  45% /
+tmpfs           7.9G   84K  7.9G   1% /dev/shm
+tmpfs           3.2G  1.0M  3.2G   1% /run
+tmpfs           5.0M     0  5.0M   0% /run/lock
+efivarfs        128M   32K  128M   1% /sys/firmware/efi/efivars
+/dev/sda16      881M   85M  735M  11% /boot
+/dev/sda15      105M  6.2M   99M   6% /boot/efi
+tmpfs           1.6G   12K  1.6G   1% /run/user/1001
+### kvm
+crw-rw-rw- 1 root kvm 10, 232 Oct 21 06:56 /dev/kvm
+### cpu virt
+4
+### ANDROID_HOME
+/home/runner/work/_temp/android-sdk
+### emulator.log
+INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+ERROR        | Unknown AVD name [headless], use -list-avds to see valid list.
+ERROR        | HOME is defined but there is no file headless.ini in $HOME/.android/avd
+ERROR        | (Note: Directories are searched in the order $ANDROID_AVD_HOME, $ANDROID_SDK_HOME/avd and $HOME/.android/avd)
+### adb devices
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+List of devices attached
+
