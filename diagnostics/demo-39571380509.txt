@@ -1,0 +1,69 @@
+## android-demo run 39571380509
+job status: cancelled
+Wed Oct 21 09:08:16 UTC 2026
+
+### captured files
+total 8
+drwxr-xr-x 2 runner runner 4096 Oct 21 08:43 .
+drwxr-xr-x 3 runner runner 4096 Oct 21 08:43 ..
+
+### checksums
+md5sum: 'android-headless/demo/out/*': No such file or directory
+
+### screenshot dimensions
+android-headless/demo/out/*.png: cannot open `android-headless/demo/out/*.png' (No such file or directory)
+
+### demo.log
+booted android 14
+
+=== A: media apps already in this image ===
+package:com.google.android.providers.media.module
+package:com.android.providers.media
+package:com.google.android.apps.youtube.music
+package:com.android.chrome
+package:com.google.android.apps.photos
+package:com.google.android.youtube
+
+=== B: put a real video on the device ===
+
+=== B0: what /sdcard looks like on this image ===
+lrw-r--r-- 1 root root 21 2024-07-11 18:27 /sdcard -> /storage/self/primary
+none on /sys/fs/fuse/connections type fusectl (rw,relatime)
+/dev/fuse on /mnt/installer/0/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+/dev/fuse on /mnt/androidwritable/0/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+/dev/fuse on /mnt/user/0/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+/dev/fuse on /storage/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+/dev/block/dm-40 on /mnt/pass_through/0/emulated type ext4 (rw,seclabel,nosuid,nodev,noatime,resgid=1065,errors=panic)
+android-headless/demo/test-video.mp4: 1 file pushed, 0 skipped. 241.4 MB/s (43046 bytes in 0.000s)
+pushed to /sdcard/Download/test-video.mp4
+
+=== C: install VLC from F-Droid ===
+trying org.videolan.vlc_13070208.apk
+Performing Streamed Install
+Success
+installed versionCode=13070208
+
+=== D: play the local video in VLC ===
+Starting: Intent { act=android.intent.action.VIEW dat=file:///... typ=video/mp4 pkg=org.videolan.vlc }
+
+### emulator.log (tail)
+INFO         |   androidboot.vbmeta.size=6656
+INFO         |   androidboot.veritymode=enforcing
+WARNING: cannnot unmap ptr 0x7fd8ec001000 as it is in the protected range from 0x7fd84c000000 to 0x7fd8ec200000
+INFO         | Monitoring duration of emulator setup.
+WARNING      | The emulator now requires a signed jwt token for gRPC access! Use the -grpc flag if you really want an open unprotected grpc port
+INFO         | Using security allow list from: /home/runner/work/_temp/android-sdk/emulator/lib/emulator_access.json
+INFO         | The active JSON Web Key Sets can be found here: /run/user/1001/avd/running/3048/jwks/ca5279d8-8cc9-45ff-aa68-ee2287756c02/active.jwk
+INFO         | Scanning /run/user/1001/avd/running/3048/jwks/ca5279d8-8cc9-45ff-aa68-ee2287756c02 for jwk keys.
+INFO         | Started GRPC server at 127.0.0.1:8554, security: Local, auth: +token
+INFO         | Advertising in: /run/user/1001/avd/running/pid_3048.ini
+INFO         | Successfully initialized netsim WiFi
+INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
+INFO         | setDisplayActiveConfig: id:0, 1080x2400
+INFO         | emulatorSetupEnvironment: Environment scene is not required
+USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
+WARNING      | Failed to process .ini file /home/runner/.android/emu-update-last-check.ini for reading.
+WARNING      | Failed to process .ini file /home/runner/.android/emu-update-last-check.ini for reading.
+INFO         | Boot completed in 38302 ms
+INFO         | Increasing screen off timeout, logcat buffer size to 2M.
