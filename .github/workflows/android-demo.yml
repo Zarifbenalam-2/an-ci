@@ -1,9 +1,10 @@
 name: android-demo
 
-# Proves the emulator behaves like a usable phone: installs a real app, puts a
-# video on the device, tries to play it, and commits what the screen actually
-# showed. Evidence lands in diagnostics/ so it is readable without logging in.
+# Can this emulator behave like a usable phone? Installs a real app, puts a video
+# on the device, plays it, and then opens the YouTube app on a real video --
+# capturing what the screen actually showed at each step.
 #
+# Evidence lands in diagnostics/ so it is readable without logging in.
 # Path-filtered so it only runs when the demo itself changes.
 
 on:
@@ -15,6 +16,9 @@ on:
 
 permissions:
   contents: write  # the evidence step commits its report
+
+env:
+  VIDEO_URL: "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
 
 jobs:
   demo:
@@ -89,9 +93,11 @@ jobs:
           out="android-headless/demo/out"
           mkdir -p "$out"
 
+          say() { printf '\n=== %s ===\n' "$*" >>"$log"; }
+          # Emulator output goes to its own file so demo.log stays readable.
           nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
             -no-snapshot-save -no-snapshot-load -no-metrics \
-            -gpu swiftshader_indirect >>"$log" 2>&1 &
+            -gpu swiftshader_indirect >"$RUNNER_TEMP/emulator.log" 2>&1 &
           adb wait-for-device
           deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
@@ -103,66 +109,73 @@ jobs:
           done
           echo "booted android $(adb shell getprop ro.build.version.release | tr -d '\r')" >>"$log"
 
-          echo "=== A: media/browser apps already in this image ===" >>"$log"
+          say "A: media apps already in this image"
           adb shell pm list packages 2>/dev/null \
-            | grep -Ei 'gallery|photo|video|chrome|browser|youtube|media|player|vlc' \
-            >>"$log" 2>&1 || true
+            | grep -Ei 'youtube|chrome|gallery|photo|media|vlc' >>"$log" 2>&1 || true
 
-          echo "=== B: put a real video on the device ===" >>"$log"
+          say "B: put a real video on the device"
           vid=""
-          for dest in /sdcard/Download/ /sdcard/Movies/ /sdcard/ /data/local/tmp/; do
+          for dest in /sdcard/Download/ /sdcard/Movies/ /sdcard/; do
             if adb push android-headless/demo/test-video.mp4 "$dest" >>"$log" 2>&1; then
               vid="${dest%/}/test-video.mp4"
               echo "pushed to $vid" >>"$log"
               break
             fi
-            echo "push to $dest failed" >>"$log"
           done
-          [ -n "$vid" ] || echo "!! could not place the video anywhere" >>"$log"
-          adb shell ls -la /sdcard/Download 2>&1 | tail -5 >>"$log" || true
+          [ -n "$vid" ] || echo "!! could not place the video" >>"$log"
+          adb shell ls -la /sdcard/Download 2>&1 | tail -4 >>"$log" || true
 
-          echo "=== C: ask the system to play it ===" >>"$log"
-          if [ -n "$vid" ]; then
-            adb shell am start -a android.intent.action.VIEW \
-              -d "file://$vid" -t video/mp4 >>"$log" 2>&1 || true
-          fi
-          sleep 6
-          adb exec-out screencap -p > "$out/01-system-player.png" 2>>"$log" || true
-          adb shell dumpsys activity activities 2>/dev/null \
-            | grep -m3 -E 'topResumedActivity|ResumedActivity' >>"$log" 2>&1 || true
-          adb shell dumpsys media_session 2>/dev/null | grep -m5 -i 'state=' >>"$log" 2>&1 || true
-
-          echo "=== D: install a real video app from F-Droid (VLC) ===" >>"$log"
+          say "C: install VLC from F-Droid"
           meta=$(curl -fsS --max-time 30 https://f-droid.org/api/v1/packages/org.videolan.vlc || true)
-          install_ok=no
+          vlc_ok=no
           for code in $(printf '%s' "$meta" \
-                        | grep -o '"versionCode":[0-9]*' | cut -d: -f2 | head -4); do
+                        | grep -o '"versionCode":[0-9]*' | cut -d: -f2 | head -3); do
             url="https://f-droid.org/repo/org.videolan.vlc_${code}.apk"
-            echo "trying $url" >>"$log"
+            echo "trying ${url##*/}" >>"$log"
             if curl -fsS --max-time 150 -o "$RUNNER_TEMP/vlc.apk" "$url" 2>>"$log" \
                && adb install -r "$RUNNER_TEMP/vlc.apk" >>"$log" 2>&1; then
-              install_ok=yes; echo "installed versionCode=$code" >>"$log"; break
+              vlc_ok=yes; echo "installed versionCode=$code" >>"$log"; break
             fi
           done
 
-          if [ "$install_ok" = yes ] && [ -n "$vid" ]; then
-            echo "=== E: play the video in VLC ===" >>"$log"
-            adb shell am start -a android.intent.action.VIEW \
+          if [ "$vlc_ok" = yes ] && [ -n "$vid" ]; then
+            say "D: play the local video in VLC"
+            adb shell am start -W -a android.intent.action.VIEW \
               -d "file://$vid" -t video/mp4 >>"$log" 2>&1 || true
             sleep 12
-            adb exec-out screencap -p > "$out/02-vlc-playing.png" 2>>"$log" || true
+            adb exec-out screencap -p > "$out/01-vlc-local-video.png" 2>>"$log" || true
             adb shell dumpsys activity activities 2>/dev/null \
-              | grep -m3 -E 'topResumedActivity|ResumedActivity' >>"$log" 2>&1 || true
-            adb shell dumpsys media_session 2>/dev/null | grep -m5 -i 'state=' >>"$log" 2>&1 || true
+              | grep -m2 'topResumedActivity' >>"$log" 2>&1 || true
+            adb shell dumpsys media_session 2>/dev/null | grep -m4 'state=' >>"$log" 2>&1 || true
           else
-            echo "skipping VLC playback (install_ok=$install_ok vid=$vid)" >>"$log"
+            echo "skipped VLC playback (vlc_ok=$vlc_ok vid=$vid)" >>"$log"
           fi
 
-          echo "=== F: media/decoder lines in logcat ===" >>"$log"
-          adb logcat -d 2>/dev/null | grep -Ei 'MediaCodec|c2\.|OMX|VideoDecoder|OMXClient' \
-            | tail -25 >>"$log" 2>&1 || true
+          say "E: open a real video in the YouTube app"
+          adb shell am start -W -a android.intent.action.VIEW \
+            -d "$VIDEO_URL" >>"$log" 2>&1 || true
+          sleep 15
+          adb exec-out screencap -p > "$out/02-youtube-app.png" 2>>"$log" || true
+          adb shell dumpsys activity activities 2>/dev/null \
+            | grep -m2 'topResumedActivity' >>"$log" 2>&1 || true
+          adb shell dumpsys media_session 2>/dev/null | grep -m4 'state=' >>"$log" 2>&1 || true
+          adb shell dumpsys window 2>/dev/null \
+            | grep -m1 'mCurrentFocus' >>"$log" 2>&1 || true
 
-          echo "=== G: captured files ===" >>"$log"
+          say "F: same URL in Chrome (fallback path)"
+          adb shell am start -W -n com.android.chrome/com.google.android.apps.chrome.Main \
+            -a android.intent.action.VIEW -d "$VIDEO_URL" >>"$log" 2>&1 || true
+          sleep 18
+          adb exec-out screencap -p > "$out/03-chrome-youtube.png" 2>>"$log" || true
+          adb shell dumpsys activity activities 2>/dev/null \
+            | grep -m2 'topResumedActivity' >>"$log" 2>&1 || true
+
+          say "G: decoder activity"
+          adb logcat -d 2>/dev/null \
+            | grep -Ei 'c2\.(goldfish|android)\.(avc|hevc|vp9|av1)|MediaCodec.*create|VideoDecoder' \
+            | tail -20 >>"$log" 2>&1 || true
+
+          say "H: captured files"
           ls -la "$out" >>"$log" 2>&1 || true
           cat "$log"
 
@@ -188,7 +201,10 @@ jobs:
           {
             echo
             echo "### demo.log"
-            tail -180 "$RUNNER_TEMP/demo.log" 2>/dev/null || echo "(none)"
+            cat "$RUNNER_TEMP/demo.log" 2>/dev/null || echo "(none)"
+            echo
+            echo "### emulator.log (tail)"
+            tail -20 "$RUNNER_TEMP/emulator.log" 2>/dev/null || echo "(none)"
           } >> "$file"
           echo "=== evidence ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"

@@ -9,5 +9,8 @@ runs/
 frame*.png
 screen.png
 
+# ...except the tiny clip the demo workflow needs to have on the device
+!android-headless/demo/test-video.mp4
+
 # Portable adb/scrcpy downloaded by phone/launch.py
 android-headless/phone/tools/
