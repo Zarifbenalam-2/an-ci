@@ -117,22 +117,46 @@ jobs:
           log="$RUNNER_TEMP/session.log"
           : > "$log"
           set -Eeuo pipefail
-          trap 'rc=$?; echo "!!! FAILED rc=$rc at line $LINENO" >>"$log"' ERR
           export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+
+          # Progress beacon: this step is opaque while it runs (the log API only
+          # serves finished jobs), so every milestone is pushed into the repo,
+          # where it is readable without authentication. Best effort: a failed
+          # push must never fail the session.
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          mkdir -p .session
+          echo "run $GITHUB_RUN_ID started $(date -u +%H:%M:%SZ)" > .session/status.txt
+          beacon() {
+            git checkout -B session-push HEAD >/dev/null 2>&1 || true
+            git add .session >/dev/null 2>&1 || true
+            git -c commit.gpgsign=false commit -q -m "session beacon: $1" || true
+            for a in 1 2 3; do
+              git fetch -q origin main && git rebase -q origin/main \
+                && git push -q origin HEAD:main && return 0
+              sleep 3
+            done
+            return 0
+          }
+          fail() { beacon "FAILED: $1"; echo "!!! $1"; exit 1; }
 
           sudo apt-get install -y -qq tmate
           # tmate needs a key of its own to reach the relay.
           [ -f "$HOME/.ssh/id_rsa" ] || ssh-keygen -t rsa -b 4096 -N "" -f "$HOME/.ssh/id_rsa" -q
+          beacon "tmate installed"
 
           nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
             -no-snapshot-save -no-snapshot-load -no-metrics \
             -gpu swiftshader_indirect >>"$log" 2>&1 &
           adb wait-for-device
+          beacon "emulator process started"
 
           deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
             if [ "$SECONDS" -ge "$deadline" ]; then
-              echo "boot timed out" >>"$log"; cat "$log"; exit 1
+              echo "boot timed out" >>"$log"; cat "$log"
+              beacon "boot timed out: $(tail -3 "$log" | tr '\n' ' ' | cut -c1-200)"
+              exit 1
             fi
             sleep 3
           done
@@ -140,6 +164,7 @@ jobs:
             adb shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
           done
           adb devices -l >>"$log" 2>&1
+          beacon "android booted, opening tmate session"
 
           echo "device is up -- opening the interactive session below"
           cat "$log"
@@ -161,43 +186,23 @@ jobs:
           echo "      refused, option A always works.)"
           echo "-------------------------------------------------------------"
 
-          # Start the session with its output captured, so the address can be
-          # pushed into the repo: the Actions log API needs admin rights, while
-          # a raw file is readable by anyone.
-          #
-          # Careful with `set -e` + `pipefail` here: grep exits 1 while the log
-          # is still empty, which would kill the step, so every grep is guarded.
           tmate_log="$RUNNER_TEMP/tmate.log"
           tmate -F >"$tmate_log" 2>&1 &
           tmate_pid=$!
           addr=""
-          for i in $(seq 1 30); do
-            addr=$(grep -m1 -oE 'ssh [A-Za-z0-9]+@[a-z0-9]+\.tmate\.io' "$tmate_log" || true)
+          for i in $(seq 1 60); do
+            addr=$(grep -m1 -oE 'ssh [-A-Za-z0-9]+@[a-z0-9.-]+\.tmate\.(io|me)' "$tmate_log" || true)
             if [ -n "$addr" ]; then break; fi
             sleep 2
           done
           if [ -n "$addr" ]; then
-            mkdir -p .session
             echo "$addr" > .session/address.txt
-            git config user.name  "an-ci bot"
-            git config user.email "actions@users.noreply.github.com"
-            # checkout leaves a detached HEAD; put the commit on a real branch
-            git checkout -B session-push HEAD >/dev/null 2>&1 || true
-            git add .session/address.txt
-            git -c commit.gpgsign=false commit -q \
-              -m "session address for run $GITHUB_RUN_ID" || true
-            for a in 1 2 3 4 5; do
-              if git fetch -q origin main \
-                 && git rebase -q origin/main \
-                 && git push -q origin HEAD:main; then
-                echo "session address pushed to .session/address.txt"; break
-              fi
-              echo "address push attempt $a failed; retrying"; sleep 5
-            done
+            beacon "tmate up: $addr"
           else
-            echo "no tmate address captured within 60s"
+            # push what tmate actually printed so the outside can diagnose it
+            cp "$tmate_log" .session/tmate.log 2>/dev/null || true
+            beacon "no tmate address in 120s: $(tail -2 "$tmate_log" | tr '\n' ' ' | cut -c1-200)"
           fi
-          cat "$tmate_log"
           wait $tmate_pid
 
       - name: Upload session log
