@@ -184,35 +184,63 @@ jobs:
           adb pull /sdcard/run.mp4 "$out/run.mp4" >>"$log" 2>&1 || true
           adb logcat -d > "$out/logcat.txt" 2>&1 || true
 
+          adb shell dumpsys window 2>/dev/null | grep -E 'mCurrentFocus|mFocusedApp' >>"$log" || true
+          adb shell dumpsys activity activities 2>/dev/null | grep -m1 'ResumedActivity' >>"$log" || true
+
           echo "--- artifacts ---" >>"$log"; ls -la "$out" >>"$log"
           cat "$log"
 
-      # The default token can push because of `permissions: contents: write`
-      # above. This exists so failures are readable without logging in.
-      - name: Diagnostics on failure
-        if: failure()
+      # Runs whether the job succeeded or failed, so every run leaves readable
+      # evidence in the repo: what the device was showing, plus file sizes and
+      # checksums for the captures. The default token can push because of
+      # `permissions: contents: write` above.
+      - name: Publish run evidence
+        if: always()
         run: |
           file="diagnostics/run-${GITHUB_RUN_ID}.txt"
           mkdir -p "$(dirname "$file")"
           {
-            echo "## android-device failure, run $GITHUB_RUN_ID"
+            echo "## android-device run $GITHUB_RUN_ID"
+            echo "job status: ${{ job.status }}"
             date -u
-            echo "### disk"; df -h || true
-            echo "### kvm"; ls -la /dev/kvm 2>&1 || true
-            echo "### cpu virt"; egrep -c '(vmx|svm)' /proc/cpuinfo || true
-            echo "### ANDROID_HOME"; echo "${ANDROID_HOME:-unset}"
-            echo "### AVD home"; echo "${ANDROID_AVD_HOME:-unset}"
-            ls -la "${ANDROID_AVD_HOME:-/nonexistent}" 2>&1 || true
-            echo "### emulator -list-avds"; emulator -list-avds 2>&1 || true
-            echo "### device.log"; tail -250 "$RUNNER_TEMP/device.log" 2>/dev/null || echo "(none)"
-            echo "### adb devices"; adb devices -l 2>&1 || true
+            echo
+            echo "### captured files"
+            ls -la android-headless/runs/ 2>&1 || true
+            echo
+            echo "### checksums"
+            md5sum android-headless/runs/* 2>&1 || true
+            echo
+            echo "### screenshot dimensions"
           } > "$file"
-          echo "=== diagnostics ==="; cat "$file"
+
+          python - >>"$file" 2>&1 <<'PY'
+import glob, struct, os
+found = False
+for p in sorted(glob.glob('android-headless/runs/*.png')):
+    found = True
+    with open(p, 'rb') as fh:
+        data = fh.read()
+    w, h = struct.unpack('>II', data[16:24])
+    print(f"{os.path.basename(p)}: {w}x{h}, {len(data):,} bytes")
+if not found:
+    print("(no screenshots captured)")
+PY
+
+          {
+            echo
+            echo "### device.log"
+            tail -120 "$RUNNER_TEMP/device.log" 2>/dev/null || echo "(none)"
+            echo
+            echo "### disk"
+            df -h / || true
+          } >> "$file"
+
+          echo "=== evidence ==="; cat "$file"
           git config user.email "ci@users.noreply.github.com"
           git config user.name  "android-ci"
           git add "$file"
-          git commit -m "CI diagnostics for run $GITHUB_RUN_ID" || echo "nothing to commit"
-          git push origin HEAD:main || echo "push of diagnostics failed"
+          git commit -m "CI evidence for run $GITHUB_RUN_ID" || echo "nothing to commit"
+          git push origin HEAD:main || echo "push of evidence failed"
 
       - name: Upload frames
         if: always()
