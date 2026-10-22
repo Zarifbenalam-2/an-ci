@@ -182,7 +182,12 @@ jobs:
           beacon "on the tailnet as android-phone at $tsip"
 
           echo "--- booting the emulator ---" | tee -a "$log"
-          nohup emulator -avd headless -no-window -no-audio -no-boot-anim \
+          # Audio must stay ON: with -no-audio the guest has no audio output
+          # route and players such as YouTube fail with PlaybackState
+          # ERROR(7) "Bluetooth audio disconnected". The default backend
+          # plays into a null sink, which is silent on a runner but real
+          # enough for the guest to start playback.
+          nohup emulator -avd headless -no-window -no-boot-anim \
             -no-snapshot-save -no-snapshot-load -no-metrics \
             -gpu swiftshader_indirect >>"$log" 2>&1 &
           adb wait-for-device
