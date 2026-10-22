@@ -144,7 +144,8 @@ jobs:
           }
           fail() {
             # The key is masked by now, so the log tail is safe to print.
-            tail -25 "$log" || true
+            # Wide enough to include the line above a usage block.
+            tail -60 "$log" || true
             beacon "FAILED: $1"
             echo "!!! $1"
             exit 1
@@ -162,18 +163,22 @@ jobs:
               "https://pkgs.tailscale.com/stable/tailscale_${ver}_amd64.tgz" >>"$log" 2>&1 \
               || fail "tailscale download failed"
             tar -xzf /tmp/ts.tgz -C /tmp
-            sudo /tmp/tailscale_${ver}/tailscaled --tun=tailscale0 \
-              --statedir=/tmp/ts-state >/dev/null 2>&1 &
+            sudo /tmp/tailscale_${ver}/tailscaled --statedir=/tmp/ts-state >>"$log" 2>&1 &
             sleep 3
-            sudo /tmp/tailscale_${ver}/tailscale up \
-              --authkey "$TS_AUTHKEY" --hostname "android-phone" \
-              --ephemeral --accept-dns=false >>"$log" 2>&1 \
-              || fail "tailscale up failed"
-            export PATH="/tmp/tailscale_${ver}:$PATH"
+            tsbin="/tmp/tailscale_${ver}/tailscale"
+          else
+            tsbin=$(readlink -f "$(command -v tailscale)") || fail "no tailscale binary"
           fi
-          sudo tailscale up --authkey "$TS_AUTHKEY" --hostname "android-phone" \
-            --ephemeral --accept-dns=false >>"$log" 2>&1 || fail "tailscale up failed"
-          tsip=$(tailscale ip -4 | head -1) || fail "no tailscale ip"
+          # Newer tailscale releases drop or rename up-flags; try in decreasing
+          # specificity so a removed flag cannot block joining the tailnet.
+          sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-phone \
+            --ephemeral --timeout 60s >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-phone \
+            --ephemeral >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" >>"$log" 2>&1 \
+          || fail "tailscale up failed"
+          tsip=$(sudo "$tsbin" ip -4 | head -1) || fail "no tailscale ip"
+          echo "tailnet address: $tsip" | tee -a "$log"
           beacon "on the tailnet as android-phone at $tsip"
 
           echo "--- booting the emulator ---" | tee -a "$log"
@@ -206,7 +211,7 @@ jobs:
           sleep 5
           if ! ss -ltn 2>/dev/null | grep -q 5555; then
             # fallback: let tailscale itself forward the port, no socat needed
-            sudo tailscale serve --bg --tcp 5555 tcp://127.0.0.1:5555 >>"$log" 2>&1 \
+            sudo "$tsbin" serve --bg --tcp 5555 tcp://127.0.0.1:5555 >>"$log" 2>&1 \
               || beacon "port relay may have failed"
           fi
           ss -ltn 2>/dev/null | grep 5555 | tee -a "$log" || true
