@@ -189,7 +189,7 @@ jobs:
           # enough for the guest to start playback.
           nohup emulator -avd headless -no-window -no-boot-anim \
             -no-snapshot-save -no-snapshot-load -no-metrics \
-            -gpu swiftshader_indirect >>"$log" 2>&1 &
+            -gpu swiftshader_indirect -writable-system >>"$log" 2>&1 &
           adb wait-for-device
           deadline=$((SECONDS + 420))
           until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
@@ -204,6 +204,45 @@ jobs:
           done
           echo "booted android $(adb shell getprop ro.build.version.release | tr -d '\r')" | tee -a "$log"
           beacon "android booted at $tsip"
+
+          # --- upgrade YouTube ------------------------------------------------
+          # The google_apis image ships an old YouTube that shows a blocking
+          # "Update available" dialog on launch, and there is no Play Store on
+          # the image to update it. With -writable-system the system partition
+          # can be remounted, the preinstalled copy deleted, and a current
+          # build sideloaded in its place.
+          adb root >/dev/null 2>&1; sleep 3
+          if adb remount >>"$log" 2>&1 \
+             && adb shell rm -rf /product/app/YouTube >>"$log" 2>&1; then
+            echo "system youtube removed; rebooting to refresh packages" | tee -a "$log"
+            adb reboot
+            adb wait-for-device
+            deadline=$((SECONDS + 300))
+            until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+              if [ "$SECONDS" -ge "$deadline" ]; then
+                fail "reboot after youtube removal timed out"
+              fi
+              sleep 3
+            done
+            adb root >/dev/null 2>&1; sleep 2
+            adb remount >>"$log" 2>&1 || true
+            beacon "system youtube removed"
+          else
+            echo "system partition not writable; keeping preinstalled youtube" >>"$log"
+          fi
+          # The image ships no Play Store, so sideload a current build.
+          if curl -fsSL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+                -o /tmp/yt.apk \
+                "https://d.apkpure.com/b/XAPK/com.google.android.youtube?version=latest" \
+                >>"$log" 2>&1 \
+             && [ "$(stat -c%s /tmp/yt.apk 2>/dev/null || echo 0)" -gt 50000000 ]; then
+            adb install -r /tmp/yt.apk >>"$log" 2>&1 || true
+            adb shell pm grant com.google.android.youtube \
+              android.permission.POST_NOTIFICATIONS >>"$log" 2>&1 || true
+            beacon "youtube upgraded to a current build"
+          else
+            beacon "youtube sideload download failed; stock version stays"
+          fi
 
           echo "--- publishing the emulator's adb port on the tailnet ---" | tee -a "$log"
           # The emulator listens on the runner's localhost only, so relay it onto
