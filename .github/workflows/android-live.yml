@@ -38,7 +38,7 @@ on:
         default: "110"
 
 permissions:
-  contents: read
+  contents: write   # the step pushes progress beacons into the repo
 
 jobs:
   live:
@@ -142,13 +142,38 @@ jobs:
             done
             return 0
           }
-          fail() { beacon "FAILED: $1"; echo "!!! $1"; exit 1; }
+          fail() {
+            # The key is masked by now, so the log tail is safe to print.
+            tail -25 "$log" || true
+            beacon "FAILED: $1"
+            echo "!!! $1"
+            exit 1
+          }
 
           echo "--- joining the tailnet ---" | tee -a "$log"
-          curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1
+          # install.sh failed with exit 2 on the new ubuntu-26.04 runner image,
+          # so fall back to the static tarball, which cannot break on a release.
+          if ! curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1; then
+            echo "install.sh failed; using the static tarball" >>"$log"
+            ver=$(curl -fsSL https://pkgs.tailscale.com/stable/ \
+              | grep -oE 'tailscale_[0-9]+\.[0-9]+\.[0-9]+_amd64\.tgz' | head -1 \
+              | cut -d_ -f2) || fail "could not read the tailscale version list"
+            curl -fsSL -o /tmp/ts.tgz \
+              "https://pkgs.tailscale.com/stable/tailscale_${ver}_amd64.tgz" >>"$log" 2>&1 \
+              || fail "tailscale download failed"
+            tar -xzf /tmp/ts.tgz -C /tmp
+            sudo /tmp/tailscale_${ver}/tailscaled --tun=tailscale0 \
+              --statedir=/tmp/ts-state >/dev/null 2>&1 &
+            sleep 3
+            sudo /tmp/tailscale_${ver}/tailscale up \
+              --authkey "$TS_AUTHKEY" --hostname "android-phone" \
+              --ephemeral --accept-dns=false >>"$log" 2>&1 \
+              || fail "tailscale up failed"
+            export PATH="/tmp/tailscale_${ver}:$PATH"
+          fi
           sudo tailscale up --authkey "$TS_AUTHKEY" --hostname "android-phone" \
-            --ephemeral --accept-dns=false >>"$log" 2>&1
-          tsip=$(tailscale ip -4 | head -1)
+            --ephemeral --accept-dns=false >>"$log" 2>&1 || fail "tailscale up failed"
+          tsip=$(tailscale ip -4 | head -1) || fail "no tailscale ip"
           beacon "on the tailnet as android-phone at $tsip"
 
           echo "--- booting the emulator ---" | tee -a "$log"
