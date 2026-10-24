@@ -233,7 +233,7 @@ jobs:
           i=1
           while [ "$i" -le "$PHONES" ]; do
             s="$tsip:$((21000 + i))"
-            wv=$(adb -s "$s" shell "dumpsys webviewupdate 2>/dev/null | grep -m1 'current WebView package'" 2>/dev/null | tr -d '\r')
+            wv=$(adb -s "$s" shell "dumpsys webviewupdate 2>/dev/null | grep -m1 'current WebView package'" 2>/dev/null | tr -d '\r' || true)
             echo "phone-$i webview: ${wv:-none-reported}" | tee -a "$log"
             if ! adb -s "$s" shell pm list packages 2>/dev/null | tr -d '\r' | grep -q com.google.android.webview; then
               echo "phone-$i: no webview package; sideloading" | tee -a "$log"
