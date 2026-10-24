@@ -1,0 +1,163 @@
+name: redroid-stress
+
+# Empirical density ceiling: does NOT guess phone counts. Boots N redroid
+# containers on one runner, puts REAL load inside Android (not idle), and
+# records per-container memory/CPU + host pressure until the matrix answers:
+# how many phones does one 4 vCPU / 16 GB runner actually hold?
+#
+# Matrix: N = 4, 6, 8, 10 -> four runners run in parallel, one per count.
+# Per container: --memory 3g cap (so a starving phone dies alone instead of
+# taking the host down), no CPU cap (contention is part of the measurement).
+#
+# Phases per runner:
+#   settle 60s -> IDLE sampling 3 min -> load ON (2 dd busy-loops per phone)
+#   -> LOADED sampling 8 min -> summary (boot time, idle/peak/avg mem,
+#   avg/peak CPU, deaths)
+#
+# Results land in diagnostics/redroid-stress-<N>.txt and .csv (one commit per
+# runner). Self-triggers on push of this file -- no dispatch or key needed.
+
+on:
+  push:
+    paths: ['.github/workflows/redroid-stress.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stress:
+    strategy:
+      fail-fast: false
+      matrix:
+        phones: [4, 6, 8, 10]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Boot N phones, load them, record everything
+        env:
+          N: ${{ matrix.phones }}
+        run: |
+          set -uo pipefail
+          R="diagnostics/redroid-stress-$N.txt"
+          CSV="diagnostics/redroid-stress-$N.csv"
+          mkdir -p diagnostics
+          {
+            echo "kernel $(uname -r) · $(nproc) vCPU · $(free -h | awk '/^Mem:/{print $2}')"
+            echo "containers: $N · cap: 3g each · load: 2x dd per phone"
+          } > "$R"
+          echo "ts,name,status,mem,cpu" > "$CSV"
+
+          sudo modprobe binder_linux devices=binder,hwbinder,vndbinder \
+            || sudo modprobe binder_linux
+          grep -q binder /proc/filesystems || { echo "BINDER MISSING" | tee -a "$R"; exit 1; }
+
+          curl -fsSL -o /tmp/pt.zip \
+            https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+          unzip -q /tmp/pt.zip -d /tmp/pt
+          export PATH="/tmp/pt/platform-tools:$PATH"
+
+          echo "pulling image..." | tee -a "$R"
+          sudo docker pull redroid/redroid:13.0.0_64only-latest >>"$R" 2>&1
+
+          echo "booting $N containers..." | tee -a "$R"
+          t0=$SECONDS
+          i=1
+          while [ "$i" -le "$N" ]; do
+            sudo docker run -d --name "droid$i" --privileged \
+              --memory 3g \
+              -p "$((20000 + i)):5555" \
+              redroid/redroid:13.0.0_64only-latest \
+              androidboot.redroid_width=720 androidboot.redroid_height=1600 \
+              androidboot.redroid_dpi=280 >>"$R" 2>&1
+            i=$((i + 1))
+          done
+
+          # wait for every adbd, note each boot time
+          i=1
+          while [ "$i" -le "$N" ]; do
+            p=$((20000 + i)); s="localhost:$p"; tb=$SECONDS
+            ok=no
+            while [ $((SECONDS - tb)) -lt 300 ]; do
+              adb connect "$s" >/dev/null 2>&1 || true
+              v=$(adb -s "$s" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+              [ "$v" = "1" ] && { ok=yes; break; }
+              sleep 4
+            done
+            if [ "$ok" = yes ]; then
+              echo "droid$i: booted in $((SECONDS - tb))s" | tee -a "$R"
+            else
+              echo "droid$i: NEVER BOOTED (adbd or boot failed)" | tee -a "$R"
+            fi
+            i=$((i + 1))
+          done
+          echo "all-boot-attempted after $((SECONDS - t0))s" | tee -a "$R"
+
+          sample() {  # one sweep: every container + host, appended to CSV
+            ts=$(date +%H:%M:%S)
+            sudo docker stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}' 2>/dev/null \
+              | while read -r name mem cpu; do
+                [ -z "$name" ] && continue
+                st=$(sudo docker inspect -f '{{.State.Status}}' "$name" 2>/dev/null || echo gone)
+                echo "$ts,$name,$st,$mem,$cpu" >> "$CSV"
+              done
+            echo "$ts,HOST,up,mem $(free -m | awk '/^Mem:/{print $3 "/" $2 "MB"}'),load $(cut -d' ' -f1 /proc/loadavg)" >> "$CSV"
+          }
+
+          echo "settling 60s..." | tee -a "$R"; sleep 60
+          echo "IDLE sampling 3 min" | tee -a "$R"
+          for w in $(seq 1 18); do sample; sleep 10; done
+
+          echo "applying LOAD (2x dd per phone)" | tee -a "$R"
+          i=1
+          while [ "$i" -le "$N" ]; do
+            s="localhost:$((20000 + i))"
+            adb -s "$s" shell 'nohup dd if=/dev/zero of=/dev/null bs=256k >/dev/null 2>&1 </dev/null &' >/dev/null 2>&1
+            adb -s "$s" shell 'nohup dd if=/dev/zero of=/dev/null bs=256k >/dev/null 2>&1 </dev/null &' >/dev/null 2>&1
+            i=$((i + 1))
+          done
+          echo "LOADED sampling 8 min" | tee -a "$R"
+          for w in $(seq 1 48); do sample; sleep 10; done
+
+          # summary straight from the CSV
+          python3 -c "
+          import csv
+  rows=list(csv.reader(open('$CSV')))
+  hdr=rows[0]; data=[r for r in rows[1:] if len(r)==5]
+  def mb(s):
+      s=s.split()[0]
+      if s.endswith('GiB'): return float(s[:-3])*1024
+      if s.endswith('MiB'): return float(s[:-3])
+      return 0.0
+  names=sorted({r[1] for r in data if r[1]!='HOST'})
+  print('== per-phone summary (mem MB / cpu %) ==')
+  for n in names:
+      rs=[r for r in data if r[1]==n]
+      dead=any(r[2]!='running' for r in rs)
+      mems=[mb(r[3]) for r in rs if r[3]]; cpus=[]
+      for r in rs:
+          try: cpus.append(float(r[4].rstrip('%')))
+          except: pass
+      idle=[mb(r[3]) for r in rs[:18] if r[1]==n]
+      print(f'{n}: idle~{sum(idle)/max(1,len(idle)):.0f}MB peak={max(mems) if mems else 0:.0f}MB '
+            f'avgCPU={sum(cpus)/max(1,len(cpus)):.0f}% peakCPU={max(cpus) if cpus else 0:.0f}% '
+            f'{'DIED/RESTARTED' if dead else 'alive'}')
+  h=[r for r in data if r[1]=='HOST']
+  print('host samples:', len(h), '· last:', h[-1][3] if h else '?', 'load', h[-1][4] if h else '?')
+  " >> "$R" 2>&1
+
+          echo | tee -a "$R"
+          grep -cE 'droid.*alive' "$R" >/dev/null 2>&1 || true
+          echo "raw CSV kept next to this file" | tee -a "$R"
+
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "$R" "$CSV"
+          git -c commit.gpgsign=false commit -q -m "redroid stress result: $N phones" || true
+          for a in 1 2 3 4 5; do
+            git fetch -q origin main && git rebase -q origin/main \
+              && git push -q origin HEAD:main && break
+            sleep 4
+          done
