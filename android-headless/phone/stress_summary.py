@@ -11,7 +11,7 @@ import sys
 
 
 def to_mb(s: str) -> float:
-    s = s.split()[0]
+    s = s.split("/")[0].split()[0].strip()
     if s.endswith("GiB"):
         return float(s[:-3]) * 1024
     if s.endswith("MiB"):

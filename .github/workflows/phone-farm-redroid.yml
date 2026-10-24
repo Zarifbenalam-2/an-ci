@@ -1,0 +1,217 @@
+name: phone-farm-redroid
+
+# The dense farm: N redroid containers WITH Google services (MindTheGapps
+# overlay) on one runner. Measured on this runner type (see
+# diagnostics/redroid-stress-*): every phone idles at ~650-800 MB, ten boot
+# in under 90 s, none died under sustained load at N=10, host RAM 8.8/16 GB
+# at N=10 -- CPU (4 shared vCPUs) is the contention wall, not memory.
+#
+# Per phone this publishes, on your tailnet:
+#   adb + scrcpy:  <tailnet-ip>:21001 ... :2100N   (docker binds the port
+#                  straight onto the tailnet interface -- no socat needed)
+#   ssh into the RUNNER host: <tailnet-ip>:2222    (your GitHub public key;
+#                  from there android-headless/redroid/add-phone.sh boots
+#                  MORE phones on this same runner without a new dispatch)
+#
+# One manual step the FIRST time you sign into Google on these phones:
+# each phone prints its GSF Android-ID; register those at
+# https://www.google.com/android/uncertified (wait ~1h) or sign-in will say
+# "device isn't certified". The IDs are committed to .session/gsf-ids.txt.
+
+on:
+  workflow_dispatch:
+    inputs:
+      authkey:
+        description: Tailscale auth key (reusable + ephemeral). Used for this run only.
+        required: true
+      phones:
+        description: How many phones on this runner (1-10)
+        required: false
+        default: "6"
+      minutes:
+        description: How long to keep the farm online (max ~340)
+        required: false
+        default: "110"
+
+permissions:
+  contents: write   # status beacons are pushed into the repo
+
+jobs:
+  farm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kernel, adb, and the GApps image
+        run: |
+          set -euo pipefail
+          sudo modprobe binder_linux devices=binder,hwbinder,vndbinder \
+            || sudo modprobe binder_linux
+          grep -q binder /proc/filesystems || { echo "no binder on this kernel"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/pt"
+          curl -fsSL -o "$RUNNER_TEMP/pt.zip" \
+            https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+          unzip -q -o "$RUNNER_TEMP/pt.zip" -d "$RUNNER_TEMP/pt"
+          echo "$RUNNER_TEMP/pt/platform-tools" >> "$GITHUB_PATH"
+          echo "--- building redroid13-gapps (MindTheGapps overlay, ~5-10 min) ---"
+          sudo docker build -t redroid13-gapps \
+            -f android-headless/redroid/Dockerfile.gapps \
+            android-headless/redroid/
+
+      # One step for everything that must stay alive: tailnet, containers,
+      # sshd, hold-open loop.
+      - name: Boot the farm, publish it, keep it alive
+        env:
+          TS_AUTHKEY: ${{ inputs.authkey }}
+          PHONES: ${{ inputs.phones }}
+          MINUTES: ${{ inputs.minutes }}
+          GH_USER: ${{ github.actor }}
+        run: |
+          set -Eeuo pipefail
+          echo "::add-mask::$TS_AUTHKEY"
+          log="$RUNNER_TEMP/rfarm.log"
+          : > "$log"
+          export PATH="$RUNNER_TEMP/pt/platform-tools:$PATH"
+
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          mkdir -p .session
+          beacon() {
+            echo "$(date -u +%H:%M:%SZ) $1" >> .session/redroid-farm-log.txt
+            git add .session >/dev/null 2>&1 || true
+            git -c commit.gpgsign=false commit -q -m "rfarm beacon: $1" || true
+            for a in 1 2 3; do
+              git fetch -q origin main && git rebase -q origin/main \
+                && git push -q origin HEAD:main && return 0
+              sleep 3
+            done
+            return 0
+          }
+          fail() { tail -50 "$log" || true; beacon "FAILED: $1"; echo "!!! $1"; exit 1; }
+
+          echo "--- joining the tailnet ---" | tee -a "$log"
+          if ! curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1; then
+            ver=$(curl -fsSL https://pkgs.tailscale.com/stable/ \
+              | grep -oE 'tailscale_[0-9]+\.[0-9]+\.[0-9]+_amd64\.tgz' | head -1 | cut -d_ -f2)
+            curl -fsSL -o /tmp/ts.tgz "https://pkgs.tailscale.com/stable/tailscale_${ver}_amd64.tgz"
+            tar -xzf /tmp/ts.tgz -C /tmp
+            sudo /tmp/tailscale_${ver}/tailscaled --statedir=/tmp/ts-state >>"$log" 2>&1 &
+            sleep 3; tsbin="/tmp/tailscale_${ver}/tailscale"
+          else
+            tsbin=$(readlink -f "$(command -v tailscale)")
+          fi
+          sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-rfarm \
+            --ephemeral --timeout 60s >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-rfarm \
+            --ephemeral >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" >>"$log" 2>&1 \
+          || fail "tailscale up failed"
+          tsip=$(sudo "$tsbin" ip -4 | head -1) || fail "no tailscale ip"
+          beacon "on the tailnet as android-rfarm at $tsip"
+
+          # persist the farm env for add-phone.sh over ssh
+          printf 'export FARM_TSIP=%s\nexport FARM_IMAGE=redroid13-gapps\nexport FARM_CAPACITY=10\n' \
+            "$tsip" > .session/farm-env
+
+          echo "--- booting $PHONES phones ---" | tee -a "$log"
+          t0=$SECONDS
+          i=1
+          while [ "$i" -le "$PHONES" ]; do
+            port=$((21000 + i))
+            sudo docker run -d --name "rfarm$i" --privileged \
+              --memory 3g --shm-size 1g \
+              -p "$tsip:$port:5555" \
+              -v "rfarm$i-data:/data" \
+              redroid13-gapps \
+              androidboot.redroid_width=720 androidboot.redroid_height=1600 \
+              androidboot.redroid_dpi=280 androidboot.use_memfd=true \
+              ro.setupwizard.mode=DISABLED >>"$log" 2>&1
+            python3 android-headless/phone/farm_redroid_status.py "$i" booting "$tsip" "$PHONES"
+            i=$((i + 1))
+          done
+
+          : > .session/gsf-ids.txt
+          i=1
+          while [ "$i" -le "$PHONES" ]; do
+            port=$((21000 + i)); s="$tsip:$port"
+            ok=no
+            for w in $(seq 1 75); do
+              adb connect "$s" >/dev/null 2>&1 || true
+              v=$(adb -s "$s" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+              [ "$v" = "1" ] && { ok=yes; break; }
+              sleep 4
+            done
+            [ "$ok" = yes ] || { python3 android-headless/phone/farm_redroid_status.py "$i" boot-failed "$tsip" "$PHONES"; beacon "phone-$i boot FAILED"; fail "phone-$i never finished booting"; }
+            for st in window_animation_scale transition_animation_scale animator_duration_scale; do
+              adb -s "$s" shell settings put global "$st" 0.0 >>"$log" 2>&1 || true
+            done
+            adb -s "$s" shell settings put secure navigation_mode 0 >>"$log" 2>&1 || true
+            gsf=$(python3 android-headless/phone/gsf_id.py adb "$s")
+            echo "phone-$i gsf_android_id=$gsf" >> .session/gsf-ids.txt
+            python3 android-headless/phone/farm_redroid_status.py "$i" booted "$tsip" "$PHONES"
+            beacon "phone-$i booted at $s (gsf $gsf)"
+            i=$((i + 1))
+          done
+          echo "all phones up after $((SECONDS - t0))s" | tee -a "$log"
+
+          echo "--- current YouTube on every phone ---" | tee -a "$log"
+          if curl -fsSL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+                -o /tmp/yt.apk \
+                "https://d.apkpure.com/b/XAPK/com.google.android.youtube?version=latest" \
+                >>"$log" 2>&1 \
+             && [ "$(stat -c%s /tmp/yt.apk 2>/dev/null || echo 0)" -gt 50000000 ]; then
+            i=1
+            while [ "$i" -le "$PHONES" ]; do
+              s="$tsip:$((21000 + i))"
+              adb -s "$s" install -r /tmp/yt.apk >>"$log" 2>&1 || true
+              adb -s "$s" shell pm grant com.google.android.youtube \
+                android.permission.POST_NOTIFICATIONS >>"$log" 2>&1 || true
+              python3 android-headless/phone/farm_redroid_status.py "$i" ready "$tsip" "$PHONES"
+              i=$((i + 1))
+            done
+            beacon "youtube installed on all phones"
+          else
+            beacon "youtube download failed; phones stay gapps-only"
+          fi
+
+          echo "--- runner ssh (for add-phone.sh) ---" | tee -a "$log"
+          if timeout 180 sudo apt-get install -y -qq openssh-server >>"$log" 2>&1; then
+            mkdir -p ~/.ssh && chmod 700 ~/.ssh
+            curl -fsSL "https://api.github.com/users/${GH_USER}/keys" \
+              | python3 -c "import json,sys;[print(k['key']) for k in json.load(sys.stdin)]" \
+              > ~/.ssh/authorized_keys 2>>"$log" || true
+            chmod 600 ~/.ssh/authorized_keys
+            sudo /usr/sbin/sshd -p 2222 -o "ListenAddress=$tsip" \
+              -o PasswordAuthentication=no -o PermitRootLogin=no >>"$log" 2>&1 \
+              && beacon "runner ssh live at $tsip:2222 (user runner, your GitHub key)" \
+              || beacon "runner ssh FAILED to start"
+          else
+            beacon "openssh-server install failed; add-phone over ssh unavailable this run"
+          fi
+          echo "ssh://runner@$tsip:2222" > .session/farm-ssh.txt
+          chmod +x android-headless/redroid/add-phone.sh
+          beacon "FARM READY: $PHONES phones on $tsip"
+
+          echo
+          echo "=============================================================="
+          echo "  REDROID FARM LIVE: $PHONES phones for ${MINUTES} minutes."
+          echo "  runner ssh : ssh -p 2222 runner@$tsip"
+          echo "               (add a phone: bash android-headless/redroid/add-phone.sh)"
+          i=1
+          while [ "$i" -le "$PHONES" ]; do
+            echo "  phone-$i   : adb connect $tsip:$((21000 + i))  ·  scrcpy -s $tsip:$((21000 + i))"
+            i=$((i + 1))
+          done
+          echo "  gsf ids    : .session/gsf-ids.txt (register at google.com/android/uncertified)"
+          echo "=============================================================="
+          echo
+
+          end=$((SECONDS + MINUTES * 60))
+          while [ "$SECONDS" -lt "$end" ]; do
+            alive=$(sudo docker ps --filter name=rfarm -q | wc -l)
+            [ "$alive" -eq 0 ] && { echo "all containers gone; ending early"; break; }
+            sleep 30
+          done
+          echo "session window closed"

@@ -1,0 +1,21 @@
+# redroid 13 + MindTheGapps overlay.
+#
+# This is the community-proven method from redroid-doc issue #887 (user
+# palchrb, Nov 2025): no AOSP build, just a 5-10 minute layer that unzips the
+# MindTheGapps 13 x86_64 package over the stock redroid system image.
+# Base is 13.0.0-latest (the variant the issue thread proved; the _64only
+# variant also boots on our runners but is untested with this overlay).
+#
+# Play sign-in on an uncertified device additionally wants the GSF Android-ID
+# registered at https://www.google.com/android/uncertified -- the farm
+# workflow prints each phone's ID for exactly that step.
+
+FROM debian:bookworm-slim AS fetch
+ARG GAPPS_URL="https://github.com/MindTheGapps/13.0.0-x86_64/releases/download/MindTheGapps-13.0.0-x86_64-20231025_201203/MindTheGapps-13.0.0-x86_64-20231025_201203.zip"
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl unzip ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN curl -fL "$GAPPS_URL" -o /mtg.zip && mkdir -p /mtg && unzip -q /mtg.zip -d /mtg
+
+FROM redroid/redroid:13.0.0-latest
+COPY --from=fetch /mtg/system/ /system/
+CMD ["/init"]

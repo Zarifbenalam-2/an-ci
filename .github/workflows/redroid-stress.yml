@@ -97,9 +97,11 @@ jobs:
 
           sample() {  # one sweep: every container + host, appended to CSV
             ts=$(date +%H:%M:%S)
-            sudo docker stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}' 2>/dev/null \
-              | while read -r name mem cpu; do
+            sudo docker stats --no-stream --format '{{.Name}}|{{.MemUsage}}|{{.CPUPerc}}' 2>/dev/null \
+              | while IFS='|' read -r name mem cpu; do
                 [ -z "$name" ] && continue
+                mem=$(echo "$mem" | tr -d ' ')   # "654MiB / 3GiB" -> "654MiB/3GiB"
+                [ -z "$cpu" ] && cpu="0.00%"
                 st=$(sudo docker inspect -f '{{.State.Status}}' "$name" 2>/dev/null || echo gone)
                 echo "$ts,$name,$st,$mem,$cpu" >> "$CSV"
               done
