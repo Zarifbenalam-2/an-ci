@@ -1,0 +1,112 @@
+name: redroid-probe
+
+# One question: can this hosted runner run redroid (Docker Android) containers?
+# redroid needs the `binder_linux` kernel module on the host. GitHub's runner
+# kernel (linux-azure) does not preload it; linux-modules-extra MIGHT ship it.
+# This job answers that empirically and records the verdict in the repo:
+#
+#   diagnostics/redroid-probe.txt
+#
+# It triggers itself on push of this file, so no dispatch/token is needed.
+# If binder loads, it goes one step further and actually boots one redroid 13
+# container and asks it its Android version over adb.
+
+on:
+  push:
+    paths: ['.github/workflows/redroid-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # the verdict is committed back
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe binder, then try a real redroid boot
+        run: |
+          set -uo pipefail   # record failures, do not die on them
+          R=diagnostics/redroid-probe.txt
+          mkdir -p diagnostics
+          {
+            echo "probe at $(date -u +%Y-%m-%dT%H:%M:%SZ), kernel $(uname -r)"
+            echo
+            echo "== 1. install linux-modules-extra for this kernel =="
+          } > "$R" 2>&1
+          sudo apt-get update -qq >>"$R" 2>&1
+          if sudo apt-get install -y -qq "linux-modules-extra-$(uname -r)" >>"$R" 2>&1; then
+            echo "modules-extra: INSTALLED" | tee -a "$R"
+          else
+            echo "modules-extra: INSTALL FAILED (no package for this kernel)" | tee -a "$R"
+          fi
+
+          echo "== 2. load binder_linux ==" | tee -a "$R"
+          if sudo modprobe binder_linux devices=binder,hwbinder,vndbinder >>"$R" 2>&1 \
+             || sudo modprobe binder_linux >>"$R" 2>&1; then
+            echo "modprobe: OK" | tee -a "$R"
+          else
+            echo "modprobe: FAILED" | tee -a "$R"
+          fi
+          if grep -q binder /proc/filesystems; then
+            echo "BINDER: OK" | tee -a "$R"
+          else
+            echo "BINDER: MISSING" | tee -a "$R"
+          fi
+
+          if grep -q "BINDER: OK" "$R"; then
+            echo | tee -a "$R"
+            echo "== 3. binder present -> boot a real redroid 13 container ==" | tee -a "$R"
+            curl -fsSL -o /tmp/pt.zip \
+              https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+            unzip -q /tmp/pt.zip -d /tmp/pt
+            export PATH="/tmp/pt/platform-tools:$PATH"
+            echo "docker: $(sudo docker --version)" | tee -a "$R"
+            if sudo docker pull redroid/redroid:13.0.0_64only-latest >>"$R" 2>&1; then
+              sudo docker run -d --name probe-droid --privileged \
+                -p 15555:5555 \
+                redroid/redroid:13.0.0_64only-latest \
+                androidboot.redroid_width=720 androidboot.redroid_height=1600 \
+                androidboot.redroid_dpi=280 >>"$R" 2>&1 \
+                && echo "container: STARTED" | tee -a "$R" \
+                || { echo "container: RUN FAILED" | tee -a "$R"; }
+              if sudo docker ps --format '{{.Names}}' | grep -q probe-droid; then
+                echo "waiting up to 150s for adbd ..." | tee -a "$R"
+                ok=no
+                for i in $(seq 1 30); do
+                  adb connect localhost:15555 >>"$R" 2>&1 || true
+                  v=$(adb -s localhost:15555 shell getprop ro.build.version.release 2>/dev/null | tr -d '\r')
+                  if [ -n "$v" ]; then ok=yes; break; fi
+                  sleep 5
+                done
+                if [ "$ok" = yes ]; then
+                  echo "REDROID: LIVE -- Android $v answered over adb" | tee -a "$R"
+                else
+                  echo "REDROID: container up but adbd never answered" | tee -a "$R"
+                  sudo docker logs --tail 30 probe-droid >>"$R" 2>&1 || true
+                fi
+              fi
+            else
+              echo "image pull failed (network/registry)" | tee -a "$R"
+            fi
+          else
+            echo | tee -a "$R"
+            echo "REDROID: NOT VIABLE on this runner (no binder; building modules" | tee -a "$R"
+            echo "per-run costs 10-15 min and pins us to kernel versions -- skip)" | tee -a "$R"
+          fi
+
+          echo | tee -a "$R"
+          echo "== verdict ==" | tee -a "$R"
+          grep -E 'BINDER:|REDROID:|container:' "$R" | tee -a "$R" || true
+
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "$R"
+          git -c commit.gpgsign=false commit -q -m "redroid probe result" || true
+          for a in 1 2 3; do
+            git fetch -q origin main && git rebase -q origin/main \
+              && git push -q origin HEAD:main && break
+            sleep 3
+          done
