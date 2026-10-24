@@ -13,3 +13,4 @@
 04:15:53Z runner ssh FAILED to start
 06:05:06Z on the tailnet as android-rfarm at 100.85.165.11
 06:06:41Z phone-1 booted at 100.85.165.11:21001 (gsf UNKNOWN)
+06:06:50Z phone-2 booted at 100.85.165.11:21002 (gsf UNKNOWN)
