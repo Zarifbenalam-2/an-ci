@@ -1,6 +1,6 @@
 {
  "run": "40061331083",
- "updated": "2026-10-24 04:14:13",
+ "updated": "2026-10-24 04:14:21",
  "ssh": "",
  "phones": [
   {
@@ -27,7 +27,7 @@
   {
    "name": "phone-4",
    "port": 21004,
-   "status": "booting",
+   "status": "booted",
    "gsf_id": "",
    "adb_address": "100.117.92.35:21004"
   },
