@@ -241,8 +241,16 @@ jobs:
             beacon "openssh-server install failed; add-phone over ssh unavailable this run"
           fi
           echo "ssh://runner@$tsip:2222" > .session/farm-ssh.txt
-          chmod +x android-headless/redroid/add-phone.sh
+          chmod +x android-headless/redroid/*.sh
           beacon "FARM READY: $PHONES phones on $tsip"
+
+          # --- baseline snapshot NOW, while everything is healthy -------------
+          # End-of-session snapshots kept dying with the runner (docker hangs
+          # at death's door). The moment that always works is right here.
+          if [ -n "${PROFILE_TOKEN:-}" ]; then
+            PROFILE_TOKEN="$PROFILE_TOKEN" FARM_LOG="$log" \
+              bash android-headless/redroid/snapshot-upload.sh baseline || true
+          fi
 
           echo
           echo "=============================================================="
@@ -266,60 +274,11 @@ jobs:
           done
           echo "session window closed"
 
-          # --- snapshot phone profiles to the private repo ---------------------
-          # Runs when the session window closes (or skip if no token). Each
-          # phone's data volume -> tarball -> release asset in farm-profiles.
-          # CLEANUP CODE MUST NOT BE KILLABLE: under set -eE + pipefail an empty
-          # `ls` or a failed tar fired the ERR trap and aborted the snapshot
-          # mid-flight (cost two debug cycles). Best-effort from here on:
-          # every failure logs loudly and the block always runs to the end.
-          set +eE
+          # --- end-of-session snapshot (best effort) ----------------------------
+          # The baseline snapshot already ran right after provisioning; this is
+          # the bonus pass for anything that changed during the session. Docker
+          # can be unresponsive this late, so this whole call is optional.
           if [ -n "${PROFILE_TOKEN:-}" ]; then
-            echo "--- snapshotting phone profiles ---" | tee -a "$log"
-            PA="Authorization: Bearer $PROFILE_TOKEN"
-            PAPI="https://api.github.com/repos/Zarifbenalam-2/farm-profiles/releases"
-            PDIR="$RUNNER_TEMP/profiles"; mkdir -p "$PDIR"
-            echo "volumes seen: [$(sudo docker volume ls --format '{{.Name}}' 2>&1 | tr '\n' ' ')]" | tee -a "$log"
-            for pv in $(sudo docker volume ls --format '{{.Name}}' 2>/dev/null | grep '^rfarm.*-data$' || true); do
-              psrc="/var/lib/docker/volumes/$pv/_data"
-              [ -d "$psrc" ] || { echo "SKIP $pv: no dir at $psrc" | tee -a "$log"; continue; }
-              sudo tar czf "$PDIR/$pv.tar.gz" \
-                --exclude='./dalvik-cache' --exclude='*/cache' \
-                -C "$psrc" . >/tmp/tar.err 2>&1 \
-                || { echo "TAR FAILED $pv: $(tail -2 /tmp/tar.err)" | tee -a "$log"; continue; }
-              sudo chmod 644 "$PDIR/$pv.tar.gz" || true
-              echo "snapshotted $pv ($(du -h "$PDIR/$pv.tar.gz" | cut -f1))" | tee -a "$log"
-            done
-            echo "tarballs staged: $(ls -1 "$PDIR"/*.tar.gz 2>/dev/null | wc -l)" | tee -a "$log"
-            prid=$(curl -fsS -H "$PA" "$PAPI/tags/profiles" 2>>"$log" \
-              | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
-            if [ -z "${prid:-}" ]; then
-              prid=$(curl -fsS -X POST -H "$PA" -H "Content-Type: application/json" \
-                -d '{"tag_name":"profiles","name":"phone profiles"}' "$PAPI" 2>>"$log" \
-                | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
-            fi
-            if [ -z "${prid:-}" ]; then
-              echo "SNAPSHOT FAILED: could not find or create the release" | tee -a "$log"
-              beacon "snapshot FAILED: no release (check PROFILE_TOKEN / farm-profiles)"
-            fi
-            if [ -n "${prid:-}" ]; then
-              shopt -s nullglob
-              for pf in "$PDIR"/*.tar.gz; do
-                pn=$(basename "$pf")
-                # replace an existing asset of the same name
-                aid=$(curl -fsS -H "$PA" "$PAPI/$prid/assets" 2>>"$log" \
-                  | python3 -c 'import json,sys;print(next((a["id"] for a in json.load(sys.stdin) if a["name"]==sys.argv[1]),""))' "$pn" 2>/dev/null || true)
-                [ -n "${aid:-}" ] && curl -fsS -X DELETE -H "$PA" \
-                  "$PAPI/$prid/assets/$aid" >/dev/null 2>&1 || true
-                if curl -fsS -X POST -H "$PA" -H "Content-Type: application/octet-stream" \
-                     --data-binary "@$pf" \
-                     "$PAPI/$prid/assets?name=$pn" >>"$log" 2>&1; then
-                  echo "uploaded $pn" | tee -a "$log"
-                else
-                  echo "upload failed: $pn (asset >2GB?)" | tee -a "$log"
-                fi
-              done
-              beacon "phone profiles snapshotted to farm-profiles"
-            fi
+            PROFILE_TOKEN="$PROFILE_TOKEN" FARM_LOG="$log" \
+              timeout 300 bash android-headless/redroid/snapshot-upload.sh final || true
           fi
-          set -eE
