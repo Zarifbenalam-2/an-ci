@@ -1,0 +1,38 @@
+kernel 7.0.0-1017-azure · 4 vCPU · 15Gi
+containers: 6 · cap: 3g each · load: 2x dd per phone
+pulling image...
+13.0.0_64only-latest: Pulling from redroid/redroid
+2824b019a4a8: Pulling fs layer
+2824b019a4a8: Download complete
+2824b019a4a8: Pull complete
+Digest: sha256:5a42a569ee1d7c71796c0385e906cbaa4c3e0a162a56d9f26b29bdb1befac13b
+Status: Downloaded newer image for redroid/redroid:13.0.0_64only-latest
+docker.io/redroid/redroid:13.0.0_64only-latest
+booting 6 containers...
+067fe8bf3a68d1017f82832876a9075001158ce499420c97757db9831670e8ac
+29e7c38b30893a19a89564020384cb4e33f10dc543a5525b5d4fa7a8528fd093
+f940ae2c72509d79381eb9693ca29d9c4b46952525f5fc93afb594d2c0e1980b
+23c80a4a02a1f7644d30bf16bb362f9c251b18b2f071ae3d51d0dbfec7f33417
+74d8c3d858235b5c27f11cd89f1925c9ce97a7190ad9fb6837b0faa0e74a6b75
+bbe6550a027d6ced5383d300d457db029d090a2e9549a88d0e740c4a139ebc61
+droid1: booted in 31s
+droid2: booted in 0s
+droid3: booted in 4s
+droid4: booted in 1s
+droid5: booted in 4s
+droid6: booted in 1s
+all-boot-attempted after 46s
+settling 60s...
+IDLE sampling 3 min
+applying LOAD (2x dd per phone)
+LOADED sampling 8 min
+== per-phone summary ==
+droid1: idle~654MB  peak=662MB  avgCPU=0%  peakCPU=0%  alive
+droid2: idle~680MB  peak=692MB  avgCPU=0%  peakCPU=0%  alive
+droid3: idle~679MB  peak=687MB  avgCPU=0%  peakCPU=0%  alive
+droid4: idle~677MB  peak=688MB  avgCPU=0%  peakCPU=0%  alive
+droid5: idle~684MB  peak=694MB  avgCPU=0%  peakCPU=0%  alive
+droid6: idle~680MB  peak=693MB  avgCPU=0%  peakCPU=0%  alive
+host samples: 66 · last: mem 5495/15983MB · load load 12.16
+
+raw CSV kept next to this file
