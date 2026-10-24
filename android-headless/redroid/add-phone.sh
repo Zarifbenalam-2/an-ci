@@ -41,6 +41,7 @@ TSIP="${FARM_TSIP:?FARM_TSIP must be exported by the farm workflow}"
 IMAGE="${FARM_IMAGE:-redroid13-gapps}"
 
 echo "booting phone-$I on $TSIP:$PORT ..."
+sudo docker rm -f "rfarm$I" >/dev/null 2>&1 || true   # a crashed prior attempt may hold the name
 sudo docker run -d --name "rfarm$I" --privileged \
   --memory 3g --shm-size 1g \
   -p "$TSIP:$PORT:5555" \
@@ -50,7 +51,15 @@ sudo docker run -d --name "rfarm$I" --privileged \
   androidboot.redroid_dpi=280 androidboot.use_memfd=true \
   ro.setupwizard.mode=DISABLED
 
-ADB="$(command -v adb || echo "$RUNNER_TEMP/pt/platform-tools/adb")"
+# adb: workflow PATH additions do not apply to ssh sessions, so hunt for it
+ADB="$(command -v adb || true)"
+if [ -z "$ADB" ]; then
+  for c in "${RUNNER_TEMP:-/home/runner/work/_temp}/pt/platform-tools/adb" \
+           /home/runner/work/_temp/pt/platform-tools/adb; do
+    [ -x "$c" ] && ADB="$c" && break
+  done
+fi
+[ -n "$ADB" ] || { echo "no adb binary found on this runner"; exit 1; }
 export PATH="$(dirname "$ADB"):$PATH"
 
 # wait for adbd + boot
