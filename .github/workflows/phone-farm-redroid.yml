@@ -225,6 +225,32 @@ jobs:
             beacon "youtube download failed; phones stay gapps-only"
           fi
 
+          # --- WebView: without a provider the Google account-add flow opens
+          # and instantly dies (redroid-doc #688). MindTheGapps' copy may be
+          # present but not selected, so check BOTH and force-select it; if
+          # missing entirely, sideload the current build like YouTube above.
+          echo "--- webview check ---" | tee -a "$log"
+          i=1
+          while [ "$i" -le "$PHONES" ]; do
+            s="$tsip:$((21000 + i))"
+            wv=$(adb -s "$s" shell "dumpsys webviewupdate 2>/dev/null | grep -m1 'current WebView package'" 2>/dev/null | tr -d '\r')
+            echo "phone-$i webview: ${wv:-none-reported}" | tee -a "$log"
+            if ! adb -s "$s" shell pm list packages 2>/dev/null | tr -d '\r' | grep -q com.google.android.webview; then
+              echo "phone-$i: no webview package; sideloading" | tee -a "$log"
+              if curl -fsSL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+                    -o /tmp/wv.apk \
+                    "https://d.apkpure.com/b/APK/com.google.android.webview?version=latest" \
+                    >>"$log" 2>&1 \
+                 && [ "$(stat -c%s /tmp/wv.apk 2>/dev/null || echo 0)" -gt 20000000 ]; then
+                adb -s "$s" install -r /tmp/wv.apk >>"$log" 2>&1 || true
+              fi
+            fi
+            adb -s "$s" shell "cmd webviewupdate set-webview-implementation com.google.android.webview" \
+              >>"$log" 2>&1 || true
+            i=$((i + 1))
+          done
+          beacon "webview ensured on all phones"
+
           echo "--- runner ssh (for add-phone.sh) ---" | tee -a "$log"
           if timeout 180 sudo apt-get install -y -qq openssh-server >>"$log" 2>&1; then
             sudo mkdir -p /run/sshd   # sshd silently refuses to start without it
