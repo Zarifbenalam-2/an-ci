@@ -68,6 +68,7 @@ jobs:
           PHONES: ${{ inputs.phones }}
           MINUTES: ${{ inputs.minutes }}
           GH_USER: ${{ github.actor }}
+          PROFILE_TOKEN: ${{ secrets.PROFILE_TOKEN }}   # private farm-profiles repo
         run: |
           set -Eeuo pipefail
           echo "::add-mask::$TS_AUTHKEY"
@@ -117,6 +118,39 @@ jobs:
           # persist the farm env for add-phone.sh over ssh
           printf 'export FARM_TSIP=%s\nexport FARM_IMAGE=redroid13-gapps\nexport FARM_CAPACITY=20\n' \
             "$tsip" > .session/farm-env
+
+          # --- restore phone profiles (private farm-profiles repo) ------------
+          # A restored phone keeps its GSF Android-ID, apps and logins, so the
+          # google.com/android/uncertified registration is burned once per
+          # phone-slot instead of once per boot.
+          if [ -n "${PROFILE_TOKEN:-}" ]; then
+            echo "--- restoring phone profiles (if any) ---" | tee -a "$log"
+            PA="Authorization: Bearer $PROFILE_TOKEN"
+            PAPI="https://api.github.com/repos/Zarifbenalam-2/farm-profiles/releases"
+            PDIR="$RUNNER_TEMP/profiles"; mkdir -p "$PDIR"
+            prid=$(curl -fsS -H "$PA" "$PAPI/tags/profiles" 2>>"$log" \
+              | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
+            if [ -n "${prid:-}" ]; then
+              curl -fsS -H "$PA" -H "Accept: application/vnd.github+json" \
+                "$PAPI/$prid/assets" 2>>"$log" \
+                | python3 -c 'import json,sys;[print(a["name"],a["url"]) for a in json.load(sys.stdin) if a["name"].startswith("rfarm") and a["name"].endswith(".tar.gz")]' > "$PDIR/list.txt" 2>/dev/null || true
+              while read -r pname purl; do
+                [ -n "$pname" ] || continue
+                curl -fsSL -H "$PA" -H "Accept: application/octet-stream" \
+                  -o "$PDIR/$pname" "$purl" 2>>"$log" || continue
+                pv="${pname%.tar.gz}"
+                sudo docker volume create "$pv" >/dev/null 2>&1 || true
+                pdst="/var/lib/docker/volumes/$pv/_data"
+                sudo rm -rf "$pdst"; sudo mkdir -p "$pdst"
+                if sudo tar xzf "$PDIR/$pname" -C "$pdst" 2>>"$log"; then
+                  echo "restored $pv from profile" | tee -a "$log"
+                fi
+              done < "$PDIR/list.txt"
+              rm -f "$PDIR/list.txt"
+            else
+              echo "no profiles release yet -- fresh phones" | tee -a "$log"
+            fi
+          fi
 
           echo "--- booting $PHONES phones ---" | tee -a "$log"
           t0=$SECONDS
@@ -193,6 +227,7 @@ jobs:
 
           echo "--- runner ssh (for add-phone.sh) ---" | tee -a "$log"
           if timeout 180 sudo apt-get install -y -qq openssh-server >>"$log" 2>&1; then
+            sudo mkdir -p /run/sshd   # sshd silently refuses to start without it
             mkdir -p ~/.ssh && chmod 700 ~/.ssh
             curl -fsSL "https://api.github.com/users/${GH_USER}/keys" \
               | python3 -c "import json,sys;[print(k['key']) for k in json.load(sys.stdin)]" \
@@ -230,3 +265,48 @@ jobs:
             sleep 30
           done
           echo "session window closed"
+
+          # --- snapshot phone profiles to the private repo ---------------------
+          # Runs when the session window closes (or skip if no token). Each
+          # phone's data volume -> tarball -> release asset in farm-profiles.
+          if [ -n "${PROFILE_TOKEN:-}" ]; then
+            echo "--- snapshotting phone profiles ---" | tee -a "$log"
+            PA="Authorization: Bearer $PROFILE_TOKEN"
+            PAPI="https://api.github.com/repos/Zarifbenalam-2/farm-profiles/releases"
+            PDIR="$RUNNER_TEMP/profiles"; mkdir -p "$PDIR"
+            for pv in $(sudo docker volume ls --format '{{.Name}}' 2>/dev/null | grep '^rfarm.*-data$' || true); do
+              psrc="/var/lib/docker/volumes/$pv/_data"
+              [ -d "$psrc" ] || continue
+              sudo tar czf "$PDIR/$pv.tar.gz" \
+                --exclude='./dalvik-cache' --exclude='*/cache' \
+                -C "$psrc" . 2>>"$log" || continue
+              sudo chmod 644 "$PDIR/$pv.tar.gz"
+              echo "snapshotted $pv ($(du -h "$PDIR/$pv.tar.gz" | cut -f1))" | tee -a "$log"
+            done
+            prid=$(curl -fsS -H "$PA" "$PAPI/tags/profiles" 2>>"$log" \
+              | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
+            if [ -z "${prid:-}" ]; then
+              prid=$(curl -fsS -X POST -H "$PA" -H "Content-Type: application/json" \
+                -d '{"tag_name":"profiles","name":"phone profiles"}' "$PAPI" 2>>"$log" \
+                | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
+            fi
+            if [ -n "${prid:-}" ]; then
+              shopt -s nullglob
+              for pf in "$PDIR"/*.tar.gz; do
+                pn=$(basename "$pf")
+                # replace an existing asset of the same name
+                aid=$(curl -fsS -H "$PA" "$PAPI/$prid/assets" 2>>"$log" \
+                  | python3 -c 'import json,sys;print(next((a["id"] for a in json.load(sys.stdin) if a["name"]==sys.argv[1]),""))' "$pn" 2>/dev/null || true)
+                [ -n "${aid:-}" ] && curl -fsS -X DELETE -H "$PA" \
+                  "$PAPI/$prid/assets/$aid" >/dev/null 2>&1 || true
+                if curl -fsS -X POST -H "$PA" -H "Content-Type: application/octet-stream" \
+                     --data-binary "@$pf" \
+                     "$PAPI/$prid/assets?name=$pn" >>"$log" 2>&1; then
+                  echo "uploaded $pn" | tee -a "$log"
+                else
+                  echo "upload failed: $pn (asset >2GB?)" | tee -a "$log"
+                fi
+              done
+              beacon "phone profiles snapshotted to farm-profiles"
+            fi
+          fi
