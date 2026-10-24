@@ -21,7 +21,11 @@ for v in "${vols[@]}"; do
   src="/var/lib/docker/volumes/$v/_data"
   [ -d "$src" ] || continue
   echo "snapshotting $v ..."
-  sudo tar czf "$OUT/$v.tar.gz" -C "$src" .
+  # dalvik-cache regenerates on boot and app caches are junk -- excluding
+  # them roughly halves the tarball with zero functional loss
+  sudo tar czf "$OUT/$v.tar.gz" \
+    --exclude='./dalvik-cache' --exclude='*/cache' \
+    -C "$src" .
   sudo chmod 644 "$OUT/$v.tar.gz"
   echo "  -> $OUT/$v.tar.gz ($(du -h "$OUT/$v.tar.gz" | cut -f1))"
 done
