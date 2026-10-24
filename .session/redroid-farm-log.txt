@@ -39,3 +39,4 @@
 10:46:48Z phone profiles snapshotted to farm-profiles
 11:14:23Z on the tailnet as android-rfarm at 100.99.98.77
 11:14:48Z phone-1 booted at 100.99.98.77:21001 (gsf UNKNOWN)
+11:14:50Z youtube download failed; phones stay gapps-only
