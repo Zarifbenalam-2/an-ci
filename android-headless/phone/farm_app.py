@@ -20,8 +20,9 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
-from tkinter import (BOTH, BOTTOM, LEFT, RIGHT, TOP, X, Y, Button, Canvas,
-                     Frame, Label, StringVar, Text, Tk, messagebox)
+from tkinter import (BOTH, BOTTOM, LEFT, RIGHT, TOP, X, Y, BooleanVar,
+                     Button, Canvas, Checkbutton, Frame, Label, Listbox,
+                     StringVar, Text, Tk, Toplevel, messagebox)
 from tkinter import ttk
 
 HERE = Path(__file__).resolve().parent          # android-headless/phone
@@ -151,6 +152,9 @@ class App:
               fg=MUTED).pack(side=LEFT, pady=10)
         Label(bar, textvariable=self.status, bg=PANEL, fg=MUTED).pack(
             side=RIGHT, padx=12)
+        Button(bar, text="Run workflow", command=self.run_workflow_dialog,
+               bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
+               padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
         Button(bar, text="GSF register",
                command=lambda: webbrowser.open(UNCERTIFIED_URL), bg=CARD,
                fg=TEXT, activebackground="#333845", relief="flat", padx=12,
@@ -165,6 +169,9 @@ class App:
         Button(bar, text="Refresh", command=self.refresh, bg=CARD, fg=TEXT,
                activebackground="#333845", relief="flat", padx=12,
                pady=5).pack(side=RIGHT, padx=4, pady=10)
+        Button(bar, text="Run workflow", command=self.run_workflow_dialog,
+               bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
+               padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
         Button(bar, text="GSF register",
                command=lambda: webbrowser.open(UNCERTIFIED_URL), bg=CARD,
                fg=TEXT, activebackground="#333845", relief="flat", padx=12,
@@ -267,6 +274,81 @@ class App:
                    relief="flat", padx=10).pack(side=LEFT)
         Button(btns, text="Connect", command=lambda a=addr: self.connect(a),
                bg="#333845", fg=TEXT, relief="flat", padx=10).pack(side=LEFT, padx=6)
+
+    # ------------------------------------------------------- run workflow
+    def run_workflow_dialog(self):
+        """Pick a JSON template from farm/templates + target phones -> run."""
+        templates = sorted((REPO / "farm" / "templates").glob("*.json"))
+        if not templates:
+            messagebox.showinfo("No templates",
+                                "Put JSON workflow templates in farm/templates/")
+            return
+        dlg = Toplevel(self.root)
+        dlg.title("Run workflow")
+        dlg.configure(bg=PANEL)
+        Label(dlg, text="Template", bg=PANEL, fg=TEXT,
+              font=("Segoe UI", 10, "bold")).pack(anchor="w", padx=12, pady=(10, 0))
+        lb = Listbox(dlg, height=min(6, len(templates)), bg="#111216", fg=TEXT,
+                     relief="flat", selectbackground=ACCENT)
+        for tp in templates:
+            lb.insert("end", tp.name)
+        lb.selection_set(0)
+        lb.pack(fill=X, padx=12)
+        Label(dlg, text="Phones", bg=PANEL, fg=TEXT,
+              font=("Segoe UI", 10, "bold")).pack(anchor="w", padx=12, pady=(10, 0))
+        picks = []
+        for ph in self.farm.phones:
+            addr = ph.get("adb_address", "")
+            if not addr:
+                continue
+            v = BooleanVar(value=True)
+            picks.append((v, addr, ph["name"]))
+            Checkbutton(dlg, text=f"{ph['name']}  ({ph.get('status')})",
+                        variable=v, bg=PANEL, fg=TEXT,
+                        selectcolor=CARD, activebackground=PANEL).pack(
+                        anchor="w", padx=16)
+        watch = BooleanVar(value=True)
+        Checkbutton(dlg, text="Open live windows while running",
+                    variable=watch, bg=PANEL, fg=TEXT, selectcolor=CARD,
+                    activebackground=PANEL).pack(anchor="w", padx=16, pady=6)
+
+        def go():
+            sel = lb.curselection()
+            addrs = [a for v, a, _ in picks if v.get()]
+            if not sel or not addrs:
+                messagebox.showerror("Run workflow",
+                                     "Pick a template and at least one phone")
+                return
+            tpl = templates[sel[0]]
+            dlg.destroy()
+            self._run_workflow(tpl, addrs, watch.get())
+
+        Button(dlg, text="Run", command=go, bg=ACCENT, fg="#0b0f0c",
+               relief="flat", padx=18, pady=4,
+               font=("Segoe UI", 10, "bold")).pack(pady=10)
+
+    def _run_workflow(self, tpl: Path, addrs: list, watch: bool):
+        if watch:
+            for a in addrs:
+                subprocess.Popen([launch.ensure_scrcpy(), "-s", a, "--no-audio",
+                                  "--max-fps", "15", "--video-bit-rate", "2M"])
+        out = REPO / "runs" / "rpa-app" / time.strftime("%Y%m%d-%H%M%S")
+        cmd = [sys.executable, str(HERE / "rpa.py"), "--template", str(tpl),
+               "--phones", ",".join(addrs), "--out", str(out)]
+        banner = "\n--- RUN %s on %d phone(s) ---\n" % (tpl.name, len(addrs))
+        self.log_box.insert("end", banner)
+        self.log_box.see("end")
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True,
+                                cwd=str(REPO))
+
+        def reader():
+            for line in proc.stdout:
+                line = line.rstrip("\n")
+                self.root.after(0, lambda l=line + "\n":
+                                (self.log_box.insert("end", l),
+                                 self.log_box.see("end")))
+        threading.Thread(target=reader, daemon=True).start()
 
     def _drain_thumbs(self):
         try:
