@@ -1,0 +1,50 @@
+kernel 7.0.0-1017-azure · 4 vCPU · 15Gi
+containers: 10 · cap: 3g each · load: 2x dd per phone
+pulling image...
+13.0.0_64only-latest: Pulling from redroid/redroid
+2824b019a4a8: Pulling fs layer
+2824b019a4a8: Download complete
+2824b019a4a8: Pull complete
+Digest: sha256:5a42a569ee1d7c71796c0385e906cbaa4c3e0a162a56d9f26b29bdb1befac13b
+Status: Downloaded newer image for redroid/redroid:13.0.0_64only-latest
+docker.io/redroid/redroid:13.0.0_64only-latest
+booting 10 containers...
+f891a0e602593a8058ab3138017200230ddf214b94d8d20104dca0de6e5ca838
+2e6e2b5622182bde0bb8cb56a9f902c757335514fdcdf1841b0f0d55c7eb0284
+cdba4c8ba2e810fa7c0bd46776d41f3ff593f16484e869c3febaa6f49e494c5f
+4ecaae80a7b28dfc60605443be7e97fe7960b0b16d13cde82098f205a0fa7b77
+56732d950e8cc31335608fcb5dd994dfcd5f2e9e5f72d82fee7089f1fc1fe5b7
+5e16383030f7b34ea18ada7c60372e037410f8388f9bcad1258e3315d9819115
+f22fd348da6bbdb43446614137ae88cd26279ff365e413646a573f6f25530d1b
+b7a363dba2cc538ba558dc7cbf89cf096eb73e9f63099e7ef83cccd6397c27b9
+f929998ceae33da3735ba5b5b37e5cb0f26fe411fc3d206d769de61e6eecde04
+9a3b63a932e49679c63bb1eeb9d8e2549f14eeb2fac85c5c73d67ed263708eab
+droid1: booted in 38s
+droid2: booted in 5s
+droid3: booted in 1s
+droid4: booted in 1s
+droid5: booted in 5s
+droid6: booted in 9s
+droid7: booted in 0s
+droid8: booted in 0s
+droid9: booted in 1s
+droid10: booted in 11s
+all-boot-attempted after 86s
+settling 60s...
+IDLE sampling 3 min
+applying LOAD (2x dd per phone)
+LOADED sampling 8 min
+== per-phone summary ==
+droid1: idle~653MB  peak=663MB  avgCPU=0%  peakCPU=0%  alive
+droid10: idle~804MB  peak=816MB  avgCPU=0%  peakCPU=0%  alive
+droid2: idle~651MB  peak=666MB  avgCPU=0%  peakCPU=0%  alive
+droid3: idle~671MB  peak=684MB  avgCPU=0%  peakCPU=0%  alive
+droid4: idle~699MB  peak=710MB  avgCPU=0%  peakCPU=0%  alive
+droid5: idle~701MB  peak=711MB  avgCPU=0%  peakCPU=0%  alive
+droid6: idle~701MB  peak=711MB  avgCPU=0%  peakCPU=0%  alive
+droid7: idle~698MB  peak=709MB  avgCPU=0%  peakCPU=0%  alive
+droid8: idle~691MB  peak=704MB  avgCPU=0%  peakCPU=0%  alive
+droid9: idle~694MB  peak=705MB  avgCPU=0%  peakCPU=0%  alive
+host samples: 66 · last: mem 8833/15983MB · load load 20.83
+
+raw CSV kept next to this file
