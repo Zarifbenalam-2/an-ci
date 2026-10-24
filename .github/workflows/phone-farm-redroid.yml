@@ -279,12 +279,14 @@ jobs:
             PA="Authorization: Bearer $PROFILE_TOKEN"
             PAPI="https://api.github.com/repos/Zarifbenalam-2/farm-profiles/releases"
             PDIR="$RUNNER_TEMP/profiles"; mkdir -p "$PDIR"
+            echo "volumes seen: [$(sudo docker volume ls --format '{{.Name}}' 2>&1 | tr '\n' ' ')]" | tee -a "$log"
             for pv in $(sudo docker volume ls --format '{{.Name}}' 2>/dev/null | grep '^rfarm.*-data$' || true); do
               psrc="/var/lib/docker/volumes/$pv/_data"
-              [ -d "$psrc" ] || continue
+              [ -d "$psrc" ] || { echo "SKIP $pv: no dir at $psrc" | tee -a "$log"; continue; }
               sudo tar czf "$PDIR/$pv.tar.gz" \
                 --exclude='./dalvik-cache' --exclude='*/cache' \
-                -C "$psrc" . 2>>"$log" || continue
+                -C "$psrc" . >/tmp/tar.err 2>&1 \
+                || { echo "TAR FAILED $pv: $(tail -2 /tmp/tar.err)" | tee -a "$log"; continue; }
               sudo chmod 644 "$PDIR/$pv.tar.gz" || true
               echo "snapshotted $pv ($(du -h "$PDIR/$pv.tar.gz" | cut -f1))" | tee -a "$log"
             done
