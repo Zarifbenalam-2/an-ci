@@ -46,3 +46,4 @@
 11:27:18Z on the tailnet as android-rfarm at 100.120.22.24
 11:27:39Z phone-1 booted at 100.120.22.24:21001 (gsf UNKNOWN)
 11:27:41Z youtube download failed; phones stay gapps-only
+11:27:51Z runner ssh live at 100.120.22.24:2222 (user runner, your GitHub key)
