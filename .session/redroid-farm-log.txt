@@ -54,3 +54,4 @@
 13:50:39Z runner ssh live at 100.82.236.86:2222 (user runner, your GitHub key)
 13:50:41Z FARM READY: 1 phones on 100.82.236.86
 14:16:25Z on the tailnet as android-rfarm at 100.75.243.28
+14:16:48Z phone-1 booted at 100.75.243.28:21001 (gsf UNKNOWN)
