@@ -1,0 +1,32 @@
+probe at 2026-10-24T01:42:47Z, kernel 7.0.0-1017-azure
+
+== 1. install linux-modules-extra for this kernel ==
+E: Unable to locate package linux-modules-extra-7.0.0-1017-azure
+E: Couldn't find any package by glob 'linux-modules-extra-7.0.0-1017-azure'
+E: Couldn't find any package by regex 'linux-modules-extra-7.0.0-1017-azure'
+modules-extra: INSTALL FAILED (no package for this kernel)
+== 2. load binder_linux ==
+modprobe: OK
+BINDER: OK
+
+== 3. binder present -> boot a real redroid 13 container ==
+docker: Docker version 29.4.2, build 055a478
+13.0.0_64only-latest: Pulling from redroid/redroid
+2824b019a4a8: Pulling fs layer
+2824b019a4a8: Download complete
+2824b019a4a8: Pull complete
+Digest: sha256:5a42a569ee1d7c71796c0385e906cbaa4c3e0a162a56d9f26b29bdb1befac13b
+Status: Downloaded newer image for redroid/redroid:13.0.0_64only-latest
+docker.io/redroid/redroid:13.0.0_64only-latest
+6a0ba3c10cfdf1f7c1415c507788648ef0be012922943637ee0a4fcde3c38b6e
+container: STARTED
+waiting up to 150s for adbd ...
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+connected to localhost:15555
+REDROID: LIVE -- Android 13 answered over adb
+
+== verdict ==
+BINDER: OK
+container: STARTED
+REDROID: LIVE -- Android 13 answered over adb
