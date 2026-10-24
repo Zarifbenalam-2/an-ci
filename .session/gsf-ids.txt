@@ -1,4 +1,1 @@
 phone-1 gsf_android_id=UNKNOWN
-phone-2 gsf_android_id=UNKNOWN
-phone-3 gsf_android_id=4513407944000014500
-phone-4 gsf_android_id=3585509966207341042
