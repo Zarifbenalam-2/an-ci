@@ -5,3 +5,4 @@
 04:12:03Z on the tailnet as android-rfarm at 100.117.92.35
 04:13:52Z phone-1 booted at 100.117.92.35:21001 (gsf UNKNOWN)
 04:14:00Z phone-2 booted at 100.117.92.35:21002 (gsf UNKNOWN)
+04:14:13Z phone-3 booted at 100.117.92.35:21003 (gsf UNKNOWN)
