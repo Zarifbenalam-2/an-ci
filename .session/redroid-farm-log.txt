@@ -32,3 +32,4 @@
 10:04:58Z FAILED: unexpected exit near line 214
 10:05:00Z phone profiles snapshotted to farm-profiles
 10:38:06Z on the tailnet as android-rfarm at 100.120.65.44
+10:38:30Z phone-1 booted at 100.120.65.44:21001 (gsf UNKNOWN)
