@@ -3,3 +3,4 @@
 03:55:28Z FAILED: unexpected exit near line 86
 03:55:30Z FAILED: unexpected exit near line 86
 04:12:03Z on the tailnet as android-rfarm at 100.117.92.35
+04:13:52Z phone-1 booted at 100.117.92.35:21001 (gsf UNKNOWN)
