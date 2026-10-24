@@ -154,7 +154,7 @@ jobs:
             ok=no
             for w in $(seq 1 75); do
               adb connect "$s" >/dev/null 2>&1 || true
-              v=$(adb -s "$s" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+              v=$(adb -s "$s" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
               [ "$v" = "1" ] && { ok=yes; break; }
               sleep 4
             done

@@ -57,7 +57,7 @@ export PATH="$(dirname "$ADB"):$PATH"
 ok=no
 for w in $(seq 1 60); do
   adb connect "$TSIP:$PORT" >/dev/null 2>&1 || true
-  v=$(adb -s "$TSIP:$PORT" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+  v=$(adb -s "$TSIP:$PORT" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
   [ "$v" = "1" ] && { ok=yes; break; }
   sleep 4
 done
