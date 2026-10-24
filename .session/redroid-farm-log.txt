@@ -10,3 +10,4 @@
 04:14:34Z phone-5 booted at 100.117.92.35:21005 (gsf UNKNOWN)
 04:14:46Z phone-6 booted at 100.117.92.35:21006 (gsf UNKNOWN)
 04:14:48Z youtube download failed; phones stay gapps-only
+04:15:53Z runner ssh FAILED to start
