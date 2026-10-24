@@ -84,7 +84,7 @@ git config user.email "actions@users.noreply.github.com"
 git add .session >/dev/null 2>&1 || true
 git -c commit.gpgsign=false commit -q -m "redroid farm: phone-$I added over ssh" || true
 for a in 1 2 3; do
-  git fetch -q origin main && git rebase -q origin/main \
+  git fetch -q origin main && git rebase -q --autostash origin/main \
     && git push -q origin HEAD:main && break
   sleep 3
 done
