@@ -43,3 +43,4 @@
 11:15:02Z runner ssh live at 100.99.98.77:2222 (user runner, your GitHub key)
 11:15:04Z FARM READY: 1 phones on 100.99.98.77
 11:21:06Z phone profiles snapshotted to farm-profiles
+11:27:18Z on the tailnet as android-rfarm at 100.120.22.24
