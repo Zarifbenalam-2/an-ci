@@ -1,0 +1,297 @@
+name: phone-farm
+
+# Boots N Android phones on ONE runner (4 vCPU / 16 GB, KVM) and publishes each
+# one's adb port on your tailnet, so from the PC app each phone is:
+#
+#     adb connect <tailnet-ip>:5555   (or 5557, 5559 ...)
+#     scrcpy  -s <tailnet-ip>:5555
+#
+# Density math (measured shape, 3 instances): each AVD gets -memory 2048
+# -cores 1 at 720x1600 (SwiftShader renders 2.25x fewer pixels than 1080x2400,
+# and CPU -- not RAM -- is the wall on a 4-core runner). Runner baseline
+# ~1.5 GB + 3 x ~3 GB fits in 16 GB with headroom.
+#
+# Per phone, this workflow also fixes the two image-quality complaints:
+#   * 3-button navigation bar  (qemu.hw.mainkeys=0 + settings put)
+#   * current YouTube          (stock 19.x shows a blocking update dialog; the
+#                               writable-system swap to a current build is done
+#                               per instance, same as android-live does)
+#
+# Same setup as android-live: paste a Tailscale auth key (reusable + ephemeral)
+# into the dispatch dialog. Key is masked, used once, stored nowhere.
+
+on:
+  workflow_dispatch:
+    inputs:
+      authkey:
+        description: Tailscale auth key (reusable + ephemeral). Used for this run only.
+        required: true
+      phones:
+        description: How many phones on this runner (1-4)
+        required: false
+        default: "3"
+      minutes:
+        description: How long to keep the phones online (max ~340)
+        required: false
+        default: "110"
+
+permissions:
+  contents: write   # progress beacons are pushed into the repo
+
+jobs:
+  farm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make /dev/kvm accessible
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install emulator runtime libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libxtst6 libgl1 libasound2t64 || \
+          sudo apt-get install -y -qq \
+            libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+            libgl1 libasound2
+
+      - name: Install SDK and system image
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/clt.zip" \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q -o "$RUNNER_TEMP/clt.zip" -d "$ANDROID_HOME/cmdline-tools"
+          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager --install platform-tools emulator \
+            "system-images;android-34;google_apis;x86_64"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/avd" "$RUNNER_TEMP/android-user"
+          echo "ANDROID_AVD_HOME=$RUNNER_TEMP/avd" >> "$GITHUB_ENV"
+          echo "ANDROID_USER_HOME=$RUNNER_TEMP/android-user" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      # N independent AVDs share the one system image; only userdata differs,
+      # so each phone keeps its own state and concurrent boot is safe.
+      - name: Create the AVDs
+        env:
+          PHONES: ${{ inputs.phones }}
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
+          for i in $(seq 1 "$PHONES"); do
+            echo no | avdmanager create avd -n "farm$i" \
+              -k "system-images;android-34;google_apis;x86_64" \
+              --device pixel_5 --force
+            # if avdmanager wrote to ANDROID_USER_HOME instead, move it to
+            # ANDROID_AVD_HOME where the emulator looks (the mismatch that
+            # cost the batch workflow a whole day once).
+            if [ ! -f "$ANDROID_AVD_HOME/farm$i.ini" ] && \
+               [ -f "$ANDROID_USER_HOME/avd/farm$i.ini" ]; then
+              cp -r "$ANDROID_USER_HOME/avd/." "$ANDROID_AVD_HOME/"
+            fi
+            test -f "$ANDROID_AVD_HOME/farm$i.ini"
+            CFG="$ANDROID_AVD_HOME/farm$i.avd/config.ini"
+            printf "hw.lcd.width=720\nhw.lcd.height=1600\nhw.lcd.dpi=280\n" >> "$CFG"
+            printf "hw.ramSize=2048\nhw.cpu.ncore=1\nhw.mainKeys=no\n" >> "$CFG"
+          done
+
+      # Everything that must stay alive lives in ONE step: tailnet, all the
+      # emulators, the port relays and the hold-open loop.
+      - name: Boot the farm and publish it on your tailnet
+        env:
+          TS_AUTHKEY: ${{ inputs.authkey }}
+          PHONES: ${{ inputs.phones }}
+          MINUTES: ${{ inputs.minutes }}
+        run: |
+          set -Eeuo pipefail
+          echo "::add-mask::$TS_AUTHKEY"
+          log="$RUNNER_TEMP/farm.log"
+          : > "$log"
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          mkdir -p .session
+          STATUS=.session/farm-status.json
+          tsip=""
+          phones_json="[]"
+
+          beacon() {  # beacon "<message>" -- commit .session to main
+            echo "$(date -u +%H:%M:%SZ) $1" >> .session/farm-log.txt
+            git checkout -B session-push HEAD >/dev/null 2>&1 || true
+            git add .session >/dev/null 2>&1 || true
+            git -c commit.gpgsign=false commit -q -m "farm beacon: $1" || true
+            for a in 1 2 3; do
+              git fetch -q origin main && git rebase -q origin/main \
+                && git push -q origin HEAD:main && return 0
+              sleep 3
+            done
+            return 0
+          }
+
+          phone_state() {  # phone_state <i> <status> -- update one phone in the JSON
+            python3 android-headless/phone/farm_status.py "$1" "$2" "$tsip" "$PHONES"
+          }
+
+          fail() {
+            tail -60 "$log" || true
+            beacon "FAILED: $1"
+            echo "!!! $1"
+            exit 1
+          }
+
+          echo "--- joining the tailnet ---" | tee -a "$log"
+          if ! curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1; then
+            echo "install.sh failed; using the static tarball" >> "$log"
+            ver=$(curl -fsSL https://pkgs.tailscale.com/stable/ \
+              | grep -oE 'tailscale_[0-9]+\.[0-9]+\.[0-9]+_amd64\.tgz' | head -1 \
+              | cut -d_ -f2) || fail "could not read the tailscale version list"
+            curl -fsSL -o /tmp/ts.tgz \
+              "https://pkgs.tailscale.com/stable/tailscale_${ver}_amd64.tgz" >>"$log" 2>&1 \
+              || fail "tailscale download failed"
+            tar -xzf /tmp/ts.tgz -C /tmp
+            sudo /tmp/tailscale_${ver}/tailscaled --statedir=/tmp/ts-state >>"$log" 2>&1 &
+            sleep 3
+            tsbin="/tmp/tailscale_${ver}/tailscale"
+          else
+            tsbin=$(readlink -f "$(command -v tailscale)") || fail "no tailscale binary"
+          fi
+          sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-farm \
+            --ephemeral --timeout 60s >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-farm \
+            --ephemeral >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" >>"$log" 2>&1 \
+          || fail "tailscale up failed"
+          tsip=$(sudo "$tsbin" ip -4 | head -1) || fail "no tailscale ip"
+          echo "tailnet address: $tsip" | tee -a "$log"
+          beacon "on the tailnet as android-farm at $tsip"
+
+          echo "--- booting $PHONES phones ---" | tee -a "$log"
+          port=5554
+          for i in $(seq 1 "$PHONES"); do
+            # audio stays ON: -no-audio gives players no output route and
+            # YouTube fails with PlaybackState ERROR(7).
+            nohup emulator -avd "farm$i" -port "$port" -no-window -no-boot-anim \
+              -no-snapshot-save -no-snapshot-load -no-metrics \
+              -memory 2048 -cores 1 \
+              -gpu swiftshader_indirect -writable-system \
+              -prop qemu.hw.mainkeys=0 >>"$log" 2>&1 &
+            phone_state "$i" "booting"
+            beacon "phone-$i booting on console $port"
+            port=$((port + 2))
+            sleep 20   # stagger: cold boots contend for disk IO
+          done
+
+          port=5554
+          for i in $(seq 1 "$PHONES"); do
+            serial="emulator-$port"
+            adb -s "$serial" wait-for-device
+            deadline=$((SECONDS + 420))
+            until [ "$(adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+              if [ "$SECONDS" -ge "$deadline" ]; then
+                phone_state "$i" "boot-timeout"
+                beacon "phone-$i boot timed out"
+                fail "phone-$i ($serial) boot timed out"
+              fi
+              sleep 3
+            done
+            for s in window_animation_scale transition_animation_scale animator_duration_scale; do
+              adb -s "$serial" shell settings put global "$s" 0.0 >>"$log" 2>&1 || true
+            done
+            # 3-button navigation bar (the "missing buttons" complaint)
+            adb -s "$serial" shell settings put secure navigation_mode 0 >>"$log" 2>&1 || true
+            echo "phone-$i booted android $(adb -s "$serial" shell getprop ro.build.version.release | tr -d '\r')" | tee -a "$log"
+            phone_state "$i" "booted"
+            beacon "phone-$i booted ($serial)"
+            port=$((port + 2))
+          done
+
+          # --- per-phone YouTube upgrade (same proven path as android-live) ---
+          port=5554
+          for i in $(seq 1 "$PHONES"); do
+            serial="emulator-$port"
+            adb -s "$serial" root >/dev/null 2>&1; sleep 3
+            if adb -s "$serial" remount >>"$log" 2>&1 \
+               && adb -s "$serial" shell rm -rf /product/app/YouTube >>"$log" 2>&1; then
+              adb -s "$serial" reboot
+              adb -s "$serial" wait-for-device
+              deadline=$((SECONDS + 300))
+              until [ "$(adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+                if [ "$SECONDS" -ge "$deadline" ]; then
+                  phone_state "$i" "reboot-timeout"; beacon "phone-$i reboot timed out"
+                  fail "phone-$i reboot after youtube removal timed out"
+                fi
+                sleep 3
+              done
+              adb -s "$serial" root >/dev/null 2>&1; sleep 2
+              adb -s "$serial" remount >>"$log" 2>&1 || true
+            fi
+            if curl -fsSL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+                  -o /tmp/yt.apk \
+                  "https://d.apkpure.com/b/XAPK/com.google.android.youtube?version=latest" \
+                  >>"$log" 2>&1 \
+               && [ "$(stat -c%s /tmp/yt.apk 2>/dev/null || echo 0)" -gt 50000000 ]; then
+              adb -s "$serial" install -r /tmp/yt.apk >>"$log" 2>&1 || true
+              adb -s "$serial" shell pm grant com.google.android.youtube \
+                android.permission.POST_NOTIFICATIONS >>"$log" 2>&1 || true
+            fi
+            adb -s "$serial" shell settings put secure navigation_mode 0 >>"$log" 2>&1 || true
+            phone_state "$i" "ready"
+            beacon "phone-$i ready at $tsip:$((port + 1))"
+            port=$((port + 2))
+          done
+
+          echo "--- publishing adb ports on the tailnet ---" | tee -a "$log"
+          if timeout 180 sudo apt-get install -y -qq socat >>"$log" 2>&1; then
+            port=5554
+            for i in $(seq 1 "$PHONES"); do
+              nohup timeout 86400 socat TCP-LISTEN:$((port + 1)),fork,reuseaddr,bind="$tsip" \
+                TCP:127.0.0.1:$((port + 1)) >>"$log" 2>&1 &
+              port=$((port + 2))
+            done
+          fi
+          sleep 5
+          ss -ltn 2>/dev/null | grep -E ':(5555|5557|5559|5561)' | tee -a "$log" || \
+            sudo "$tsbin" serve --bg --tcp 5555 tcp://127.0.0.1:5555 >>"$log" 2>&1 || true
+          beacon "farm live: $PHONES phones on $tsip (adb 5555/5557/5559...)"
+
+          echo
+          echo "=============================================================="
+          echo "  FARM IS LIVE: $PHONES phones for ${MINUTES} minutes."
+          echo
+          echo "  On the PC (Tailscale running):"
+          port=5554
+          for i in $(seq 1 "$PHONES"); do
+            echo "      phone-$i:  adb connect $tsip:$((port + 1))"
+            echo "                 scrcpy -s $tsip:$((port + 1)) --max-fps 15 --video-bit-rate 2M"
+            port=$((port + 2))
+          done
+          echo "=============================================================="
+          echo
+
+          end=$((SECONDS + MINUTES * 60))
+          while [ "$SECONDS" -lt "$end" ]; do
+            alive=0
+            for pid in $(pgrep -f 'qemu-system|emulator -avd'); do
+              kill -0 "$pid" 2>/dev/null && alive=$((alive + 1))
+            done
+            [ "$alive" -eq 0 ] && { echo "all emulators gone; ending early"; break; }
+            sleep 30
+          done
+          echo "session window closed"
