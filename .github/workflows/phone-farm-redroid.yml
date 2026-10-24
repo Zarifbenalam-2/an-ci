@@ -269,6 +269,11 @@ jobs:
           # --- snapshot phone profiles to the private repo ---------------------
           # Runs when the session window closes (or skip if no token). Each
           # phone's data volume -> tarball -> release asset in farm-profiles.
+          # CLEANUP CODE MUST NOT BE KILLABLE: under set -eE + pipefail an empty
+          # `ls` or a failed tar fired the ERR trap and aborted the snapshot
+          # mid-flight (cost two debug cycles). Best-effort from here on:
+          # every failure logs loudly and the block always runs to the end.
+          set +eE
           if [ -n "${PROFILE_TOKEN:-}" ]; then
             echo "--- snapshotting phone profiles ---" | tee -a "$log"
             PA="Authorization: Bearer $PROFILE_TOKEN"
@@ -280,7 +285,7 @@ jobs:
               sudo tar czf "$PDIR/$pv.tar.gz" \
                 --exclude='./dalvik-cache' --exclude='*/cache' \
                 -C "$psrc" . 2>>"$log" || continue
-              sudo chmod 644 "$PDIR/$pv.tar.gz"
+              sudo chmod 644 "$PDIR/$pv.tar.gz" || true
               echo "snapshotted $pv ($(du -h "$PDIR/$pv.tar.gz" | cut -f1))" | tee -a "$log"
             done
             echo "tarballs staged: $(ls -1 "$PDIR"/*.tar.gz 2>/dev/null | wc -l)" | tee -a "$log"
@@ -315,3 +320,4 @@ jobs:
               beacon "phone profiles snapshotted to farm-profiles"
             fi
           fi
+          set -eE
