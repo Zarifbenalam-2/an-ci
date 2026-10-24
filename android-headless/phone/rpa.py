@@ -120,10 +120,18 @@ class Engine:
         elif act == "launch_app":
             pkg = self.subst(node["package"])
             if node.get("activity"):
-                sh(f"am start -n {pkg}/{self.subst(node['activity'])}")
+                comp = f"{pkg}/{self.subst(node['activity'])}"
+            else:
+                # resolve the app's own launcher activity; monkey alone has
+                # proven unreliable on some images (opens the drawer instead)
+                resolved = sh(f"cmd package resolve-activity --brief -c "
+                              f"android.intent.category.LAUNCHER {pkg} | tail -1")
+                comp = resolved if "/" in resolved else None
+            if comp and "Error" not in comp:
+                sh(f"am start -n {comp}")
             else:
                 sh(f"monkey -p {pkg} -c android.intent.category.LAUNCHER 1")
-            log(f"{tag} -> {pkg}")
+            log(f"{tag} -> {comp or pkg + ' (monkey)'}")
         elif act == "stop_app":
             sh(f"am force-stop {self.subst(node['package'])}"); log(f"{tag} ok")
         elif act == "tap":
