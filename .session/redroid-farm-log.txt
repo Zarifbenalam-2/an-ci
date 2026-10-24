@@ -17,3 +17,4 @@
 06:07:01Z phone-3 booted at 100.85.165.11:21003 (gsf 4513407944000014500)
 06:07:07Z phone-4 booted at 100.85.165.11:21004 (gsf 3585509966207341042)
 06:07:11Z youtube download failed; phones stay gapps-only
+06:07:46Z runner ssh live at 100.85.165.11:2222 (user runner, your GitHub key)
