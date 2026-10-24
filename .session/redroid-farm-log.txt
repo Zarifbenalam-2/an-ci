@@ -57,3 +57,4 @@
 14:16:48Z phone-1 booted at 100.75.243.28:21001 (gsf UNKNOWN)
 14:16:49Z youtube download failed; phones stay gapps-only
 14:17:02Z runner ssh live at 100.75.243.28:2222 (user runner, your GitHub key)
+14:17:03Z FARM READY: 1 phones on 100.75.243.28
