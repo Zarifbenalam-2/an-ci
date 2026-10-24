@@ -1,0 +1,18 @@
+{
+  "name": "tour",
+  "params": { "n": 3, "pkg": "com.android.settings" },
+  "steps": [
+    { "action": "wake" },
+    { "action": "screenshot", "name": "01-start" },
+    { "action": "launch_app", "package": "{{pkg}}" },
+    { "action": "wait", "seconds": [2, 4] },
+    { "action": "screenshot", "name": "02-app-open" },
+    { "action": "loop", "times": "{{n}}", "steps": [
+      { "action": "swipe", "x1": 360, "y1": 1200, "x2": 360, "y2": 400, "duration": [250, 450] },
+      { "action": "wait", "seconds": [1, 2.5] }
+    ]},
+    { "action": "screenshot", "name": "03-scrolled" },
+    { "action": "key", "name": "HOME" },
+    { "action": "adb", "command": "dumpsys window | grep mCurrentFocus | head -1" }
+  ]
+}
