@@ -273,7 +273,10 @@ class AndroidDevice:
         scrcpy mirrors the screen over adb and forwards mouse/keyboard back, so
         the same connection that scripts use is also the one you click on.
         """
-        cmd = [self.scrcpy_path(), "--adb", self.adb, "--max-size", str(max_size)]
+        # --no-audio: redroid images ship no opus encoder and scrcpy 5.x
+        # dies on the audio stream without it (Server connection failed)
+        cmd = [self.scrcpy_path(), "--adb", self.adb, "--no-audio",
+               "--max-size", str(max_size)]
         if self.serial:
             cmd += ["-s", self.serial]
         cmd += extra or []

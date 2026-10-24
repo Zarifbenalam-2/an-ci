@@ -251,7 +251,7 @@ jobs:
           echo "               (add a phone: bash android-headless/redroid/add-phone.sh)"
           i=1
           while [ "$i" -le "$PHONES" ]; do
-            echo "  phone-$i   : adb connect $tsip:$((21000 + i))  ·  scrcpy -s $tsip:$((21000 + i))"
+            echo "  phone-$i   : adb connect $tsip:$((21000 + i))  ·  scrcpy --no-audio -s $tsip:$((21000 + i))"
             i=$((i + 1))
           done
           echo "  gsf ids    : .session/gsf-ids.txt (register at google.com/android/uncertified)"

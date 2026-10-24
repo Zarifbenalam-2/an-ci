@@ -298,7 +298,7 @@ class App:
 
     def view(self, addr):
         self.connect(addr)
-        subprocess.Popen([launch.ensure_scrcpy(), "-s", addr,
+        subprocess.Popen([launch.ensure_scrcpy(), "-s", addr, "--no-audio",
                           "--max-fps", "15", "--video-bit-rate", "2M"])
 
     def spawn(self):
