@@ -1,3 +1,3 @@
-export FARM_TSIP=100.99.98.77
+export FARM_TSIP=100.120.22.24
 export FARM_IMAGE=redroid13-gapps
 export FARM_CAPACITY=20
