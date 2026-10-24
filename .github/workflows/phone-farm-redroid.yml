@@ -283,12 +283,17 @@ jobs:
               sudo chmod 644 "$PDIR/$pv.tar.gz"
               echo "snapshotted $pv ($(du -h "$PDIR/$pv.tar.gz" | cut -f1))" | tee -a "$log"
             done
+            echo "tarballs staged: $(ls -1 "$PDIR"/*.tar.gz 2>/dev/null | wc -l)" | tee -a "$log"
             prid=$(curl -fsS -H "$PA" "$PAPI/tags/profiles" 2>>"$log" \
               | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
             if [ -z "${prid:-}" ]; then
               prid=$(curl -fsS -X POST -H "$PA" -H "Content-Type: application/json" \
                 -d '{"tag_name":"profiles","name":"phone profiles"}' "$PAPI" 2>>"$log" \
                 | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
+            fi
+            if [ -z "${prid:-}" ]; then
+              echo "SNAPSHOT FAILED: could not find or create the release" | tee -a "$log"
+              beacon "snapshot FAILED: no release (check PROFILE_TOKEN / farm-profiles)"
             fi
             if [ -n "${prid:-}" ]; then
               shopt -s nullglob
