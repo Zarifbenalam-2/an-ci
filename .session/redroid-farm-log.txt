@@ -27,3 +27,4 @@
 09:46:33Z phone-1 booted at 100.121.60.26:21001 (gsf UNKNOWN)
 09:46:36Z phone-2 booted at 100.121.60.26:21002 (gsf UNKNOWN)
 09:46:39Z youtube download failed; phones stay gapps-only
+09:46:54Z runner ssh live at 100.121.60.26:2222 (user runner, your GitHub key)
