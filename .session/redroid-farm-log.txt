@@ -48,3 +48,4 @@
 11:27:41Z youtube download failed; phones stay gapps-only
 11:27:51Z runner ssh live at 100.120.22.24:2222 (user runner, your GitHub key)
 11:27:52Z FARM READY: 1 phones on 100.120.22.24
+13:50:09Z on the tailnet as android-rfarm at 100.82.236.86
