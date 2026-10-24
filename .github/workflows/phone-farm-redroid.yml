@@ -90,6 +90,9 @@ jobs:
             return 0
           }
           fail() { tail -50 "$log" || true; beacon "FAILED: $1"; echo "!!! $1"; exit 1; }
+          # any unguarded command dying under set -e must dump the log too,
+          # not exit silently (that blind-death cost a whole debug cycle once)
+          trap 'fail "unexpected exit near line $LINENO"' ERR
 
           echo "--- joining the tailnet ---" | tee -a "$log"
           if ! curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1; then
@@ -120,14 +123,26 @@ jobs:
           i=1
           while [ "$i" -le "$PHONES" ]; do
             port=$((21000 + i))
-            sudo docker run -d --name "rfarm$i" --privileged \
-              --memory 3g --shm-size 1g \
-              -p "$tsip:$port:5555" \
-              -v "rfarm$i-data:/data" \
-              redroid13-gapps \
-              androidboot.redroid_width=720 androidboot.redroid_height=1600 \
-              androidboot.redroid_dpi=280 androidboot.use_memfd=true \
-              ro.setupwizard.mode=DISABLED >>"$log" 2>&1
+            if ! sudo docker run -d --name "rfarm$i" --privileged \
+                 --memory 3g --shm-size 1g \
+                 -p "$tsip:$port:5555" \
+                 -v "rfarm$i-data:/data" \
+                 redroid13-gapps \
+                 androidboot.redroid_width=720 androidboot.redroid_height=1600 \
+                 androidboot.redroid_dpi=280 androidboot.use_memfd=true \
+                 ro.setupwizard.mode=DISABLED >>"$log" 2>&1; then
+              echo "docker run rfarm$i failed; retrying bound to 0.0.0.0 (tailnet-only reachability is preserved by tailscale ACLs)" >> "$log"
+              sudo docker rm -f "rfarm$i" >/dev/null 2>&1 || true
+              sudo docker run -d --name "rfarm$i" --privileged \
+                --memory 3g --shm-size 1g \
+                -p "$port:5555" \
+                -v "rfarm$i-data:/data" \
+                redroid13-gapps \
+                androidboot.redroid_width=720 androidboot.redroid_height=1600 \
+                androidboot.redroid_dpi=280 androidboot.use_memfd=true \
+                ro.setupwizard.mode=DISABLED >>"$log" 2>&1 \
+                || fail "docker run rfarm$i failed both binds"
+            fi
             python3 android-headless/phone/farm_redroid_status.py "$i" booting "$tsip" "$PHONES"
             i=$((i + 1))
           done
