@@ -71,3 +71,4 @@
 14:26:28Z FARM READY: 1 phones on 100.100.148.126
 15:34:31Z on the tailnet as android-rfarm at 100.92.82.93
 15:34:53Z phone-1 booted at 100.92.82.93:21001 (gsf UNKNOWN)
+15:34:54Z youtube download failed; phones stay gapps-only
