@@ -19,10 +19,8 @@ on:
         description: Android API level
         required: false
         default: "34"
-  push:
-    paths:
-      - "android-headless/**"
-      - ".github/workflows/android-device.yml"
+  # push trigger removed: every android-headless/** edit (which is most of
+  # them) re-ran this batch workflow and added CI-evidence noise. Manual only.
 
 permissions:
   contents: write  # only used by the failure-diagnostics step, which pushes a log
