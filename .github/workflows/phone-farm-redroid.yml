@@ -115,7 +115,7 @@ jobs:
           beacon "on the tailnet as android-rfarm at $tsip"
 
           # persist the farm env for add-phone.sh over ssh
-          printf 'export FARM_TSIP=%s\nexport FARM_IMAGE=redroid13-gapps\nexport FARM_CAPACITY=10\n' \
+          printf 'export FARM_TSIP=%s\nexport FARM_IMAGE=redroid13-gapps\nexport FARM_CAPACITY=20\n' \
             "$tsip" > .session/farm-env
 
           echo "--- booting $PHONES phones ---" | tee -a "$log"
