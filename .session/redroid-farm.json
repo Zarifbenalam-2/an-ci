@@ -1,6 +1,6 @@
 {
- "run": "40061331083",
- "updated": "2026-10-24 04:14:46",
+ "run": "40068728635",
+ "updated": "2026-10-24 06:06:41",
  "ssh": "",
  "phones": [
   {
@@ -8,28 +8,28 @@
    "port": 21001,
    "status": "booted",
    "gsf_id": "",
-   "adb_address": "100.117.92.35:21001"
+   "adb_address": "100.85.165.11:21001"
   },
   {
    "name": "phone-2",
    "port": 21002,
-   "status": "booted",
+   "status": "booting",
    "gsf_id": "",
-   "adb_address": "100.117.92.35:21002"
+   "adb_address": "100.85.165.11:21002"
   },
   {
    "name": "phone-3",
    "port": 21003,
-   "status": "booted",
+   "status": "booting",
    "gsf_id": "",
-   "adb_address": "100.117.92.35:21003"
+   "adb_address": "100.85.165.11:21003"
   },
   {
    "name": "phone-4",
    "port": 21004,
-   "status": "booted",
+   "status": "booting",
    "gsf_id": "",
-   "adb_address": "100.117.92.35:21004"
+   "adb_address": "100.85.165.11:21004"
   },
   {
    "name": "phone-5",
