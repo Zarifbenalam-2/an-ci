@@ -3,3 +3,4 @@ phone-2 gsf_android_id=UNKNOWN
 phone-3 gsf_android_id=UNKNOWN
 phone-4 gsf_android_id=UNKNOWN
 phone-5 gsf_android_id=UNKNOWN
+phone-6 gsf_android_id=UNKNOWN
