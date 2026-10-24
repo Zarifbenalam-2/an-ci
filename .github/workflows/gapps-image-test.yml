@@ -1,0 +1,114 @@
+name: gapps-image-test
+
+# Proves the MindTheGapps overlay actually produces a Google-capable phone:
+# builds redroid13-gapps from android-headless/redroid/Dockerfile.gapps,
+# boots ONE container, and asserts the three packages that matter --
+#   com.android.vending      (Play Store)
+#   com.google.android.gms   (Play Services)
+#   com.google.android.gsf   (Google Services Framework -- source of the ID
+#                             registered at google.com/android/uncertified)
+# -- then launches the Play Store and reports whether its activity came up.
+#
+# Self-triggers on push of this file; verdict lands in
+# diagnostics/gapps-image-test.txt.
+
+on:
+  push:
+    paths: ['.github/workflows/gapps-image-test.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image, boot one phone, assert Google packages
+        run: |
+          set -uo pipefail
+          R=diagnostics/gapps-image-test.txt
+          mkdir -p diagnostics
+          echo "gapps image test $(date -u +%Y-%m-%dT%H:%M:%SZ), kernel $(uname -r)" > "$R"
+
+          sudo modprobe binder_linux devices=binder,hwbinder,vndbinder \
+            || sudo modprobe binder_linux
+          grep -q binder /proc/filesystems || { echo "BINDER MISSING" | tee -a "$R"; exit 1; }
+
+          mkdir -p "$RUNNER_TEMP/pt"
+          curl -fsSL -o "$RUNNER_TEMP/pt.zip" \
+            https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+          unzip -q -o "$RUNNER_TEMP/pt.zip" -d "$RUNNER_TEMP/pt"
+          export PATH="$RUNNER_TEMP/pt/platform-tools:$PATH"
+
+          echo "--- building redroid13-gapps (MindTheGapps overlay) ---" | tee -a "$R"
+          t0=$SECONDS
+          if sudo docker build -t redroid13-gapps \
+               -f android-headless/redroid/Dockerfile.gapps \
+               android-headless/redroid/ >>"$R" 2>&1; then
+            echo "IMAGE BUILD OK in $((SECONDS - t0))s" | tee -a "$R"
+          else
+            echo "IMAGE BUILD FAILED" | tee -a "$R"; exit 1
+          fi
+
+          echo "--- booting one phone ---" | tee -a "$R"
+          sudo docker run -d --name gapps-test --privileged \
+            --memory 3g --shm-size 1g \
+            -p 127.0.0.1:21099:5555 \
+            -v gapps-test-data:/data \
+            redroid13-gapps \
+            androidboot.redroid_width=720 androidboot.redroid_height=1600 \
+            androidboot.redroid_dpi=280 androidboot.use_memfd=true \
+            ro.setupwizard.mode=DISABLED >>"$R" 2>&1
+
+          s=127.0.0.1:21099
+          ok=no
+          for w in $(seq 1 75); do
+            adb connect "$s" >/dev/null 2>&1 || true
+            v=$(adb -s "$s" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            [ "$v" = "1" ] && { ok=yes; break; }
+            sleep 4
+          done
+          [ "$ok" = yes ] || { echo "BOOT FAILED" | tee -a "$R"; sudo docker logs --tail 40 gapps-test >>"$R" 2>&1; exit 1; }
+          echo "BOOT OK -- Android $(adb -s "$s" shell getprop ro.build.version.release | tr -d '\r')" | tee -a "$R"
+
+          echo "--- package assertions ---" | tee -a "$R"
+          pkgs=$(adb -s "$s" shell pm list packages 2>/dev/null | tr -d '\r')
+          for want in com.android.vending com.google.android.gms com.google.android.gsf; do
+            if echo "$pkgs" | grep -q "$want"; then
+              echo "PRESENT: $want" | tee -a "$R"
+            else
+              echo "MISSING: $want" | tee -a "$R"
+            fi
+          done
+
+          echo "--- play store launch ---" | tee -a "$R"
+          adb -s "$s" shell monkey -p com.android.vending -c android.intent.category.LAUNCHER 1 >>"$R" 2>&1 || true
+          sleep 15
+          fg=$(adb -s "$s" shell dumpsys window 2>/dev/null | grep -E 'mCurrentFocus|mFocusedApp' | head -2 | tr -d '\r')
+          echo "foreground: $fg" | tee -a "$R"
+          if echo "$fg" | grep -q vending; then
+            echo "PLAY STORE LAUNCHED (its activity is foreground)" | tee -a "$R"
+          else
+            echo "play store not foreground (may still be provisioning)" | tee -a "$R"
+          fi
+
+          gsf=$(python3 android-headless/phone/gsf_id.py adb "$s" 2>/dev/null || echo UNKNOWN)
+          echo "gsf android_id: $gsf" | tee -a "$R"
+
+          echo | tee -a "$R"
+          echo "== verdict ==" | tee -a "$R"
+          grep -E 'BUILD OK|BOOT OK|PRESENT|MISSING|PLAY STORE|gsf' "$R" | tee -a "$R"
+
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "$R"
+          git -c commit.gpgsign=false commit -q -m "gapps image test result" || true
+          for a in 1 2 3; do
+            git fetch -q origin main && git rebase -q origin/main \
+              && git push -q origin HEAD:main && break
+            sleep 3
+          done

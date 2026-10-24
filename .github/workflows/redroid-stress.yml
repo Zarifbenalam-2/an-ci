@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        phones: [4, 6, 8, 10]
+        phones: [12, 16, 20]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
