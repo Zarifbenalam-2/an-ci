@@ -9,42 +9,42 @@ Digest: sha256:5a42a569ee1d7c71796c0385e906cbaa4c3e0a162a56d9f26b29bdb1befac13b
 Status: Downloaded newer image for redroid/redroid:13.0.0_64only-latest
 docker.io/redroid/redroid:13.0.0_64only-latest
 booting 10 containers...
-f891a0e602593a8058ab3138017200230ddf214b94d8d20104dca0de6e5ca838
-2e6e2b5622182bde0bb8cb56a9f902c757335514fdcdf1841b0f0d55c7eb0284
-cdba4c8ba2e810fa7c0bd46776d41f3ff593f16484e869c3febaa6f49e494c5f
-4ecaae80a7b28dfc60605443be7e97fe7960b0b16d13cde82098f205a0fa7b77
-56732d950e8cc31335608fcb5dd994dfcd5f2e9e5f72d82fee7089f1fc1fe5b7
-5e16383030f7b34ea18ada7c60372e037410f8388f9bcad1258e3315d9819115
-f22fd348da6bbdb43446614137ae88cd26279ff365e413646a573f6f25530d1b
-b7a363dba2cc538ba558dc7cbf89cf096eb73e9f63099e7ef83cccd6397c27b9
-f929998ceae33da3735ba5b5b37e5cb0f26fe411fc3d206d769de61e6eecde04
-9a3b63a932e49679c63bb1eeb9d8e2549f14eeb2fac85c5c73d67ed263708eab
+94705b34668ab35a83a030e35d46da5d4f1904fb18f4ff67e10681f0b51a74b9
+8e84a9dad930633fcd379382ec512204a2d8aaccdb23a6497cc66bc4b6ac85d5
+0631643086b167b817a30b67ab29114ea76687599adf683afaf9f1dce84d5753
+057bf324dfe6be88583270349f9f8b8fb232fb5b394eaac9e47cbaef4d3b8ccc
+38e48b13f5a44e227cac449c58f5bede54ff8c4580f13578b40913ca8ca56df5
+9f6ed3cb43226b3627e4529ed78b61fa9d9eff0edca58b56ca6d9e56a6cff46d
+b382ff0ec391e740f7e1a9d8fa0bc8255ad59a1a89c7eb9445c5047ca882c831
+78b7b517c5ad34d3bd4612c815d617ae0ee81fbc4055fa74e57a1d53fbf8bccc
+973c53c382821821333acfc25202b2c25c55365dc8fc58e629f65f4e35f78d32
+279ddb9454532fdb42507adc219c909f3aab4fe9b57d4202b1a54a0808e8bb4a
 droid1: booted in 38s
-droid2: booted in 5s
-droid3: booted in 1s
+droid2: booted in 7s
+droid3: booted in 5s
 droid4: booted in 1s
-droid5: booted in 5s
-droid6: booted in 9s
+droid5: booted in 9s
+droid6: booted in 6s
 droid7: booted in 0s
 droid8: booted in 0s
 droid9: booted in 1s
-droid10: booted in 11s
-all-boot-attempted after 86s
+droid10: booted in 0s
+all-boot-attempted after 82s
 settling 60s...
 IDLE sampling 3 min
 applying LOAD (2x dd per phone)
 LOADED sampling 8 min
 == per-phone summary ==
-droid1: idle~653MB  peak=663MB  avgCPU=0%  peakCPU=0%  alive
-droid10: idle~804MB  peak=816MB  avgCPU=0%  peakCPU=0%  alive
-droid2: idle~651MB  peak=666MB  avgCPU=0%  peakCPU=0%  alive
-droid3: idle~671MB  peak=684MB  avgCPU=0%  peakCPU=0%  alive
-droid4: idle~699MB  peak=710MB  avgCPU=0%  peakCPU=0%  alive
-droid5: idle~701MB  peak=711MB  avgCPU=0%  peakCPU=0%  alive
-droid6: idle~701MB  peak=711MB  avgCPU=0%  peakCPU=0%  alive
-droid7: idle~698MB  peak=709MB  avgCPU=0%  peakCPU=0%  alive
-droid8: idle~691MB  peak=704MB  avgCPU=0%  peakCPU=0%  alive
-droid9: idle~694MB  peak=705MB  avgCPU=0%  peakCPU=0%  alive
-host samples: 66 · last: mem 8833/15983MB · load load 20.83
+droid1: idle~634MB  peak=644MB  avgCPU=29%  peakCPU=43%  alive
+droid10: idle~707MB  peak=717MB  avgCPU=28%  peakCPU=42%  alive
+droid2: idle~689MB  peak=697MB  avgCPU=29%  peakCPU=45%  alive
+droid3: idle~687MB  peak=698MB  avgCPU=29%  peakCPU=43%  alive
+droid4: idle~694MB  peak=707MB  avgCPU=28%  peakCPU=41%  alive
+droid5: idle~690MB  peak=702MB  avgCPU=29%  peakCPU=42%  alive
+droid6: idle~694MB  peak=705MB  avgCPU=28%  peakCPU=43%  alive
+droid7: idle~684MB  peak=695MB  avgCPU=29%  peakCPU=42%  alive
+droid8: idle~814MB  peak=826MB  avgCPU=29%  peakCPU=42%  alive
+droid9: idle~690MB  peak=702MB  avgCPU=28%  peakCPU=41%  alive
+host samples: 66 · last: mem 8700/15983MB · load load 21.07
 
 raw CSV kept next to this file

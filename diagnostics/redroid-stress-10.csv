@@ -1,727 +1,727 @@
 ts,name,status,mem,cpu
-02:35:49,droid10,running,806.7MiB,/ 3GiB 0.07%
-02:35:49,droid9,running,694.5MiB,/ 3GiB 0.21%
-02:35:49,droid8,running,691.1MiB,/ 3GiB 0.07%
-02:35:49,droid7,running,699.1MiB,/ 3GiB 0.06%
-02:35:49,droid6,running,701.4MiB,/ 3GiB 0.15%
-02:35:49,droid5,running,700.2MiB,/ 3GiB 0.19%
-02:35:49,droid4,running,697.8MiB,/ 3GiB 0.13%
-02:35:49,droid3,running,670.5MiB,/ 3GiB 0.11%
-02:35:49,droid2,running,651MiB,/ 3GiB 0.13%
-02:35:49,droid1,running,650.8MiB,/ 3GiB 0.08%
-02:35:49,HOST,up,mem 8702/15983MB,load 33.72
-02:36:01,droid10,running,805.2MiB,/ 3GiB 0.15%
-02:36:01,droid9,running,693MiB,/ 3GiB 0.19%
-02:36:01,droid8,running,690.1MiB,/ 3GiB 0.13%
-02:36:01,droid7,running,696.7MiB,/ 3GiB 0.11%
-02:36:01,droid6,running,700.4MiB,/ 3GiB 0.12%
-02:36:01,droid5,running,700.2MiB,/ 3GiB 0.19%
-02:36:01,droid4,running,697MiB,/ 3GiB 0.22%
-02:36:01,droid3,running,669.9MiB,/ 3GiB 0.14%
-02:36:01,droid2,running,650.6MiB,/ 3GiB 0.27%
-02:36:01,droid1,running,650.8MiB,/ 3GiB 0.20%
-02:36:01,HOST,up,mem 8674/15983MB,load 28.53
-02:36:14,droid10,running,803MiB,/ 3GiB 0.20%
-02:36:14,droid9,running,692.8MiB,/ 3GiB 0.12%
-02:36:14,droid8,running,689.5MiB,/ 3GiB 0.10%
-02:36:14,droid7,running,696.6MiB,/ 3GiB 0.15%
-02:36:14,droid6,running,700.4MiB,/ 3GiB 0.09%
-02:36:14,droid5,running,699.5MiB,/ 3GiB 0.09%
-02:36:14,droid4,running,697.2MiB,/ 3GiB 0.15%
-02:36:14,droid3,running,670MiB,/ 3GiB 0.10%
-02:36:14,droid2,running,650.9MiB,/ 3GiB 0.09%
-02:36:14,droid1,running,650.9MiB,/ 3GiB 0.07%
-02:36:14,HOST,up,mem 8680/15983MB,load 22.21
-02:36:26,droid10,running,802.9MiB,/ 3GiB 0.12%
-02:36:26,droid9,running,692.8MiB,/ 3GiB 0.08%
-02:36:26,droid8,running,689.8MiB,/ 3GiB 0.26%
-02:36:26,droid7,running,697.1MiB,/ 3GiB 0.23%
-02:36:26,droid6,running,700.2MiB,/ 3GiB 0.26%
-02:36:26,droid5,running,699.6MiB,/ 3GiB 0.10%
-02:36:26,droid4,running,697MiB,/ 3GiB 0.14%
-02:36:26,droid3,running,670.2MiB,/ 3GiB 0.10%
-02:36:26,droid2,running,650.5MiB,/ 3GiB 0.13%
-02:36:26,droid1,running,650.9MiB,/ 3GiB 0.06%
-02:36:26,HOST,up,mem 8693/15983MB,load 18.80
-02:36:38,droid10,running,803.1MiB,/ 3GiB 0.07%
-02:36:38,droid9,running,692.6MiB,/ 3GiB 0.10%
-02:36:38,droid8,running,689.9MiB,/ 3GiB 0.09%
-02:36:38,droid7,running,696.8MiB,/ 3GiB 0.05%
-02:36:38,droid6,running,700.3MiB,/ 3GiB 0.06%
-02:36:38,droid5,running,699.9MiB,/ 3GiB 0.06%
-02:36:38,droid4,running,697.4MiB,/ 3GiB 0.10%
-02:36:38,droid3,running,670.1MiB,/ 3GiB 0.05%
-02:36:38,droid2,running,650.6MiB,/ 3GiB 0.07%
-02:36:38,droid1,running,651.3MiB,/ 3GiB 0.06%
-02:36:38,HOST,up,mem 8699/15983MB,load 14.79
-02:36:50,droid10,running,803MiB,/ 3GiB 0.08%
-02:36:50,droid9,running,692.8MiB,/ 3GiB 0.08%
-02:36:50,droid8,running,690MiB,/ 3GiB 0.10%
-02:36:50,droid7,running,697.1MiB,/ 3GiB 0.11%
-02:36:50,droid6,running,700.4MiB,/ 3GiB 0.07%
-02:36:50,droid5,running,699.7MiB,/ 3GiB 0.09%
-02:36:50,droid4,running,697.5MiB,/ 3GiB 0.07%
-02:36:50,droid3,running,670.4MiB,/ 3GiB 0.13%
-02:36:50,droid2,running,650.6MiB,/ 3GiB 0.08%
-02:36:50,droid1,running,651.3MiB,/ 3GiB 0.11%
-02:36:50,HOST,up,mem 8699/15983MB,load 12.67
-02:37:03,droid10,running,803.5MiB,/ 3GiB 0.07%
-02:37:03,droid9,running,693.2MiB,/ 3GiB 0.04%
-02:37:03,droid8,running,690.6MiB,/ 3GiB 0.05%
-02:37:03,droid7,running,697MiB,/ 3GiB 0.05%
-02:37:03,droid6,running,700.6MiB,/ 3GiB 0.05%
-02:37:03,droid5,running,701.1MiB,/ 3GiB 0.09%
-02:37:03,droid4,running,698.8MiB,/ 3GiB 0.05%
-02:37:03,droid3,running,670.4MiB,/ 3GiB 0.04%
-02:37:03,droid2,running,651MiB,/ 3GiB 0.04%
-02:37:03,droid1,running,653.2MiB,/ 3GiB 0.06%
-02:37:03,HOST,up,mem 8735/15983MB,load 9.86
-02:37:15,droid10,running,803.5MiB,/ 3GiB 0.04%
-02:37:15,droid9,running,693.5MiB,/ 3GiB 0.06%
-02:37:15,droid8,running,690.4MiB,/ 3GiB 0.04%
-02:37:15,droid7,running,697.3MiB,/ 3GiB 0.05%
-02:37:15,droid6,running,700.9MiB,/ 3GiB 0.05%
-02:37:15,droid5,running,700.8MiB,/ 3GiB 0.05%
-02:37:15,droid4,running,699.1MiB,/ 3GiB 0.10%
-02:37:15,droid3,running,670.7MiB,/ 3GiB 0.05%
-02:37:15,droid2,running,651.3MiB,/ 3GiB 0.06%
-02:37:15,droid1,running,652.8MiB,/ 3GiB 0.05%
-02:37:15,HOST,up,mem 8708/15983MB,load 8.34
-02:37:27,droid10,running,803.3MiB,/ 3GiB 0.04%
-02:37:27,droid9,running,693.3MiB,/ 3GiB 0.05%
-02:37:27,droid8,running,691.2MiB,/ 3GiB 0.20%
-02:37:27,droid7,running,697.8MiB,/ 3GiB 0.20%
-02:37:27,droid6,running,701.4MiB,/ 3GiB 0.18%
-02:37:27,droid5,running,700.6MiB,/ 3GiB 0.05%
-02:37:27,droid4,running,699.1MiB,/ 3GiB 0.08%
-02:37:27,droid3,running,670.7MiB,/ 3GiB 0.07%
-02:37:27,droid2,running,651.1MiB,/ 3GiB 0.12%
-02:37:27,droid1,running,653.1MiB,/ 3GiB 0.05%
-02:37:27,HOST,up,mem 8713/15983MB,load 6.56
-02:37:40,droid10,running,803.6MiB,/ 3GiB 0.06%
-02:37:40,droid9,running,693.1MiB,/ 3GiB 0.06%
-02:37:40,droid8,running,690.5MiB,/ 3GiB 0.06%
-02:37:40,droid7,running,697.6MiB,/ 3GiB 0.07%
-02:37:40,droid6,running,701MiB,/ 3GiB 0.04%
-02:37:40,droid5,running,701.2MiB,/ 3GiB 0.05%
-02:37:40,droid4,running,699.2MiB,/ 3GiB 0.05%
-02:37:40,droid3,running,670.5MiB,/ 3GiB 0.06%
-02:37:40,droid2,running,651.9MiB,/ 3GiB 0.12%
-02:37:40,droid1,running,652.9MiB,/ 3GiB 0.06%
-02:37:40,HOST,up,mem 8713/15983MB,load 5.55
-02:37:52,droid10,running,803.6MiB,/ 3GiB 0.06%
-02:37:52,droid9,running,693.4MiB,/ 3GiB 0.09%
-02:37:52,droid8,running,690.8MiB,/ 3GiB 0.06%
-02:37:52,droid7,running,697.7MiB,/ 3GiB 0.04%
-02:37:52,droid6,running,701MiB,/ 3GiB 0.06%
-02:37:52,droid5,running,700.8MiB,/ 3GiB 0.05%
-02:37:52,droid4,running,698.8MiB,/ 3GiB 0.04%
-02:37:52,droid3,running,670.6MiB,/ 3GiB 0.07%
-02:37:52,droid2,running,651.2MiB,/ 3GiB 0.05%
-02:37:52,droid1,running,652.9MiB,/ 3GiB 0.05%
-02:37:52,HOST,up,mem 8709/15983MB,load 4.85
-02:38:04,droid10,running,804.3MiB,/ 3GiB 0.08%
-02:38:04,droid9,running,694.1MiB,/ 3GiB 0.07%
-02:38:04,droid8,running,691MiB,/ 3GiB 0.08%
-02:38:04,droid7,running,698.8MiB,/ 3GiB 0.08%
-02:38:04,droid6,running,701.7MiB,/ 3GiB 0.11%
-02:38:04,droid5,running,701.5MiB,/ 3GiB 0.11%
-02:38:04,droid4,running,699.9MiB,/ 3GiB 0.10%
-02:38:04,droid3,running,671.2MiB,/ 3GiB 0.08%
-02:38:04,droid2,running,651.7MiB,/ 3GiB 0.07%
-02:38:04,droid1,running,653.8MiB,/ 3GiB 0.03%
-02:38:04,HOST,up,mem 8726/15983MB,load 3.84
-02:38:17,droid10,running,804.1MiB,/ 3GiB 0.07%
-02:38:17,droid9,running,693.8MiB,/ 3GiB 0.05%
-02:38:17,droid8,running,691.3MiB,/ 3GiB 0.07%
-02:38:17,droid7,running,699.4MiB,/ 3GiB 0.07%
-02:38:17,droid6,running,701.5MiB,/ 3GiB 0.05%
-02:38:17,droid5,running,701.7MiB,/ 3GiB 0.05%
-02:38:17,droid4,running,699.7MiB,/ 3GiB 0.08%
-02:38:17,droid3,running,671.3MiB,/ 3GiB 0.06%
-02:38:17,droid2,running,651.5MiB,/ 3GiB 0.07%
-02:38:17,droid1,running,653.4MiB,/ 3GiB 0.05%
-02:38:17,HOST,up,mem 8728/15983MB,load 3.25
-02:38:29,droid10,running,804.4MiB,/ 3GiB 0.11%
-02:38:29,droid9,running,694.2MiB,/ 3GiB 0.09%
-02:38:29,droid8,running,691.1MiB,/ 3GiB 0.05%
-02:38:29,droid7,running,699.7MiB,/ 3GiB 0.19%
-02:38:29,droid6,running,701.4MiB,/ 3GiB 0.23%
-02:38:29,droid5,running,701.5MiB,/ 3GiB 0.10%
-02:38:29,droid4,running,699.5MiB,/ 3GiB 0.10%
-02:38:29,droid3,running,671.3MiB,/ 3GiB 0.10%
-02:38:29,droid2,running,652MiB,/ 3GiB 0.15%
-02:38:29,droid1,running,653.7MiB,/ 3GiB 0.12%
-02:38:29,HOST,up,mem 8723/15983MB,load 2.61
-02:38:41,droid10,running,804.2MiB,/ 3GiB 0.04%
-02:38:41,droid9,running,694.2MiB,/ 3GiB 0.10%
-02:38:41,droid8,running,691.4MiB,/ 3GiB 0.06%
-02:38:41,droid7,running,699.5MiB,/ 3GiB 0.06%
-02:38:41,droid6,running,701.6MiB,/ 3GiB 0.06%
-02:38:41,droid5,running,701.7MiB,/ 3GiB 0.05%
-02:38:41,droid4,running,699.6MiB,/ 3GiB 0.04%
-02:38:41,droid3,running,671.7MiB,/ 3GiB 0.06%
-02:38:41,droid2,running,652.1MiB,/ 3GiB 0.06%
-02:38:41,droid1,running,653.8MiB,/ 3GiB 0.08%
-02:38:41,HOST,up,mem 8719/15983MB,load 2.36
-02:38:54,droid10,running,804.5MiB,/ 3GiB 0.09%
-02:38:54,droid9,running,694.6MiB,/ 3GiB 0.09%
-02:38:54,droid8,running,691.5MiB,/ 3GiB 0.08%
-02:38:54,droid7,running,699.1MiB,/ 3GiB 0.08%
-02:38:54,droid6,running,701.9MiB,/ 3GiB 0.14%
-02:38:54,droid5,running,702.2MiB,/ 3GiB 0.10%
-02:38:54,droid4,running,699.6MiB,/ 3GiB 0.08%
-02:38:54,droid3,running,671.5MiB,/ 3GiB 0.07%
-02:38:54,droid2,running,651.9MiB,/ 3GiB 0.05%
-02:38:54,droid1,running,653.8MiB,/ 3GiB 0.08%
-02:38:54,HOST,up,mem 8722/15983MB,load 1.97
-02:39:06,droid10,running,804.7MiB,/ 3GiB 0.06%
-02:39:06,droid9,running,694.7MiB,/ 3GiB 0.05%
-02:39:06,droid8,running,691.7MiB,/ 3GiB 0.05%
-02:39:06,droid7,running,699.7MiB,/ 3GiB 0.05%
-02:39:06,droid6,running,701.9MiB,/ 3GiB 0.06%
-02:39:06,droid5,running,702.3MiB,/ 3GiB 0.11%
-02:39:06,droid4,running,699.8MiB,/ 3GiB 0.05%
-02:39:06,droid3,running,672.5MiB,/ 3GiB 0.06%
-02:39:06,droid2,running,652.9MiB,/ 3GiB 0.06%
-02:39:06,droid1,running,654.8MiB,/ 3GiB 0.33%
-02:39:06,HOST,up,mem 8731/15983MB,load 1.67
-02:39:18,droid10,running,804.8MiB,/ 3GiB 0.05%
-02:39:18,droid9,running,695.3MiB,/ 3GiB 0.05%
-02:39:18,droid8,running,692.5MiB,/ 3GiB 0.42%
-02:39:18,droid7,running,700.5MiB,/ 3GiB 0.06%
-02:39:18,droid6,running,702.9MiB,/ 3GiB 0.04%
-02:39:18,droid5,running,703.1MiB,/ 3GiB 0.06%
-02:39:18,droid4,running,700.9MiB,/ 3GiB 0.33%
-02:39:18,droid3,running,672.6MiB,/ 3GiB 0.04%
-02:39:18,droid2,running,653.1MiB,/ 3GiB 0.04%
-02:39:18,droid1,running,654.7MiB,/ 3GiB 0.04%
-02:39:18,HOST,up,mem 8747/15983MB,load 1.50
-02:39:31,droid10,running,806.8MiB,/ 3GiB 40.51%
-02:39:31,droid9,running,699.5MiB,/ 3GiB 39.46%
-02:39:31,droid8,running,696.2MiB,/ 3GiB 39.29%
-02:39:31,droid7,running,704.1MiB,/ 3GiB 40.54%
-02:39:31,droid6,running,704.6MiB,/ 3GiB 39.75%
-02:39:31,droid5,running,704.9MiB,/ 3GiB 39.14%
-02:39:31,droid4,running,705.1MiB,/ 3GiB 40.84%
-02:39:31,droid3,running,677.2MiB,/ 3GiB 40.03%
-02:39:31,droid2,running,656.4MiB,/ 3GiB 39.21%
-02:39:31,droid1,running,656.1MiB,/ 3GiB 38.78%
-02:39:31,HOST,up,mem 8770/15983MB,load 2.85
-02:39:45,droid10,running,807MiB,/ 3GiB 36.16%
-02:39:45,droid9,running,699.7MiB,/ 3GiB 37.75%
-02:39:45,droid8,running,696MiB,/ 3GiB 35.87%
-02:39:45,droid7,running,703.5MiB,/ 3GiB 35.78%
-02:39:45,droid6,running,704.1MiB,/ 3GiB 35.48%
-02:39:45,droid5,running,705.2MiB,/ 3GiB 36.96%
-02:39:45,droid4,running,705.3MiB,/ 3GiB 35.80%
-02:39:45,droid3,running,677.2MiB,/ 3GiB 36.12%
-02:39:45,droid2,running,656.4MiB,/ 3GiB 35.76%
-02:39:45,droid1,running,656.1MiB,/ 3GiB 36.13%
-02:39:45,HOST,up,mem 8760/15983MB,load 5.64
-02:39:58,droid10,running,807MiB,/ 3GiB 34.98%
-02:39:58,droid9,running,699.6MiB,/ 3GiB 39.48%
-02:39:58,droid8,running,696.4MiB,/ 3GiB 37.76%
-02:39:58,droid7,running,704.1MiB,/ 3GiB 40.36%
-02:39:58,droid6,running,703.3MiB,/ 3GiB 40.43%
-02:39:58,droid5,running,705.2MiB,/ 3GiB 39.77%
-02:39:58,droid4,running,705.6MiB,/ 3GiB 39.24%
-02:39:58,droid3,running,677.4MiB,/ 3GiB 39.26%
-02:39:58,droid2,running,657.5MiB,/ 3GiB 40.33%
-02:39:58,droid1,running,656.8MiB,/ 3GiB 40.28%
-02:39:58,HOST,up,mem 8774/15983MB,load 8.90
-02:40:11,droid10,running,808.6MiB,/ 3GiB 40.94%
-02:40:11,droid9,running,699.7MiB,/ 3GiB 38.16%
-02:40:11,droid8,running,696.5MiB,/ 3GiB 40.06%
-02:40:11,droid7,running,704.7MiB,/ 3GiB 38.95%
-02:40:11,droid6,running,703.6MiB,/ 3GiB 39.13%
-02:40:11,droid5,running,705.5MiB,/ 3GiB 40.54%
-02:40:11,droid4,running,705.5MiB,/ 3GiB 38.89%
-02:40:11,droid3,running,677.6MiB,/ 3GiB 41.65%
-02:40:11,droid2,running,656.8MiB,/ 3GiB 39.81%
-02:40:11,droid1,running,657MiB,/ 3GiB 40.26%
-02:40:11,HOST,up,mem 8772/15983MB,load 10.68
-02:40:24,droid10,running,808.6MiB,/ 3GiB 39.32%
-02:40:24,droid9,running,700.2MiB,/ 3GiB 39.09%
-02:40:24,droid8,running,696.5MiB,/ 3GiB 39.55%
-02:40:24,droid7,running,704.2MiB,/ 3GiB 39.43%
-02:40:24,droid6,running,703.4MiB,/ 3GiB 39.66%
-02:40:24,droid5,running,705.5MiB,/ 3GiB 41.38%
-02:40:24,droid4,running,705.5MiB,/ 3GiB 40.08%
-02:40:24,droid3,running,677.4MiB,/ 3GiB 39.54%
-02:40:24,droid2,running,656.8MiB,/ 3GiB 39.68%
-02:40:24,droid1,running,656.8MiB,/ 3GiB 42.85%
-02:40:24,HOST,up,mem 8773/15983MB,load 13.04
-02:40:37,droid10,running,808.8MiB,/ 3GiB 38.79%
-02:40:37,droid9,running,699.5MiB,/ 3GiB 39.48%
-02:40:37,droid8,running,696.6MiB,/ 3GiB 40.35%
-02:40:37,droid7,running,704.2MiB,/ 3GiB 39.33%
-02:40:37,droid6,running,703.4MiB,/ 3GiB 39.47%
-02:40:37,droid5,running,705.8MiB,/ 3GiB 38.64%
-02:40:37,droid4,running,705.5MiB,/ 3GiB 41.17%
-02:40:37,droid3,running,677.7MiB,/ 3GiB 40.32%
-02:40:37,droid2,running,656.9MiB,/ 3GiB 40.06%
-02:40:37,droid1,running,656.6MiB,/ 3GiB 38.48%
-02:40:37,HOST,up,mem 8786/15983MB,load 15.02
-02:40:51,droid10,running,808.6MiB,/ 3GiB 39.04%
-02:40:51,droid9,running,700MiB,/ 3GiB 40.16%
-02:40:51,droid8,running,696.9MiB,/ 3GiB 38.48%
-02:40:51,droid7,running,704.3MiB,/ 3GiB 42.83%
-02:40:51,droid6,running,703.2MiB,/ 3GiB 37.89%
-02:40:51,droid5,running,705.8MiB,/ 3GiB 38.32%
-02:40:51,droid4,running,705.5MiB,/ 3GiB 40.38%
-02:40:51,droid3,running,677.7MiB,/ 3GiB 38.97%
-02:40:51,droid2,running,657.4MiB,/ 3GiB 38.18%
-02:40:51,droid1,running,657.1MiB,/ 3GiB 43.36%
-02:40:51,HOST,up,mem 8776/15983MB,load 16.42
-02:41:05,droid10,running,813MiB,/ 3GiB 40.53%
-02:41:05,droid9,running,700.1MiB,/ 3GiB 39.02%
-02:41:05,droid8,running,701MiB,/ 3GiB 39.49%
-02:41:05,droid7,running,704.4MiB,/ 3GiB 39.44%
-02:41:05,droid6,running,708.1MiB,/ 3GiB 39.61%
-02:41:05,droid5,running,706.2MiB,/ 3GiB 40.43%
-02:41:05,droid4,running,704.7MiB,/ 3GiB 38.60%
-02:41:05,droid3,running,681.9MiB,/ 3GiB 40.20%
-02:41:05,droid2,running,661.6MiB,/ 3GiB 39.51%
-02:41:05,droid1,running,661MiB,/ 3GiB 41.92%
-02:41:05,HOST,up,mem 8803/15983MB,load 17.13
-02:41:18,droid10,running,813.3MiB,/ 3GiB 39.47%
-02:41:18,droid9,running,700MiB,/ 3GiB 39.95%
-02:41:18,droid8,running,701.1MiB,/ 3GiB 39.55%
-02:41:18,droid7,running,704.7MiB,/ 3GiB 40.02%
-02:41:18,droid6,running,707.9MiB,/ 3GiB 39.62%
-02:41:18,droid5,running,706.2MiB,/ 3GiB 40.18%
-02:41:18,droid4,running,705MiB,/ 3GiB 38.66%
-02:41:18,droid3,running,681.9MiB,/ 3GiB 40.23%
-02:41:18,droid2,running,661.6MiB,/ 3GiB 39.84%
-02:41:18,droid1,running,661.1MiB,/ 3GiB 40.05%
-02:41:18,HOST,up,mem 8799/15983MB,load 17.76
-02:41:31,droid10,running,813.1MiB,/ 3GiB 40.79%
-02:41:31,droid9,running,700MiB,/ 3GiB 33.53%
-02:41:31,droid8,running,701.1MiB,/ 3GiB 37.24%
-02:41:31,droid7,running,705MiB,/ 3GiB 39.83%
-02:41:31,droid6,running,708.2MiB,/ 3GiB 33.58%
-02:41:31,droid5,running,706MiB,/ 3GiB 40.02%
-02:41:31,droid4,running,704.8MiB,/ 3GiB 32.06%
-02:41:31,droid3,running,682.2MiB,/ 3GiB 39.28%
-02:41:31,droid2,running,661.7MiB,/ 3GiB 38.72%
-02:41:31,droid1,running,661.1MiB,/ 3GiB 35.04%
-02:41:31,HOST,up,mem 8802/15983MB,load 18.58
-02:41:45,droid10,running,813.2MiB,/ 3GiB 36.49%
-02:41:45,droid9,running,700.3MiB,/ 3GiB 37.51%
-02:41:45,droid8,running,701.2MiB,/ 3GiB 37.39%
-02:41:45,droid7,running,704.8MiB,/ 3GiB 35.13%
-02:41:45,droid6,running,708MiB,/ 3GiB 35.12%
-02:41:45,droid5,running,706.6MiB,/ 3GiB 35.98%
-02:41:45,droid4,running,704.8MiB,/ 3GiB 36.67%
-02:41:45,droid3,running,682MiB,/ 3GiB 36.27%
-02:41:45,droid2,running,661.5MiB,/ 3GiB 36.56%
-02:41:45,droid1,running,661.2MiB,/ 3GiB 35.15%
-02:41:45,HOST,up,mem 8810/15983MB,load 18.88
-02:41:58,droid10,running,813.7MiB,/ 3GiB 38.11%
-02:41:58,droid9,running,700.1MiB,/ 3GiB 40.60%
-02:41:58,droid8,running,701MiB,/ 3GiB 39.76%
-02:41:58,droid7,running,704.9MiB,/ 3GiB 34.88%
-02:41:58,droid6,running,708MiB,/ 3GiB 42.71%
-02:41:58,droid5,running,706.4MiB,/ 3GiB 39.42%
-02:41:58,droid4,running,705.2MiB,/ 3GiB 38.91%
-02:41:58,droid3,running,681.6MiB,/ 3GiB 41.54%
-02:41:58,droid2,running,661.6MiB,/ 3GiB 41.02%
-02:41:58,droid1,running,661MiB,/ 3GiB 38.44%
-02:41:58,HOST,up,mem 8809/15983MB,load 19.36
-02:42:12,droid10,running,813.9MiB,/ 3GiB 39.64%
-02:42:12,droid9,running,700.7MiB,/ 3GiB 38.45%
-02:42:12,droid8,running,701.7MiB,/ 3GiB 40.09%
-02:42:12,droid7,running,705.7MiB,/ 3GiB 40.02%
-02:42:12,droid6,running,708.5MiB,/ 3GiB 39.72%
-02:42:12,droid5,running,706.5MiB,/ 3GiB 39.85%
-02:42:12,droid4,running,705.4MiB,/ 3GiB 39.52%
-02:42:12,droid3,running,682.1MiB,/ 3GiB 40.04%
-02:42:12,droid2,running,662.2MiB,/ 3GiB 39.66%
-02:42:12,droid1,running,660.5MiB,/ 3GiB 40.29%
-02:42:12,HOST,up,mem 8809/15983MB,load 20.05
-02:42:25,droid10,running,813.7MiB,/ 3GiB 39.90%
-02:42:25,droid9,running,700.5MiB,/ 3GiB 40.33%
-02:42:25,droid8,running,701.7MiB,/ 3GiB 38.38%
-02:42:25,droid7,running,705.7MiB,/ 3GiB 38.58%
-02:42:25,droid6,running,708.7MiB,/ 3GiB 38.50%
-02:42:25,droid5,running,706.6MiB,/ 3GiB 38.92%
-02:42:25,droid4,running,705.4MiB,/ 3GiB 40.89%
-02:42:25,droid3,running,681.9MiB,/ 3GiB 39.41%
-02:42:25,droid2,running,662MiB,/ 3GiB 37.09%
-02:42:25,droid1,running,660.5MiB,/ 3GiB 32.21%
-02:42:25,HOST,up,mem 8811/15983MB,load 20.19
-02:42:38,droid10,running,813.9MiB,/ 3GiB 37.77%
-02:42:38,droid9,running,700.8MiB,/ 3GiB 40.14%
-02:42:38,droid8,running,701.5MiB,/ 3GiB 41.83%
-02:42:38,droid7,running,705.5MiB,/ 3GiB 39.57%
-02:42:38,droid6,running,708.5MiB,/ 3GiB 39.05%
-02:42:38,droid5,running,707.1MiB,/ 3GiB 41.19%
-02:42:38,droid4,running,706MiB,/ 3GiB 40.55%
-02:42:38,droid3,running,682MiB,/ 3GiB 38.63%
-02:42:38,droid2,running,662.1MiB,/ 3GiB 39.97%
-02:42:38,droid1,running,660.6MiB,/ 3GiB 38.63%
-02:42:38,HOST,up,mem 8812/15983MB,load 20.22
-02:42:52,droid10,running,813.8MiB,/ 3GiB 39.65%
-02:42:52,droid9,running,700.6MiB,/ 3GiB 39.02%
-02:42:52,droid8,running,701.8MiB,/ 3GiB 39.62%
-02:42:52,droid7,running,705.8MiB,/ 3GiB 40.28%
-02:42:52,droid6,running,708.6MiB,/ 3GiB 39.81%
-02:42:52,droid5,running,706.7MiB,/ 3GiB 39.14%
-02:42:52,droid4,running,705.5MiB,/ 3GiB 39.91%
-02:42:52,droid3,running,682MiB,/ 3GiB 40.60%
-02:42:52,droid2,running,662.4MiB,/ 3GiB 40.08%
-02:42:52,droid1,running,660.6MiB,/ 3GiB 39.86%
-02:42:52,HOST,up,mem 8810/15983MB,load 20.69
-02:43:05,droid10,running,814.1MiB,/ 3GiB 40.30%
-02:43:05,droid9,running,701MiB,/ 3GiB 38.49%
-02:43:05,droid8,running,702.6MiB,/ 3GiB 39.21%
-02:43:05,droid7,running,705.9MiB,/ 3GiB 41.65%
-02:43:05,droid6,running,709.2MiB,/ 3GiB 39.79%
-02:43:05,droid5,running,707.4MiB,/ 3GiB 39.12%
-02:43:05,droid4,running,705.9MiB,/ 3GiB 39.26%
-02:43:05,droid3,running,682.6MiB,/ 3GiB 38.42%
-02:43:05,droid2,running,663.8MiB,/ 3GiB 39.68%
-02:43:05,droid1,running,661MiB,/ 3GiB 40.36%
-02:43:05,HOST,up,mem 8787/15983MB,load 20.67
-02:43:19,droid10,running,814.5MiB,/ 3GiB 38.83%
-02:43:19,droid9,running,701.1MiB,/ 3GiB 39.33%
-02:43:19,droid8,running,702.2MiB,/ 3GiB 40.52%
-02:43:19,droid7,running,706MiB,/ 3GiB 40.05%
-02:43:19,droid6,running,709.1MiB,/ 3GiB 39.68%
-02:43:19,droid5,running,707.4MiB,/ 3GiB 38.78%
-02:43:19,droid4,running,706.3MiB,/ 3GiB 41.03%
-02:43:19,droid3,running,682.5MiB,/ 3GiB 39.83%
-02:43:19,droid2,running,663.9MiB,/ 3GiB 39.60%
-02:43:19,droid1,running,661.1MiB,/ 3GiB 39.48%
-02:43:19,HOST,up,mem 8805/15983MB,load 20.60
-02:43:32,droid10,running,814.5MiB,/ 3GiB 39.23%
-02:43:32,droid9,running,701.1MiB,/ 3GiB 41.04%
-02:43:32,droid8,running,702.5MiB,/ 3GiB 37.76%
-02:43:32,droid7,running,706.6MiB,/ 3GiB 39.32%
-02:43:32,droid6,running,709.4MiB,/ 3GiB 40.33%
-02:43:32,droid5,running,707MiB,/ 3GiB 39.36%
-02:43:32,droid4,running,706.1MiB,/ 3GiB 39.65%
-02:43:32,droid3,running,682.8MiB,/ 3GiB 39.00%
-02:43:32,droid2,running,664MiB,/ 3GiB 39.51%
-02:43:32,droid1,running,661.1MiB,/ 3GiB 41.02%
-02:43:32,HOST,up,mem 8791/15983MB,load 20.71
-02:43:45,droid10,running,814.3MiB,/ 3GiB 32.84%
-02:43:45,droid9,running,701.5MiB,/ 3GiB 37.13%
-02:43:45,droid8,running,702.6MiB,/ 3GiB 36.44%
-02:43:45,droid7,running,706.1MiB,/ 3GiB 36.67%
-02:43:45,droid6,running,709.2MiB,/ 3GiB 36.07%
-02:43:45,droid5,running,707.6MiB,/ 3GiB 38.15%
-02:43:45,droid4,running,706.1MiB,/ 3GiB 38.81%
-02:43:45,droid3,running,682.6MiB,/ 3GiB 36.32%
-02:43:45,droid2,running,664MiB,/ 3GiB 40.69%
-02:43:45,droid1,running,661.2MiB,/ 3GiB 39.06%
-02:43:45,HOST,up,mem 8813/15983MB,load 20.68
-02:43:59,droid10,running,815.5MiB,/ 3GiB 37.41%
-02:43:59,droid9,running,701.9MiB,/ 3GiB 40.66%
-02:43:59,droid8,running,702.7MiB,/ 3GiB 36.60%
-02:43:59,droid7,running,706.8MiB,/ 3GiB 36.57%
-02:43:59,droid6,running,709.6MiB,/ 3GiB 38.54%
-02:43:59,droid5,running,707.7MiB,/ 3GiB 36.41%
-02:43:59,droid4,running,706.7MiB,/ 3GiB 35.75%
-02:43:59,droid3,running,683MiB,/ 3GiB 35.41%
-02:43:59,droid2,running,664.2MiB,/ 3GiB 40.85%
-02:43:59,droid1,running,661.9MiB,/ 3GiB 36.78%
-02:43:59,HOST,up,mem 8821/15983MB,load 20.73
-02:44:12,droid10,running,815.2MiB,/ 3GiB 40.08%
-02:44:12,droid9,running,701.7MiB,/ 3GiB 38.53%
-02:44:12,droid8,running,702.9MiB,/ 3GiB 40.33%
-02:44:12,droid7,running,706.4MiB,/ 3GiB 38.66%
-02:44:12,droid6,running,709.6MiB,/ 3GiB 41.22%
-02:44:12,droid5,running,707.5MiB,/ 3GiB 39.44%
-02:44:12,droid4,running,706.7MiB,/ 3GiB 41.04%
-02:44:12,droid3,running,683.3MiB,/ 3GiB 40.36%
-02:44:12,droid2,running,664.9MiB,/ 3GiB 39.72%
-02:44:12,droid1,running,661.8MiB,/ 3GiB 38.79%
-02:44:12,HOST,up,mem 8826/15983MB,load 20.73
-02:44:25,droid10,running,814.8MiB,/ 3GiB 39.63%
-02:44:25,droid9,running,701.7MiB,/ 3GiB 40.51%
-02:44:25,droid8,running,702.5MiB,/ 3GiB 39.55%
-02:44:25,droid7,running,706.6MiB,/ 3GiB 40.00%
-02:44:25,droid6,running,709.9MiB,/ 3GiB 39.40%
-02:44:25,droid5,running,707.8MiB,/ 3GiB 39.88%
-02:44:25,droid4,running,706.8MiB,/ 3GiB 37.88%
-02:44:25,droid3,running,683.4MiB,/ 3GiB 38.95%
-02:44:25,droid2,running,665.2MiB,/ 3GiB 44.50%
-02:44:25,droid1,running,661.7MiB,/ 3GiB 41.48%
-02:44:25,HOST,up,mem 8824/15983MB,load 20.77
-02:44:38,droid10,running,815.6MiB,/ 3GiB 39.31%
-02:44:38,droid9,running,701.8MiB,/ 3GiB 39.80%
-02:44:38,droid8,running,702.8MiB,/ 3GiB 40.25%
-02:44:38,droid7,running,706.4MiB,/ 3GiB 38.85%
-02:44:38,droid6,running,710MiB,/ 3GiB 39.17%
-02:44:38,droid5,running,708MiB,/ 3GiB 40.92%
-02:44:38,droid4,running,707.6MiB,/ 3GiB 39.21%
-02:44:38,droid3,running,683.2MiB,/ 3GiB 39.89%
-02:44:38,droid2,running,664.7MiB,/ 3GiB 39.29%
-02:44:38,droid1,running,661.8MiB,/ 3GiB 39.62%
-02:44:38,HOST,up,mem 8816/15983MB,load 20.67
-02:44:52,droid10,running,814.9MiB,/ 3GiB 38.30%
-02:44:52,droid9,running,702.2MiB,/ 3GiB 39.27%
-02:44:52,droid8,running,703.4MiB,/ 3GiB 41.08%
-02:44:52,droid7,running,706.8MiB,/ 3GiB 38.96%
-02:44:52,droid6,running,709.9MiB,/ 3GiB 40.94%
-02:44:52,droid5,running,708MiB,/ 3GiB 37.55%
-02:44:52,droid4,running,706.7MiB,/ 3GiB 40.80%
-02:44:52,droid3,running,683.1MiB,/ 3GiB 37.54%
-02:44:52,droid2,running,665MiB,/ 3GiB 43.69%
-02:44:52,droid1,running,661.9MiB,/ 3GiB 34.09%
-02:44:52,HOST,up,mem 8827/15983MB,load 21.13
-02:45:05,droid10,running,815.5MiB,/ 3GiB 39.89%
-02:45:05,droid9,running,702.4MiB,/ 3GiB 39.95%
-02:45:05,droid8,running,703.4MiB,/ 3GiB 39.93%
-02:45:05,droid7,running,707.2MiB,/ 3GiB 39.59%
-02:45:05,droid6,running,710.5MiB,/ 3GiB 38.46%
-02:45:05,droid5,running,708.2MiB,/ 3GiB 40.75%
-02:45:05,droid4,running,707.1MiB,/ 3GiB 39.05%
-02:45:05,droid3,running,684MiB,/ 3GiB 39.16%
-02:45:05,droid2,running,665.4MiB,/ 3GiB 41.07%
-02:45:05,droid1,running,662.9MiB,/ 3GiB 37.93%
-02:45:05,HOST,up,mem 8848/15983MB,load 20.96
-02:45:18,droid10,running,815.9MiB,/ 3GiB 39.93%
-02:45:18,droid9,running,703MiB,/ 3GiB 39.79%
-02:45:18,droid8,running,703.4MiB,/ 3GiB 38.49%
-02:45:18,droid7,running,707.3MiB,/ 3GiB 40.18%
-02:45:18,droid6,running,710.3MiB,/ 3GiB 39.67%
-02:45:18,droid5,running,708.7MiB,/ 3GiB 40.43%
-02:45:18,droid4,running,707.6MiB,/ 3GiB 40.04%
-02:45:18,droid3,running,683.8MiB,/ 3GiB 39.25%
-02:45:18,droid2,running,665.2MiB,/ 3GiB 39.25%
-02:45:18,droid1,running,662.5MiB,/ 3GiB 39.16%
-02:45:18,HOST,up,mem 8817/15983MB,load 20.89
-02:45:31,droid10,running,815.6MiB,/ 3GiB 38.57%
-02:45:31,droid9,running,702.5MiB,/ 3GiB 39.02%
-02:45:31,droid8,running,703.5MiB,/ 3GiB 40.26%
-02:45:31,droid7,running,707.3MiB,/ 3GiB 39.20%
-02:45:31,droid6,running,710.9MiB,/ 3GiB 41.54%
-02:45:31,droid5,running,708.5MiB,/ 3GiB 39.83%
-02:45:31,droid4,running,707.4MiB,/ 3GiB 39.36%
-02:45:31,droid3,running,684.3MiB,/ 3GiB 39.44%
-02:45:31,droid2,running,665.5MiB,/ 3GiB 39.31%
-02:45:31,droid1,running,662.8MiB,/ 3GiB 41.46%
-02:45:31,HOST,up,mem 8826/15983MB,load 21.01
-02:45:45,droid10,running,815.6MiB,/ 3GiB 35.95%
-02:45:45,droid9,running,702.6MiB,/ 3GiB 35.86%
-02:45:45,droid8,running,703.3MiB,/ 3GiB 38.75%
-02:45:45,droid7,running,707.4MiB,/ 3GiB 34.74%
-02:45:45,droid6,running,710.7MiB,/ 3GiB 36.01%
-02:45:45,droid5,running,708.9MiB,/ 3GiB 37.70%
-02:45:45,droid4,running,707.5MiB,/ 3GiB 37.66%
-02:45:45,droid3,running,683.9MiB,/ 3GiB 34.24%
-02:45:45,droid2,running,665.3MiB,/ 3GiB 32.09%
-02:45:45,droid1,running,662.8MiB,/ 3GiB 33.70%
-02:45:45,HOST,up,mem 8837/15983MB,load 21.09
-02:45:59,droid10,running,812.7MiB,/ 3GiB 38.39%
-02:45:59,droid9,running,703.3MiB,/ 3GiB 39.92%
-02:45:59,droid8,running,700.4MiB,/ 3GiB 38.44%
-02:45:59,droid7,running,707.8MiB,/ 3GiB 38.75%
-02:45:59,droid6,running,706.6MiB,/ 3GiB 38.96%
-02:45:59,droid5,running,709MiB,/ 3GiB 37.95%
-02:45:59,droid4,running,707.9MiB,/ 3GiB 41.94%
-02:45:59,droid3,running,680.3MiB,/ 3GiB 47.31%
-02:45:59,droid2,running,661.7MiB,/ 3GiB 39.62%
-02:45:59,droid1,running,659.4MiB,/ 3GiB 39.53%
-02:45:59,HOST,up,mem 8828/15983MB,load 20.92
-02:46:12,droid10,running,812.1MiB,/ 3GiB 38.44%
-02:46:12,droid9,running,702.9MiB,/ 3GiB 37.19%
-02:46:12,droid8,running,700.2MiB,/ 3GiB 41.79%
-02:46:12,droid7,running,707.8MiB,/ 3GiB 41.11%
-02:46:12,droid6,running,706.8MiB,/ 3GiB 39.40%
-02:46:12,droid5,running,709MiB,/ 3GiB 41.00%
-02:46:12,droid4,running,707.9MiB,/ 3GiB 38.55%
-02:46:12,droid3,running,680.8MiB,/ 3GiB 39.10%
-02:46:12,droid2,running,662MiB,/ 3GiB 38.48%
-02:46:12,droid1,running,659MiB,/ 3GiB 41.21%
-02:46:12,HOST,up,mem 8812/15983MB,load 21.18
-02:46:25,droid10,running,812.2MiB,/ 3GiB 31.06%
-02:46:25,droid9,running,703.3MiB,/ 3GiB 38.79%
-02:46:25,droid8,running,700.2MiB,/ 3GiB 35.17%
-02:46:25,droid7,running,707.9MiB,/ 3GiB 38.35%
-02:46:25,droid6,running,707.4MiB,/ 3GiB 38.62%
-02:46:25,droid5,running,709.1MiB,/ 3GiB 35.01%
-02:46:25,droid4,running,707.9MiB,/ 3GiB 39.81%
-02:46:25,droid3,running,680.4MiB,/ 3GiB 39.25%
-02:46:25,droid2,running,661.8MiB,/ 3GiB 39.21%
-02:46:25,droid1,running,659MiB,/ 3GiB 41.60%
-02:46:25,HOST,up,mem 8810/15983MB,load 21.07
-02:46:39,droid10,running,812.7MiB,/ 3GiB 39.14%
-02:46:39,droid9,running,703.1MiB,/ 3GiB 39.48%
-02:46:39,droid8,running,700.3MiB,/ 3GiB 39.15%
-02:46:39,droid7,running,707.9MiB,/ 3GiB 39.81%
-02:46:39,droid6,running,707.2MiB,/ 3GiB 39.36%
-02:46:39,droid5,running,709.1MiB,/ 3GiB 40.13%
-02:46:39,droid4,running,708.5MiB,/ 3GiB 40.57%
-02:46:39,droid3,running,680.4MiB,/ 3GiB 40.21%
-02:46:39,droid2,running,661.8MiB,/ 3GiB 39.00%
-02:46:39,droid1,running,659.1MiB,/ 3GiB 39.96%
-02:46:39,HOST,up,mem 8813/15983MB,load 20.91
-02:46:52,droid10,running,812.2MiB,/ 3GiB 39.78%
-02:46:52,droid9,running,703.2MiB,/ 3GiB 38.83%
-02:46:52,droid8,running,700.1MiB,/ 3GiB 39.46%
-02:46:52,droid7,running,708.5MiB,/ 3GiB 41.01%
-02:46:52,droid6,running,706.7MiB,/ 3GiB 40.72%
-02:46:52,droid5,running,709.2MiB,/ 3GiB 39.16%
-02:46:52,droid4,running,708MiB,/ 3GiB 40.11%
-02:46:52,droid3,running,680.7MiB,/ 3GiB 40.35%
-02:46:52,droid2,running,662.1MiB,/ 3GiB 39.71%
-02:46:52,droid1,running,659.1MiB,/ 3GiB 39.46%
-02:46:52,HOST,up,mem 8826/15983MB,load 20.94
-02:47:05,droid10,running,812.6MiB,/ 3GiB 39.35%
-02:47:05,droid9,running,703.5MiB,/ 3GiB 39.28%
-02:47:05,droid8,running,700.4MiB,/ 3GiB 38.96%
-02:47:05,droid7,running,708.4MiB,/ 3GiB 38.88%
-02:47:05,droid6,running,707.4MiB,/ 3GiB 40.26%
-02:47:05,droid5,running,709.6MiB,/ 3GiB 40.68%
-02:47:05,droid4,running,708.4MiB,/ 3GiB 40.41%
-02:47:05,droid3,running,681MiB,/ 3GiB 39.74%
-02:47:05,droid2,running,662.5MiB,/ 3GiB 39.19%
-02:47:05,droid1,running,659.8MiB,/ 3GiB 40.12%
-02:47:05,HOST,up,mem 8818/15983MB,load 20.87
-02:47:19,droid10,running,812.9MiB,/ 3GiB 40.07%
-02:47:19,droid9,running,703.6MiB,/ 3GiB 36.46%
-02:47:19,droid8,running,700.5MiB,/ 3GiB 38.55%
-02:47:19,droid7,running,708.7MiB,/ 3GiB 37.42%
-02:47:19,droid6,running,707.5MiB,/ 3GiB 39.05%
-02:47:19,droid5,running,709.6MiB,/ 3GiB 37.20%
-02:47:19,droid4,running,709MiB,/ 3GiB 38.36%
-02:47:19,droid3,running,681.3MiB,/ 3GiB 40.95%
-02:47:19,droid2,running,662.6MiB,/ 3GiB 39.39%
-02:47:19,droid1,running,659.8MiB,/ 3GiB 39.07%
-02:47:19,HOST,up,mem 8805/15983MB,load 21.04
-02:47:32,droid10,running,812.7MiB,/ 3GiB 40.08%
-02:47:32,droid9,running,703.6MiB,/ 3GiB 38.60%
-02:47:32,droid8,running,701MiB,/ 3GiB 39.85%
-02:47:32,droid7,running,708.7MiB,/ 3GiB 39.58%
-02:47:32,droid6,running,708MiB,/ 3GiB 39.62%
-02:47:32,droid5,running,709.7MiB,/ 3GiB 40.22%
-02:47:32,droid4,running,708.5MiB,/ 3GiB 38.56%
-02:47:32,droid3,running,680.8MiB,/ 3GiB 39.36%
-02:47:32,droid2,running,662.4MiB,/ 3GiB 39.96%
-02:47:32,droid1,running,659.8MiB,/ 3GiB 41.09%
-02:47:32,HOST,up,mem 8816/15983MB,load 21.20
-02:47:45,droid10,running,812.7MiB,/ 3GiB 35.67%
-02:47:45,droid9,running,703.6MiB,/ 3GiB 39.05%
-02:47:45,droid8,running,700.5MiB,/ 3GiB 34.35%
-02:47:45,droid7,running,708.7MiB,/ 3GiB 37.89%
-02:47:45,droid6,running,707.5MiB,/ 3GiB 34.85%
-02:47:45,droid5,running,709.9MiB,/ 3GiB 35.28%
-02:47:45,droid4,running,708.8MiB,/ 3GiB 36.90%
-02:47:45,droid3,running,681.6MiB,/ 3GiB 35.41%
-02:47:45,droid2,running,662.4MiB,/ 3GiB 37.38%
-02:47:45,droid1,running,659.9MiB,/ 3GiB 37.17%
-02:47:45,HOST,up,mem 8816/15983MB,load 21.25
-02:47:58,droid10,running,813.7MiB,/ 3GiB 40.48%
-02:47:58,droid9,running,704MiB,/ 3GiB 38.41%
-02:47:58,droid8,running,700.7MiB,/ 3GiB 40.81%
-02:47:58,droid7,running,708.2MiB,/ 3GiB 40.28%
-02:47:58,droid6,running,708.3MiB,/ 3GiB 39.75%
-02:47:58,droid5,running,710.3MiB,/ 3GiB 36.58%
-02:47:58,droid4,running,709.5MiB,/ 3GiB 42.26%
-02:47:58,droid3,running,681.5MiB,/ 3GiB 37.56%
-02:47:58,droid2,running,661.2MiB,/ 3GiB 40.24%
-02:47:58,droid1,running,659.7MiB,/ 3GiB 40.64%
-02:47:58,HOST,up,mem 8814/15983MB,load 21.05
-02:48:12,droid10,running,813.2MiB,/ 3GiB 42.04%
-02:48:12,droid9,running,704.3MiB,/ 3GiB 38.81%
-02:48:12,droid8,running,701.2MiB,/ 3GiB 39.09%
-02:48:12,droid7,running,708.2MiB,/ 3GiB 38.90%
-02:48:12,droid6,running,708.3MiB,/ 3GiB 38.89%
-02:48:12,droid5,running,710.2MiB,/ 3GiB 39.72%
-02:48:12,droid4,running,709.3MiB,/ 3GiB 39.52%
-02:48:12,droid3,running,681.5MiB,/ 3GiB 40.04%
-02:48:12,droid2,running,661.5MiB,/ 3GiB 39.00%
-02:48:12,droid1,running,660.1MiB,/ 3GiB 40.54%
-02:48:12,HOST,up,mem 8821/15983MB,load 21.29
-02:48:25,droid10,running,813.3MiB,/ 3GiB 39.93%
-02:48:25,droid9,running,704.4MiB,/ 3GiB 37.71%
-02:48:25,droid8,running,701.3MiB,/ 3GiB 40.08%
-02:48:25,droid7,running,708.3MiB,/ 3GiB 41.09%
-02:48:25,droid6,running,708.4MiB,/ 3GiB 39.06%
-02:48:25,droid5,running,710.2MiB,/ 3GiB 39.05%
-02:48:25,droid4,running,709.1MiB,/ 3GiB 39.47%
-02:48:25,droid3,running,681.6MiB,/ 3GiB 40.35%
-02:48:25,droid2,running,661.3MiB,/ 3GiB 39.56%
-02:48:25,droid1,running,660.1MiB,/ 3GiB 40.21%
-02:48:25,HOST,up,mem 8829/15983MB,load 21.32
-02:48:38,droid10,running,813.5MiB,/ 3GiB 38.53%
-02:48:38,droid9,running,704.4MiB,/ 3GiB 38.74%
-02:48:38,droid8,running,701.1MiB,/ 3GiB 41.26%
-02:48:38,droid7,running,707.9MiB,/ 3GiB 39.53%
-02:48:38,droid6,running,707.9MiB,/ 3GiB 39.36%
-02:48:38,droid5,running,710.5MiB,/ 3GiB 39.88%
-02:48:38,droid4,running,709.1MiB,/ 3GiB 38.15%
-02:48:38,droid3,running,682.1MiB,/ 3GiB 39.42%
-02:48:38,droid2,running,661.6MiB,/ 3GiB 41.76%
-02:48:38,droid1,running,660.2MiB,/ 3GiB 41.12%
-02:48:38,HOST,up,mem 8825/15983MB,load 21.32
-02:48:51,droid10,running,813.4MiB,/ 3GiB 40.32%
-02:48:51,droid9,running,704.3MiB,/ 3GiB 39.67%
-02:48:51,droid8,running,701.4MiB,/ 3GiB 39.02%
-02:48:51,droid7,running,708.2MiB,/ 3GiB 40.04%
-02:48:51,droid6,running,708.5MiB,/ 3GiB 37.93%
-02:48:51,droid5,running,710.1MiB,/ 3GiB 41.39%
-02:48:51,droid4,running,709.4MiB,/ 3GiB 38.87%
-02:48:51,droid3,running,682.2MiB,/ 3GiB 39.47%
-02:48:51,droid2,running,661.6MiB,/ 3GiB 38.81%
-02:48:51,droid1,running,660.4MiB,/ 3GiB 39.10%
-02:48:51,HOST,up,mem 8835/15983MB,load 21.48
-02:49:05,droid10,running,813.7MiB,/ 3GiB 38.42%
-02:49:05,droid9,running,704.7MiB,/ 3GiB 38.78%
-02:49:05,droid8,running,701.6MiB,/ 3GiB 39.87%
-02:49:05,droid7,running,708.3MiB,/ 3GiB 34.73%
-02:49:05,droid6,running,709.1MiB,/ 3GiB 41.85%
-02:49:05,droid5,running,710.7MiB,/ 3GiB 37.55%
-02:49:05,droid4,running,709.3MiB,/ 3GiB 41.86%
-02:49:05,droid3,running,682.3MiB,/ 3GiB 39.48%
-02:49:05,droid2,running,662.1MiB,/ 3GiB 40.13%
-02:49:05,droid1,running,661.2MiB,/ 3GiB 40.83%
-02:49:05,HOST,up,mem 8825/15983MB,load 21.33
-02:49:18,droid10,running,813.7MiB,/ 3GiB 39.78%
-02:49:18,droid9,running,704.7MiB,/ 3GiB 38.07%
-02:49:18,droid8,running,702.1MiB,/ 3GiB 38.74%
-02:49:18,droid7,running,708.4MiB,/ 3GiB 37.80%
-02:49:18,droid6,running,708.7MiB,/ 3GiB 39.11%
-02:49:18,droid5,running,711.2MiB,/ 3GiB 37.84%
-02:49:18,droid4,running,709.9MiB,/ 3GiB 52.58%
-02:49:18,droid3,running,681.9MiB,/ 3GiB 38.26%
-02:49:18,droid2,running,662.3MiB,/ 3GiB 37.41%
-02:49:18,droid1,running,660.9MiB,/ 3GiB 38.31%
-02:49:18,HOST,up,mem 8819/15983MB,load 21.10
-02:49:31,droid10,running,813.8MiB,/ 3GiB 39.63%
-02:49:31,droid9,running,704.8MiB,/ 3GiB 40.16%
-02:49:31,droid8,running,702.1MiB,/ 3GiB 38.46%
-02:49:31,droid7,running,708.7MiB,/ 3GiB 40.42%
-02:49:31,droid6,running,709.2MiB,/ 3GiB 39.77%
-02:49:31,droid5,running,710.6MiB,/ 3GiB 39.90%
-02:49:31,droid4,running,709.7MiB,/ 3GiB 40.67%
-02:49:31,droid3,running,682.7MiB,/ 3GiB 39.25%
-02:49:31,droid2,running,662.4MiB,/ 3GiB 39.57%
-02:49:31,droid1,running,661MiB,/ 3GiB 38.88%
-02:49:31,HOST,up,mem 8825/15983MB,load 21.17
-02:49:45,droid10,running,814.1MiB,/ 3GiB 32.87%
-02:49:45,droid9,running,705.1MiB,/ 3GiB 29.38%
-02:49:45,droid8,running,701.7MiB,/ 3GiB 28.94%
-02:49:45,droid7,running,708.7MiB,/ 3GiB 35.27%
-02:49:45,droid6,running,708.5MiB,/ 3GiB 33.69%
-02:49:45,droid5,running,710.9MiB,/ 3GiB 34.32%
-02:49:45,droid4,running,709.8MiB,/ 3GiB 31.49%
-02:49:45,droid3,running,682.5MiB,/ 3GiB 31.23%
-02:49:45,droid2,running,662.2MiB,/ 3GiB 33.46%
-02:49:45,droid1,running,660.8MiB,/ 3GiB 36.63%
-02:49:45,HOST,up,mem 8822/15983MB,load 21.07
-02:49:58,droid10,running,814.4MiB,/ 3GiB 38.38%
-02:49:58,droid9,running,705.1MiB,/ 3GiB 39.34%
-02:49:58,droid8,running,702.1MiB,/ 3GiB 38.64%
-02:49:58,droid7,running,709.1MiB,/ 3GiB 40.88%
-02:49:58,droid6,running,709.5MiB,/ 3GiB 39.14%
-02:49:58,droid5,running,711.4MiB,/ 3GiB 38.10%
-02:49:58,droid4,running,710.5MiB,/ 3GiB 41.26%
-02:49:58,droid3,running,684MiB,/ 3GiB 41.92%
-02:49:58,droid2,running,662.3MiB,/ 3GiB 39.53%
-02:49:58,droid1,running,661.2MiB,/ 3GiB 38.64%
-02:49:58,HOST,up,mem 8833/15983MB,load 20.83
+03:02:58,droid10,running,705.9MiB/3GiB,0.14%
+03:02:58,droid9,running,691.5MiB/3GiB,1.76%
+03:02:58,droid8,running,816.4MiB/3GiB,2.02%
+03:02:58,droid7,running,684.9MiB/3GiB,2.07%
+03:02:58,droid6,running,695MiB/3GiB,2.07%
+03:02:58,droid5,running,691.8MiB/3GiB,2.09%
+03:02:58,droid4,running,694.1MiB/3GiB,2.10%
+03:02:58,droid3,running,688.2MiB/3GiB,1.74%
+03:02:58,droid2,running,689.4MiB/3GiB,2.48%
+03:02:58,droid1,running,634.1MiB/3GiB,1.97%
+03:02:58,HOST,up,mem 8581/15983MB,load 36.77
+03:03:10,droid10,running,707MiB/3GiB,0.10%
+03:03:10,droid9,running,689.4MiB/3GiB,0.08%
+03:03:10,droid8,running,815.2MiB/3GiB,0.35%
+03:03:10,droid7,running,684.7MiB/3GiB,0.09%
+03:03:10,droid6,running,694MiB/3GiB,0.16%
+03:03:10,droid5,running,690.6MiB/3GiB,0.17%
+03:03:10,droid4,running,693MiB/3GiB,0.12%
+03:03:10,droid3,running,686.5MiB/3GiB,0.07%
+03:03:10,droid2,running,688.5MiB/3GiB,0.16%
+03:03:10,droid1,running,633.3MiB/3GiB,0.04%
+03:03:10,HOST,up,mem 8579/15983MB,load 31.12
+03:03:23,droid10,running,705.9MiB/3GiB,0.09%
+03:03:23,droid9,running,688.7MiB/3GiB,0.17%
+03:03:23,droid8,running,813.3MiB/3GiB,0.09%
+03:03:23,droid7,running,683.1MiB/3GiB,0.15%
+03:03:23,droid6,running,693.8MiB/3GiB,0.09%
+03:03:23,droid5,running,689.4MiB/3GiB,0.18%
+03:03:23,droid4,running,692.5MiB/3GiB,0.14%
+03:03:23,droid3,running,686.2MiB/3GiB,0.16%
+03:03:23,droid2,running,688MiB/3GiB,0.29%
+03:03:23,droid1,running,633.4MiB/3GiB,0.07%
+03:03:23,HOST,up,mem 8571/15983MB,load 24.23
+03:03:35,droid10,running,705.6MiB/3GiB,0.12%
+03:03:35,droid9,running,688.7MiB/3GiB,0.10%
+03:03:35,droid8,running,813.3MiB/3GiB,0.11%
+03:03:35,droid7,running,683MiB/3GiB,0.12%
+03:03:35,droid6,running,693.1MiB/3GiB,0.09%
+03:03:35,droid5,running,689.2MiB/3GiB,0.11%
+03:03:35,droid4,running,692.8MiB/3GiB,0.09%
+03:03:35,droid3,running,686.6MiB/3GiB,0.10%
+03:03:35,droid2,running,687.8MiB/3GiB,0.17%
+03:03:35,droid1,running,633.7MiB/3GiB,0.07%
+03:03:35,HOST,up,mem 8577/15983MB,load 20.50
+03:03:47,droid10,running,705.7MiB/3GiB,0.05%
+03:03:47,droid9,running,689.5MiB/3GiB,0.15%
+03:03:47,droid8,running,813.4MiB/3GiB,0.15%
+03:03:47,droid7,running,683.1MiB/3GiB,0.06%
+03:03:47,droid6,running,693.2MiB/3GiB,0.05%
+03:03:47,droid5,running,689.3MiB/3GiB,0.05%
+03:03:47,droid4,running,693.1MiB/3GiB,0.17%
+03:03:47,droid3,running,686.4MiB/3GiB,0.07%
+03:03:47,droid2,running,688.2MiB/3GiB,0.13%
+03:03:47,droid1,running,633.5MiB/3GiB,0.05%
+03:03:47,HOST,up,mem 8584/15983MB,load 15.96
+03:04:00,droid10,running,706.4MiB/3GiB,0.10%
+03:04:00,droid9,running,689.2MiB/3GiB,0.05%
+03:04:00,droid8,running,813.8MiB/3GiB,0.05%
+03:04:00,droid7,running,683.4MiB/3GiB,0.07%
+03:04:00,droid6,running,693.1MiB/3GiB,0.05%
+03:04:00,droid5,running,689.9MiB/3GiB,0.05%
+03:04:00,droid4,running,693.4MiB/3GiB,0.08%
+03:04:00,droid3,running,686.8MiB/3GiB,0.07%
+03:04:00,droid2,running,688.5MiB/3GiB,0.07%
+03:04:00,droid1,running,634MiB/3GiB,0.06%
+03:04:00,HOST,up,mem 8577/15983MB,load 13.50
+03:04:12,droid10,running,706.2MiB/3GiB,0.06%
+03:04:12,droid9,running,689.3MiB/3GiB,0.08%
+03:04:12,droid8,running,814.1MiB/3GiB,0.07%
+03:04:12,droid7,running,683.3MiB/3GiB,0.06%
+03:04:12,droid6,running,693.4MiB/3GiB,0.07%
+03:04:12,droid5,running,689.7MiB/3GiB,0.18%
+03:04:12,droid4,running,693.7MiB/3GiB,0.05%
+03:04:12,droid3,running,686.9MiB/3GiB,0.06%
+03:04:12,droid2,running,688.6MiB/3GiB,0.07%
+03:04:12,droid1,running,634MiB/3GiB,0.06%
+03:04:12,HOST,up,mem 8597/15983MB,load 10.51
+03:04:25,droid10,running,706.5MiB/3GiB,0.07%
+03:04:25,droid9,running,689.1MiB/3GiB,0.05%
+03:04:25,droid8,running,813.9MiB/3GiB,0.05%
+03:04:25,droid7,running,683.6MiB/3GiB,0.08%
+03:04:25,droid6,running,693.2MiB/3GiB,0.05%
+03:04:25,droid5,running,689.5MiB/3GiB,0.06%
+03:04:25,droid4,running,693.8MiB/3GiB,0.05%
+03:04:25,droid3,running,686.9MiB/3GiB,0.07%
+03:04:25,droid2,running,688.4MiB/3GiB,0.06%
+03:04:25,droid1,running,634.1MiB/3GiB,0.06%
+03:04:25,HOST,up,mem 8587/15983MB,load 8.90
+03:04:37,droid10,running,706.5MiB/3GiB,0.07%
+03:04:37,droid9,running,689.7MiB/3GiB,0.09%
+03:04:37,droid8,running,814MiB/3GiB,0.06%
+03:04:37,droid7,running,683.4MiB/3GiB,0.07%
+03:04:37,droid6,running,693.3MiB/3GiB,0.08%
+03:04:37,droid5,running,690.1MiB/3GiB,0.07%
+03:04:37,droid4,running,693.6MiB/3GiB,0.06%
+03:04:37,droid3,running,687MiB/3GiB,0.05%
+03:04:37,droid2,running,688.4MiB/3GiB,0.07%
+03:04:37,droid1,running,634.4MiB/3GiB,0.04%
+03:04:37,HOST,up,mem 8583/15983MB,load 7.08
+03:04:49,droid10,running,706.1MiB/3GiB,0.06%
+03:04:49,droid9,running,689.4MiB/3GiB,0.17%
+03:04:49,droid8,running,814MiB/3GiB,0.05%
+03:04:49,droid7,running,683.5MiB/3GiB,0.06%
+03:04:49,droid6,running,693.3MiB/3GiB,0.05%
+03:04:49,droid5,running,689.9MiB/3GiB,0.06%
+03:04:49,droid4,running,693.9MiB/3GiB,0.18%
+03:04:49,droid3,running,687.2MiB/3GiB,0.09%
+03:04:49,droid2,running,688.5MiB/3GiB,0.08%
+03:04:49,droid1,running,634.4MiB/3GiB,0.08%
+03:04:49,HOST,up,mem 8580/15983MB,load 6.06
+03:05:02,droid10,running,706.7MiB/3GiB,0.05%
+03:05:02,droid9,running,690.1MiB/3GiB,0.10%
+03:05:02,droid8,running,814.3MiB/3GiB,0.22%
+03:05:02,droid7,running,683.8MiB/3GiB,0.06%
+03:05:02,droid6,running,693.6MiB/3GiB,0.04%
+03:05:02,droid5,running,690.6MiB/3GiB,0.12%
+03:05:02,droid4,running,694.1MiB/3GiB,0.05%
+03:05:02,droid3,running,687.4MiB/3GiB,0.05%
+03:05:02,droid2,running,688.9MiB/3GiB,0.06%
+03:05:02,droid1,running,634.6MiB/3GiB,0.08%
+03:05:02,HOST,up,mem 8593/15983MB,load 4.72
+03:05:14,droid10,running,706.8MiB/3GiB,0.06%
+03:05:14,droid9,running,689.9MiB/3GiB,0.05%
+03:05:14,droid8,running,814.5MiB/3GiB,0.04%
+03:05:14,droid7,running,683.9MiB/3GiB,0.05%
+03:05:14,droid6,running,694MiB/3GiB,0.05%
+03:05:14,droid5,running,690.8MiB/3GiB,0.16%
+03:05:14,droid4,running,694.2MiB/3GiB,0.04%
+03:05:14,droid3,running,687.5MiB/3GiB,0.06%
+03:05:14,droid2,running,689.3MiB/3GiB,0.08%
+03:05:14,droid1,running,634.9MiB/3GiB,0.05%
+03:05:14,HOST,up,mem 8590/15983MB,load 3.99
+03:05:26,droid10,running,706.8MiB/3GiB,0.06%
+03:05:26,droid9,running,689.7MiB/3GiB,0.07%
+03:05:26,droid8,running,814.8MiB/3GiB,0.06%
+03:05:26,droid7,running,683.9MiB/3GiB,0.10%
+03:05:26,droid6,running,693.8MiB/3GiB,0.06%
+03:05:26,droid5,running,690.4MiB/3GiB,0.10%
+03:05:26,droid4,running,694.3MiB/3GiB,0.05%
+03:05:26,droid3,running,687.7MiB/3GiB,0.05%
+03:05:26,droid2,running,689.3MiB/3GiB,0.08%
+03:05:26,droid1,running,634.7MiB/3GiB,0.05%
+03:05:26,HOST,up,mem 8597/15983MB,load 3.11
+03:05:39,droid10,running,707.1MiB/3GiB,0.09%
+03:05:39,droid9,running,690.3MiB/3GiB,0.07%
+03:05:39,droid8,running,814.8MiB/3GiB,0.06%
+03:05:39,droid7,running,684MiB/3GiB,0.09%
+03:05:39,droid6,running,693.9MiB/3GiB,0.05%
+03:05:39,droid5,running,690.7MiB/3GiB,0.11%
+03:05:39,droid4,running,694.4MiB/3GiB,0.06%
+03:05:39,droid3,running,687.8MiB/3GiB,0.05%
+03:05:39,droid2,running,688.9MiB/3GiB,0.08%
+03:05:39,droid1,running,635MiB/3GiB,0.09%
+03:05:39,HOST,up,mem 8591/15983MB,load 2.63
+03:05:51,droid10,running,707.2MiB/3GiB,0.17%
+03:05:51,droid9,running,690.6MiB/3GiB,0.07%
+03:05:51,droid8,running,814.7MiB/3GiB,0.07%
+03:05:51,droid7,running,684.1MiB/3GiB,0.07%
+03:05:51,droid6,running,693.9MiB/3GiB,0.05%
+03:05:51,droid5,running,690.5MiB/3GiB,0.07%
+03:05:51,droid4,running,694.6MiB/3GiB,0.12%
+03:05:51,droid3,running,687.6MiB/3GiB,0.07%
+03:05:51,droid2,running,688.9MiB/3GiB,0.07%
+03:05:51,droid1,running,634.8MiB/3GiB,0.05%
+03:05:51,HOST,up,mem 8586/15983MB,load 2.21
+03:06:03,droid10,running,707.1MiB/3GiB,0.08%
+03:06:03,droid9,running,691MiB/3GiB,0.07%
+03:06:03,droid8,running,815.3MiB/3GiB,0.06%
+03:06:03,droid7,running,684.6MiB/3GiB,0.07%
+03:06:03,droid6,running,694.3MiB/3GiB,0.06%
+03:06:03,droid5,running,691.1MiB/3GiB,0.07%
+03:06:03,droid4,running,696.1MiB/3GiB,0.07%
+03:06:03,droid3,running,688MiB/3GiB,0.05%
+03:06:03,droid2,running,689.4MiB/3GiB,0.08%
+03:06:03,droid1,running,635.2MiB/3GiB,0.04%
+03:06:03,HOST,up,mem 8598/15983MB,load 1.87
+03:06:16,droid10,running,707.4MiB/3GiB,0.05%
+03:06:16,droid9,running,690.6MiB/3GiB,0.05%
+03:06:16,droid8,running,815.2MiB/3GiB,0.07%
+03:06:16,droid7,running,684.6MiB/3GiB,0.08%
+03:06:16,droid6,running,694.4MiB/3GiB,0.04%
+03:06:16,droid5,running,691.3MiB/3GiB,0.07%
+03:06:16,droid4,running,696.4MiB/3GiB,0.09%
+03:06:16,droid3,running,688.3MiB/3GiB,0.05%
+03:06:16,droid2,running,689.7MiB/3GiB,0.07%
+03:06:16,droid1,running,635.8MiB/3GiB,0.05%
+03:06:16,HOST,up,mem 8601/15983MB,load 1.58
+03:06:28,droid10,running,708.3MiB/3GiB,0.48%
+03:06:28,droid9,running,691.4MiB/3GiB,0.45%
+03:06:28,droid8,running,815MiB/3GiB,0.06%
+03:06:28,droid7,running,685.6MiB/3GiB,0.07%
+03:06:28,droid6,running,694.7MiB/3GiB,0.06%
+03:06:28,droid5,running,691.7MiB/3GiB,0.07%
+03:06:28,droid4,running,696.6MiB/3GiB,0.06%
+03:06:28,droid3,running,688.7MiB/3GiB,0.12%
+03:06:28,droid2,running,690.5MiB/3GiB,0.16%
+03:06:28,droid1,running,636MiB/3GiB,0.05%
+03:06:28,HOST,up,mem 8609/15983MB,load 1.39
+03:06:42,droid10,running,711.2MiB/3GiB,39.17%
+03:06:42,droid9,running,695.8MiB/3GiB,40.40%
+03:06:42,droid8,running,820MiB/3GiB,39.96%
+03:06:42,droid7,running,688.3MiB/3GiB,39.76%
+03:06:42,droid6,running,698.4MiB/3GiB,39.25%
+03:06:42,droid5,running,695.3MiB/3GiB,38.37%
+03:06:42,droid4,running,701.3MiB/3GiB,39.61%
+03:06:42,droid3,running,691.2MiB/3GiB,38.81%
+03:06:42,droid2,running,691.7MiB/3GiB,40.32%
+03:06:42,droid1,running,637.4MiB/3GiB,39.61%
+03:06:42,HOST,up,mem 8656/15983MB,load 2.90
+03:06:55,droid10,running,711.6MiB/3GiB,40.05%
+03:06:55,droid9,running,695.8MiB/3GiB,39.59%
+03:06:55,droid8,running,820.4MiB/3GiB,38.91%
+03:06:55,droid7,running,689MiB/3GiB,39.82%
+03:06:55,droid6,running,698.4MiB/3GiB,39.08%
+03:06:55,droid5,running,695MiB/3GiB,38.72%
+03:06:55,droid4,running,701.5MiB/3GiB,41.05%
+03:06:55,droid3,running,691.2MiB/3GiB,39.51%
+03:06:55,droid2,running,691.8MiB/3GiB,40.96%
+03:06:55,droid1,running,637.9MiB/3GiB,39.54%
+03:06:55,HOST,up,mem 8627/15983MB,load 7.08
+03:07:09,droid10,running,712.2MiB/3GiB,34.98%
+03:07:09,droid9,running,696.6MiB/3GiB,33.01%
+03:07:09,droid8,running,820.6MiB/3GiB,38.25%
+03:07:09,droid7,running,689.2MiB/3GiB,30.14%
+03:07:09,droid6,running,699.2MiB/3GiB,37.96%
+03:07:09,droid5,running,695.8MiB/3GiB,32.65%
+03:07:09,droid4,running,701.6MiB/3GiB,39.60%
+03:07:09,droid3,running,691.6MiB/3GiB,37.30%
+03:07:09,droid2,running,692.4MiB/3GiB,33.13%
+03:07:09,droid1,running,637.8MiB/3GiB,39.75%
+03:07:09,HOST,up,mem 8633/15983MB,load 9.22
+03:07:22,droid10,running,712.2MiB/3GiB,39.24%
+03:07:22,droid9,running,696.2MiB/3GiB,41.22%
+03:07:22,droid8,running,820.7MiB/3GiB,39.37%
+03:07:22,droid7,running,689MiB/3GiB,41.20%
+03:07:22,droid6,running,699.2MiB/3GiB,38.26%
+03:07:22,droid5,running,695.9MiB/3GiB,39.38%
+03:07:22,droid4,running,702MiB/3GiB,39.92%
+03:07:22,droid3,running,691.6MiB/3GiB,40.25%
+03:07:22,droid2,running,692.2MiB/3GiB,38.37%
+03:07:22,droid1,running,638.3MiB/3GiB,39.77%
+03:07:22,HOST,up,mem 8642/15983MB,load 11.82
+03:07:36,droid10,running,712.3MiB/3GiB,40.16%
+03:07:36,droid9,running,696.5MiB/3GiB,39.50%
+03:07:36,droid8,running,821MiB/3GiB,40.87%
+03:07:36,droid7,running,689.3MiB/3GiB,39.07%
+03:07:36,droid6,running,698.8MiB/3GiB,39.16%
+03:07:36,droid5,running,695.9MiB/3GiB,37.77%
+03:07:36,droid4,running,701.8MiB/3GiB,39.17%
+03:07:36,droid3,running,691.6MiB/3GiB,40.60%
+03:07:36,droid2,running,692.2MiB/3GiB,44.99%
+03:07:36,droid1,running,637.9MiB/3GiB,41.09%
+03:07:36,HOST,up,mem 8640/15983MB,load 13.86
+03:07:50,droid10,running,712.1MiB/3GiB,34.23%
+03:07:50,droid9,running,696.3MiB/3GiB,40.48%
+03:07:50,droid8,running,820.8MiB/3GiB,37.45%
+03:07:50,droid7,running,689.3MiB/3GiB,40.31%
+03:07:50,droid6,running,699.1MiB/3GiB,35.27%
+03:07:50,droid5,running,695.7MiB/3GiB,37.21%
+03:07:50,droid4,running,701.9MiB/3GiB,39.97%
+03:07:50,droid3,running,691.9MiB/3GiB,37.53%
+03:07:50,droid2,running,692.3MiB/3GiB,38.72%
+03:07:50,droid1,running,637.9MiB/3GiB,39.02%
+03:07:50,HOST,up,mem 8639/15983MB,load 15.51
+03:08:04,droid10,running,712.5MiB/3GiB,41.71%
+03:08:04,droid9,running,696.9MiB/3GiB,40.21%
+03:08:04,droid8,running,821.5MiB/3GiB,39.96%
+03:08:04,droid7,running,689.6MiB/3GiB,41.02%
+03:08:04,droid6,running,699.4MiB/3GiB,40.85%
+03:08:04,droid5,running,696.1MiB/3GiB,38.42%
+03:08:04,droid4,running,702.5MiB/3GiB,37.72%
+03:08:04,droid3,running,691.8MiB/3GiB,39.99%
+03:08:04,droid2,running,693.1MiB/3GiB,39.66%
+03:08:04,droid1,running,638.3MiB/3GiB,39.28%
+03:08:04,HOST,up,mem 8644/15983MB,load 16.28
+03:08:17,droid10,running,712.7MiB/3GiB,39.69%
+03:08:17,droid9,running,696.6MiB/3GiB,39.30%
+03:08:17,droid8,running,821.3MiB/3GiB,39.24%
+03:08:17,droid7,running,689.9MiB/3GiB,40.18%
+03:08:17,droid6,running,699.8MiB/3GiB,41.71%
+03:08:17,droid5,running,696.4MiB/3GiB,39.70%
+03:08:17,droid4,running,702.6MiB/3GiB,40.23%
+03:08:17,droid3,running,692.1MiB/3GiB,38.66%
+03:08:17,droid2,running,692.7MiB/3GiB,38.60%
+03:08:17,droid1,running,638.8MiB/3GiB,35.82%
+03:08:17,HOST,up,mem 8647/15983MB,load 17.42
+03:08:31,droid10,running,712.3MiB/3GiB,39.33%
+03:08:31,droid9,running,696.7MiB/3GiB,39.87%
+03:08:31,droid8,running,821.3MiB/3GiB,39.71%
+03:08:31,droid7,running,689.4MiB/3GiB,39.75%
+03:08:31,droid6,running,699.5MiB/3GiB,38.81%
+03:08:31,droid5,running,696.4MiB/3GiB,39.60%
+03:08:31,droid4,running,702.3MiB/3GiB,39.19%
+03:08:31,droid3,running,692.2MiB/3GiB,39.72%
+03:08:31,droid2,running,693.3MiB/3GiB,40.03%
+03:08:31,droid1,running,638.6MiB/3GiB,41.29%
+03:08:31,HOST,up,mem 8650/15983MB,load 18.51
+03:08:45,droid10,running,712.8MiB/3GiB,36.75%
+03:08:45,droid9,running,697MiB/3GiB,39.38%
+03:08:45,droid8,running,821.4MiB/3GiB,40.25%
+03:08:45,droid7,running,690MiB/3GiB,38.49%
+03:08:45,droid6,running,699.8MiB/3GiB,39.03%
+03:08:45,droid5,running,696.4MiB/3GiB,40.17%
+03:08:45,droid4,running,702.7MiB/3GiB,39.37%
+03:08:45,droid3,running,692.7MiB/3GiB,40.19%
+03:08:45,droid2,running,693.1MiB/3GiB,40.87%
+03:08:45,droid1,running,639MiB/3GiB,40.09%
+03:08:45,HOST,up,mem 8645/15983MB,load 19.00
+03:08:59,droid10,running,711.1MiB/3GiB,40.08%
+03:08:59,droid9,running,697MiB/3GiB,40.62%
+03:08:59,droid8,running,821.9MiB/3GiB,39.48%
+03:08:59,droid7,running,690.6MiB/3GiB,39.46%
+03:08:59,droid6,running,699.9MiB/3GiB,39.84%
+03:08:59,droid5,running,696.8MiB/3GiB,39.51%
+03:08:59,droid4,running,703.4MiB/3GiB,40.77%
+03:08:59,droid3,running,692.9MiB/3GiB,38.94%
+03:08:59,droid2,running,693.2MiB/3GiB,40.11%
+03:08:59,droid1,running,640.4MiB/3GiB,39.04%
+03:08:59,HOST,up,mem 8674/15983MB,load 19.31
+03:09:12,droid10,running,711.3MiB/3GiB,40.24%
+03:09:12,droid9,running,697.2MiB/3GiB,40.17%
+03:09:12,droid8,running,821.8MiB/3GiB,40.17%
+03:09:12,droid7,running,690.2MiB/3GiB,39.76%
+03:09:12,droid6,running,700.2MiB/3GiB,39.09%
+03:09:12,droid5,running,697.2MiB/3GiB,40.27%
+03:09:12,droid4,running,703.4MiB/3GiB,39.35%
+03:09:12,droid3,running,692.7MiB/3GiB,37.93%
+03:09:12,droid2,running,693.3MiB/3GiB,40.13%
+03:09:12,droid1,running,640.1MiB/3GiB,39.40%
+03:09:12,HOST,up,mem 8663/15983MB,load 19.47
+03:09:26,droid10,running,711.5MiB/3GiB,38.08%
+03:09:26,droid9,running,697.3MiB/3GiB,38.98%
+03:09:26,droid8,running,821.9MiB/3GiB,39.58%
+03:09:26,droid7,running,690.1MiB/3GiB,39.29%
+03:09:26,droid6,running,700.6MiB/3GiB,34.24%
+03:09:26,droid5,running,696.8MiB/3GiB,40.22%
+03:09:26,droid4,running,703.1MiB/3GiB,40.83%
+03:09:26,droid3,running,693.3MiB/3GiB,40.23%
+03:09:26,droid2,running,693.4MiB/3GiB,39.71%
+03:09:26,droid1,running,640.2MiB/3GiB,39.46%
+03:09:26,HOST,up,mem 8645/15983MB,load 19.81
+03:09:40,droid10,running,711.7MiB/3GiB,39.56%
+03:09:40,droid9,running,697.8MiB/3GiB,40.02%
+03:09:40,droid8,running,822MiB/3GiB,40.14%
+03:09:40,droid7,running,690.4MiB/3GiB,40.12%
+03:09:40,droid6,running,700.1MiB/3GiB,39.56%
+03:09:40,droid5,running,696.8MiB/3GiB,38.34%
+03:09:40,droid4,running,703.1MiB/3GiB,40.64%
+03:09:40,droid3,running,692.8MiB/3GiB,41.77%
+03:09:40,droid2,running,693.4MiB/3GiB,40.08%
+03:09:40,droid1,running,640.5MiB/3GiB,37.57%
+03:09:40,HOST,up,mem 8665/15983MB,load 19.84
+03:09:53,droid10,running,711.8MiB/3GiB,39.01%
+03:09:53,droid9,running,697.7MiB/3GiB,40.41%
+03:09:53,droid8,running,822.2MiB/3GiB,40.84%
+03:09:53,droid7,running,690.4MiB/3GiB,39.72%
+03:09:53,droid6,running,700.6MiB/3GiB,40.53%
+03:09:53,droid5,running,697.3MiB/3GiB,39.40%
+03:09:53,droid4,running,703.2MiB/3GiB,40.39%
+03:09:53,droid3,running,692.6MiB/3GiB,39.42%
+03:09:53,droid2,running,693.5MiB/3GiB,38.54%
+03:09:53,droid1,running,640.3MiB/3GiB,39.05%
+03:09:53,HOST,up,mem 8643/15983MB,load 20.28
+03:10:07,droid10,running,712MiB/3GiB,36.73%
+03:10:07,droid9,running,698.5MiB/3GiB,35.57%
+03:10:07,droid8,running,822.7MiB/3GiB,35.43%
+03:10:07,droid7,running,691MiB/3GiB,37.34%
+03:10:07,droid6,running,701.1MiB/3GiB,32.57%
+03:10:07,droid5,running,697.5MiB/3GiB,39.11%
+03:10:07,droid4,running,703.6MiB/3GiB,33.16%
+03:10:07,droid3,running,693.5MiB/3GiB,34.76%
+03:10:07,droid2,running,692.6MiB/3GiB,37.24%
+03:10:07,droid1,running,640.7MiB/3GiB,36.27%
+03:10:07,HOST,up,mem 8659/15983MB,load 20.28
+03:10:21,droid10,running,712.2MiB/3GiB,40.22%
+03:10:21,droid9,running,698MiB/3GiB,39.15%
+03:10:21,droid8,running,822.7MiB/3GiB,39.81%
+03:10:21,droid7,running,691.1MiB/3GiB,38.76%
+03:10:21,droid6,running,700.9MiB/3GiB,38.36%
+03:10:21,droid5,running,697.1MiB/3GiB,39.61%
+03:10:21,droid4,running,703.7MiB/3GiB,40.06%
+03:10:21,droid3,running,693.6MiB/3GiB,40.33%
+03:10:21,droid2,running,692.7MiB/3GiB,40.17%
+03:10:21,droid1,running,641MiB/3GiB,41.07%
+03:10:21,HOST,up,mem 8642/15983MB,load 20.69
+03:10:35,droid10,running,712.1MiB/3GiB,40.23%
+03:10:35,droid9,running,697.9MiB/3GiB,39.80%
+03:10:35,droid8,running,822.8MiB/3GiB,38.14%
+03:10:35,droid7,running,690.9MiB/3GiB,41.91%
+03:10:35,droid6,running,701.2MiB/3GiB,40.08%
+03:10:35,droid5,running,697.4MiB/3GiB,40.83%
+03:10:35,droid4,running,704MiB/3GiB,38.76%
+03:10:35,droid3,running,693.6MiB/3GiB,38.24%
+03:10:35,droid2,running,693.2MiB/3GiB,40.39%
+03:10:35,droid1,running,640.8MiB/3GiB,38.45%
+03:10:35,HOST,up,mem 8661/15983MB,load 20.66
+03:10:48,droid10,running,712.1MiB/3GiB,37.51%
+03:10:48,droid9,running,697.9MiB/3GiB,38.88%
+03:10:48,droid8,running,822.8MiB/3GiB,40.29%
+03:10:48,droid7,running,691MiB/3GiB,39.93%
+03:10:48,droid6,running,701MiB/3GiB,39.01%
+03:10:48,droid5,running,697.4MiB/3GiB,39.50%
+03:10:48,droid4,running,703.7MiB/3GiB,39.74%
+03:10:48,droid3,running,693.4MiB/3GiB,38.60%
+03:10:48,droid2,running,692.8MiB/3GiB,41.03%
+03:10:48,droid1,running,641.4MiB/3GiB,39.68%
+03:10:48,HOST,up,mem 8665/15983MB,load 20.74
+03:11:02,droid10,running,712.5MiB/3GiB,38.63%
+03:11:02,droid9,running,698.7MiB/3GiB,38.81%
+03:11:02,droid8,running,822.3MiB/3GiB,40.16%
+03:11:02,droid7,running,691.3MiB/3GiB,40.29%
+03:11:02,droid6,running,701.4MiB/3GiB,40.00%
+03:11:02,droid5,running,698.2MiB/3GiB,40.53%
+03:11:02,droid4,running,703MiB/3GiB,39.87%
+03:11:02,droid3,running,693.8MiB/3GiB,38.01%
+03:11:02,droid2,running,693.2MiB/3GiB,40.28%
+03:11:02,droid1,running,641.2MiB/3GiB,39.47%
+03:11:02,HOST,up,mem 8664/15983MB,load 20.57
+03:11:15,droid10,running,712.9MiB/3GiB,37.22%
+03:11:15,droid9,running,698.5MiB/3GiB,34.21%
+03:11:15,droid8,running,822.4MiB/3GiB,37.40%
+03:11:15,droid7,running,691.4MiB/3GiB,36.04%
+03:11:15,droid6,running,701.5MiB/3GiB,34.80%
+03:11:15,droid5,running,697.8MiB/3GiB,35.92%
+03:11:15,droid4,running,703MiB/3GiB,35.90%
+03:11:15,droid3,running,694.1MiB/3GiB,35.92%
+03:11:15,droid2,running,693.5MiB/3GiB,35.21%
+03:11:15,droid1,running,641.6MiB/3GiB,38.75%
+03:11:15,HOST,up,mem 8650/15983MB,load 21.09
+03:11:29,droid10,running,712.7MiB/3GiB,38.70%
+03:11:29,droid9,running,698.6MiB/3GiB,37.95%
+03:11:29,droid8,running,822.6MiB/3GiB,39.63%
+03:11:29,droid7,running,691.4MiB/3GiB,39.58%
+03:11:29,droid6,running,701.3MiB/3GiB,39.92%
+03:11:29,droid5,running,697.9MiB/3GiB,41.08%
+03:11:29,droid4,running,703MiB/3GiB,39.90%
+03:11:29,droid3,running,694.2MiB/3GiB,37.87%
+03:11:29,droid2,running,693.5MiB/3GiB,40.59%
+03:11:29,droid1,running,641.4MiB/3GiB,42.73%
+03:11:29,HOST,up,mem 8664/15983MB,load 21.14
+03:11:43,droid10,running,712.8MiB/3GiB,39.28%
+03:11:43,droid9,running,699.1MiB/3GiB,37.25%
+03:11:43,droid8,running,822.5MiB/3GiB,39.82%
+03:11:43,droid7,running,691.5MiB/3GiB,36.59%
+03:11:43,droid6,running,701.6MiB/3GiB,37.25%
+03:11:43,droid5,running,698.5MiB/3GiB,42.37%
+03:11:43,droid4,running,703.1MiB/3GiB,38.27%
+03:11:43,droid3,running,694.1MiB/3GiB,41.31%
+03:11:43,droid2,running,693.4MiB/3GiB,39.83%
+03:11:43,droid1,running,641.8MiB/3GiB,40.15%
+03:11:43,HOST,up,mem 8682/15983MB,load 21.03
+03:11:57,droid10,running,712.7MiB/3GiB,40.06%
+03:11:57,droid9,running,699.1MiB/3GiB,39.13%
+03:11:57,droid8,running,822.6MiB/3GiB,39.89%
+03:11:57,droid7,running,691.9MiB/3GiB,40.53%
+03:11:57,droid6,running,702MiB/3GiB,41.62%
+03:11:57,droid5,running,698.1MiB/3GiB,37.98%
+03:11:57,droid4,running,703.5MiB/3GiB,39.12%
+03:11:57,droid3,running,694.2MiB/3GiB,40.28%
+03:11:57,droid2,running,693.9MiB/3GiB,39.69%
+03:11:57,droid1,running,641.8MiB/3GiB,40.34%
+03:11:57,HOST,up,mem 8668/15983MB,load 21.10
+03:12:10,droid10,running,713.7MiB/3GiB,40.76%
+03:12:10,droid9,running,699.2MiB/3GiB,39.00%
+03:12:10,droid8,running,823MiB/3GiB,39.78%
+03:12:10,droid7,running,692.3MiB/3GiB,39.18%
+03:12:10,droid6,running,702MiB/3GiB,40.07%
+03:12:10,droid5,running,698.7MiB/3GiB,40.20%
+03:12:10,droid4,running,703.6MiB/3GiB,38.58%
+03:12:10,droid3,running,694.9MiB/3GiB,40.32%
+03:12:10,droid2,running,694MiB/3GiB,39.74%
+03:12:10,droid1,running,642.2MiB/3GiB,40.46%
+03:12:10,HOST,up,mem 8671/15983MB,load 21.23
+03:12:24,droid10,running,713.5MiB/3GiB,40.16%
+03:12:24,droid9,running,699.5MiB/3GiB,39.53%
+03:12:24,droid8,running,823MiB/3GiB,39.16%
+03:12:24,droid7,running,692.1MiB/3GiB,39.13%
+03:12:24,droid6,running,702.3MiB/3GiB,39.22%
+03:12:24,droid5,running,698.5MiB/3GiB,37.40%
+03:12:24,droid4,running,703.9MiB/3GiB,38.50%
+03:12:24,droid3,running,694.9MiB/3GiB,41.28%
+03:12:24,droid2,running,694MiB/3GiB,39.98%
+03:12:24,droid1,running,642.5MiB/3GiB,38.01%
+03:12:24,HOST,up,mem 8673/15983MB,load 21.27
+03:12:38,droid10,running,713.8MiB/3GiB,39.53%
+03:12:38,droid9,running,699.2MiB/3GiB,39.55%
+03:12:38,droid8,running,823.5MiB/3GiB,39.08%
+03:12:38,droid7,running,692.4MiB/3GiB,38.51%
+03:12:38,droid6,running,702MiB/3GiB,39.98%
+03:12:38,droid5,running,698.5MiB/3GiB,40.08%
+03:12:38,droid4,running,703.7MiB/3GiB,39.35%
+03:12:38,droid3,running,694.7MiB/3GiB,38.82%
+03:12:38,droid2,running,694.3MiB/3GiB,38.91%
+03:12:38,droid1,running,642.3MiB/3GiB,42.73%
+03:12:38,HOST,up,mem 8665/15983MB,load 21.06
+03:12:51,droid10,running,713.6MiB/3GiB,36.95%
+03:12:51,droid9,running,699.5MiB/3GiB,39.28%
+03:12:51,droid8,running,823.3MiB/3GiB,41.59%
+03:12:51,droid7,running,692.2MiB/3GiB,40.39%
+03:12:51,droid6,running,702.1MiB/3GiB,43.03%
+03:12:51,droid5,running,698.6MiB/3GiB,39.13%
+03:12:51,droid4,running,703.9MiB/3GiB,38.20%
+03:12:51,droid3,running,695MiB/3GiB,38.37%
+03:12:51,droid2,running,694.1MiB/3GiB,39.57%
+03:12:51,droid1,running,642.1MiB/3GiB,40.73%
+03:12:51,HOST,up,mem 8667/15983MB,load 20.90
+03:13:05,droid10,running,714.3MiB/3GiB,38.27%
+03:13:05,droid9,running,699.7MiB/3GiB,36.26%
+03:13:05,droid8,running,823.5MiB/3GiB,36.71%
+03:13:05,droid7,running,692.6MiB/3GiB,38.62%
+03:13:05,droid6,running,702.8MiB/3GiB,34.70%
+03:13:05,droid5,running,699.3MiB/3GiB,36.89%
+03:13:05,droid4,running,704.4MiB/3GiB,35.00%
+03:13:05,droid3,running,695.4MiB/3GiB,38.33%
+03:13:05,droid2,running,694.5MiB/3GiB,37.03%
+03:13:05,droid1,running,642.4MiB/3GiB,34.87%
+03:13:05,HOST,up,mem 8664/15983MB,load 21.10
+03:13:19,droid10,running,713.8MiB/3GiB,38.08%
+03:13:19,droid9,running,699.9MiB/3GiB,40.09%
+03:13:19,droid8,running,823.5MiB/3GiB,40.20%
+03:13:19,droid7,running,692.9MiB/3GiB,40.88%
+03:13:19,droid6,running,702.6MiB/3GiB,39.66%
+03:13:19,droid5,running,699.3MiB/3GiB,40.07%
+03:13:19,droid4,running,704.1MiB/3GiB,39.16%
+03:13:19,droid3,running,695.7MiB/3GiB,39.40%
+03:13:19,droid2,running,694.5MiB/3GiB,37.86%
+03:13:19,droid1,running,642.7MiB/3GiB,40.19%
+03:13:19,HOST,up,mem 8675/15983MB,load 21.24
+03:13:33,droid10,running,714.1MiB/3GiB,39.27%
+03:13:33,droid9,running,699.7MiB/3GiB,41.14%
+03:13:33,droid8,running,823.5MiB/3GiB,39.91%
+03:13:33,droid7,running,692.4MiB/3GiB,39.28%
+03:13:33,droid6,running,702.7MiB/3GiB,39.20%
+03:13:33,droid5,running,699.1MiB/3GiB,39.69%
+03:13:33,droid4,running,704.7MiB/3GiB,38.88%
+03:13:33,droid3,running,695.5MiB/3GiB,39.55%
+03:13:33,droid2,running,695MiB/3GiB,39.79%
+03:13:33,droid1,running,642.5MiB/3GiB,39.86%
+03:13:33,HOST,up,mem 8678/15983MB,load 21.12
+03:13:47,droid10,running,714.4MiB/3GiB,32.37%
+03:13:47,droid9,running,699.7MiB/3GiB,37.47%
+03:13:47,droid8,running,823.9MiB/3GiB,34.40%
+03:13:47,droid7,running,692.7MiB/3GiB,36.52%
+03:13:47,droid6,running,702.5MiB/3GiB,38.75%
+03:13:47,droid5,running,699.4MiB/3GiB,38.29%
+03:13:47,droid4,running,704.2MiB/3GiB,37.68%
+03:13:47,droid3,running,695.6MiB/3GiB,34.43%
+03:13:47,droid2,running,694.9MiB/3GiB,37.22%
+03:13:47,droid1,running,642.8MiB/3GiB,38.97%
+03:13:47,HOST,up,mem 8672/15983MB,load 21.18
+03:14:00,droid10,running,715.1MiB/3GiB,39.26%
+03:14:00,droid9,running,700.3MiB/3GiB,40.56%
+03:14:00,droid8,running,824.2MiB/3GiB,38.72%
+03:14:00,droid7,running,693.1MiB/3GiB,39.17%
+03:14:00,droid6,running,703.2MiB/3GiB,39.79%
+03:14:00,droid5,running,699.6MiB/3GiB,40.78%
+03:14:00,droid4,running,704.7MiB/3GiB,40.30%
+03:14:00,droid3,running,695.8MiB/3GiB,40.14%
+03:14:00,droid2,running,695.2MiB/3GiB,39.71%
+03:14:00,droid1,running,643.1MiB/3GiB,39.54%
+03:14:00,HOST,up,mem 8675/15983MB,load 21.00
+03:14:13,droid10,running,714.7MiB/3GiB,40.73%
+03:14:13,droid9,running,700.2MiB/3GiB,39.90%
+03:14:13,droid8,running,823.8MiB/3GiB,39.88%
+03:14:13,droid7,running,693.4MiB/3GiB,39.65%
+03:14:13,droid6,running,703.2MiB/3GiB,36.71%
+03:14:13,droid5,running,699.8MiB/3GiB,40.67%
+03:14:13,droid4,running,705.1MiB/3GiB,39.87%
+03:14:13,droid3,running,695.8MiB/3GiB,39.26%
+03:14:13,droid2,running,695.3MiB/3GiB,38.90%
+03:14:13,droid1,running,643.1MiB/3GiB,39.48%
+03:14:13,HOST,up,mem 8684/15983MB,load 20.94
+03:14:27,droid10,running,714.8MiB/3GiB,38.15%
+03:14:27,droid9,running,700.5MiB/3GiB,39.90%
+03:14:27,droid8,running,824.3MiB/3GiB,38.82%
+03:14:27,droid7,running,693.2MiB/3GiB,39.98%
+03:14:27,droid6,running,703.3MiB/3GiB,38.79%
+03:14:27,droid5,running,699.6MiB/3GiB,40.95%
+03:14:27,droid4,running,704.7MiB/3GiB,40.36%
+03:14:27,droid3,running,696.1MiB/3GiB,39.43%
+03:14:27,droid2,running,695.3MiB/3GiB,41.12%
+03:14:27,droid1,running,643.1MiB/3GiB,39.14%
+03:14:27,HOST,up,mem 8691/15983MB,load 21.01
+03:14:41,droid10,running,715MiB/3GiB,39.99%
+03:14:41,droid9,running,700.5MiB/3GiB,39.35%
+03:14:41,droid8,running,824.3MiB/3GiB,40.26%
+03:14:41,droid7,running,693.5MiB/3GiB,42.35%
+03:14:41,droid6,running,703.3MiB/3GiB,38.71%
+03:14:41,droid5,running,699.4MiB/3GiB,39.62%
+03:14:41,droid4,running,704.7MiB/3GiB,39.68%
+03:14:41,droid3,running,696.1MiB/3GiB,39.94%
+03:14:41,droid2,running,695.3MiB/3GiB,39.51%
+03:14:41,droid1,running,643.4MiB/3GiB,37.83%
+03:14:41,HOST,up,mem 8675/15983MB,load 20.94
+03:14:55,droid10,running,714.6MiB/3GiB,40.50%
+03:14:55,droid9,running,700.2MiB/3GiB,40.01%
+03:14:55,droid8,running,824.6MiB/3GiB,39.23%
+03:14:55,droid7,running,693.3MiB/3GiB,39.40%
+03:14:55,droid6,running,703.6MiB/3GiB,40.23%
+03:14:55,droid5,running,699.6MiB/3GiB,40.09%
+03:14:55,droid4,running,705MiB/3GiB,38.99%
+03:14:55,droid3,running,696.4MiB/3GiB,39.58%
+03:14:55,droid2,running,695.4MiB/3GiB,39.30%
+03:14:55,droid1,running,643.5MiB/3GiB,39.82%
+03:14:55,HOST,up,mem 8680/15983MB,load 20.80
+03:15:08,droid10,running,715.2MiB/3GiB,38.22%
+03:15:08,droid9,running,701MiB/3GiB,38.16%
+03:15:08,droid8,running,824.8MiB/3GiB,40.22%
+03:15:08,droid7,running,693.6MiB/3GiB,39.93%
+03:15:08,droid6,running,704MiB/3GiB,37.45%
+03:15:08,droid5,running,700.1MiB/3GiB,40.38%
+03:15:08,droid4,running,705.1MiB/3GiB,40.82%
+03:15:08,droid3,running,696.4MiB/3GiB,40.15%
+03:15:08,droid2,running,695.5MiB/3GiB,39.31%
+03:15:08,droid1,running,643.8MiB/3GiB,40.55%
+03:15:08,HOST,up,mem 8692/15983MB,load 20.94
+03:15:22,droid10,running,715.3MiB/3GiB,37.89%
+03:15:22,droid9,running,700.7MiB/3GiB,38.84%
+03:15:22,droid8,running,824.6MiB/3GiB,37.21%
+03:15:22,droid7,running,693.7MiB/3GiB,36.63%
+03:15:22,droid6,running,703.8MiB/3GiB,37.96%
+03:15:22,droid5,running,700.1MiB/3GiB,37.25%
+03:15:22,droid4,running,705.4MiB/3GiB,36.49%
+03:15:22,droid3,running,696.4MiB/3GiB,36.75%
+03:15:22,droid2,running,695.8MiB/3GiB,38.15%
+03:15:22,droid1,running,643.6MiB/3GiB,32.79%
+03:15:22,HOST,up,mem 8692/15983MB,load 20.95
+03:15:36,droid10,running,715.3MiB/3GiB,41.29%
+03:15:36,droid9,running,700.8MiB/3GiB,37.77%
+03:15:36,droid8,running,824.6MiB/3GiB,40.68%
+03:15:36,droid7,running,693.7MiB/3GiB,41.16%
+03:15:36,droid6,running,703.9MiB/3GiB,40.98%
+03:15:36,droid5,running,700.1MiB/3GiB,39.07%
+03:15:36,droid4,running,705.2MiB/3GiB,37.25%
+03:15:36,droid3,running,697MiB/3GiB,39.86%
+03:15:36,droid2,running,696.1MiB/3GiB,39.52%
+03:15:36,droid1,running,643.9MiB/3GiB,38.12%
+03:15:36,HOST,up,mem 8713/15983MB,load 21.52
+03:15:49,droid10,running,715.4MiB/3GiB,39.27%
+03:15:49,droid9,running,700.8MiB/3GiB,39.66%
+03:15:49,droid8,running,824.9MiB/3GiB,39.77%
+03:15:49,droid7,running,693.8MiB/3GiB,40.07%
+03:15:49,droid6,running,704.1MiB/3GiB,39.96%
+03:15:49,droid5,running,700.2MiB/3GiB,39.58%
+03:15:49,droid4,running,705.2MiB/3GiB,39.95%
+03:15:49,droid3,running,696.5MiB/3GiB,39.42%
+03:15:49,droid2,running,695.9MiB/3GiB,39.76%
+03:15:49,droid1,running,644.2MiB/3GiB,38.78%
+03:15:49,HOST,up,mem 8688/15983MB,load 21.28
+03:16:03,droid10,running,715.7MiB/3GiB,38.82%
+03:16:03,droid9,running,701.5MiB/3GiB,39.89%
+03:16:03,droid8,running,825.3MiB/3GiB,40.23%
+03:16:03,droid7,running,694.3MiB/3GiB,40.07%
+03:16:03,droid6,running,704.6MiB/3GiB,39.37%
+03:16:03,droid5,running,700.7MiB/3GiB,39.17%
+03:16:03,droid4,running,705.9MiB/3GiB,39.08%
+03:16:03,droid3,running,696.7MiB/3GiB,39.93%
+03:16:03,droid2,running,695.8MiB/3GiB,39.00%
+03:16:03,droid1,running,643.1MiB/3GiB,39.86%
+03:16:03,HOST,up,mem 8705/15983MB,load 21.07
+03:16:16,droid10,running,715.8MiB/3GiB,34.84%
+03:16:16,droid9,running,701.3MiB/3GiB,36.73%
+03:16:16,droid8,running,825.1MiB/3GiB,37.10%
+03:16:16,droid7,running,694.5MiB/3GiB,35.66%
+03:16:16,droid6,running,704.4MiB/3GiB,36.72%
+03:16:16,droid5,running,700.7MiB/3GiB,36.63%
+03:16:16,droid4,running,705.7MiB/3GiB,34.42%
+03:16:16,droid3,running,697.2MiB/3GiB,36.53%
+03:16:16,droid2,running,696.4MiB/3GiB,35.48%
+03:16:16,droid1,running,643.2MiB/3GiB,34.43%
+03:16:16,HOST,up,mem 8704/15983MB,load 21.21
+03:16:30,droid10,running,716.3MiB/3GiB,39.98%
+03:16:30,droid9,running,701.4MiB/3GiB,39.89%
+03:16:30,droid8,running,825.1MiB/3GiB,39.44%
+03:16:30,droid7,running,694.5MiB/3GiB,38.32%
+03:16:30,droid6,running,704.5MiB/3GiB,39.08%
+03:16:30,droid5,running,700.8MiB/3GiB,38.34%
+03:16:30,droid4,running,705.9MiB/3GiB,40.93%
+03:16:30,droid3,running,697.2MiB/3GiB,43.23%
+03:16:30,droid2,running,696.4MiB/3GiB,38.82%
+03:16:30,droid1,running,643MiB/3GiB,38.40%
+03:16:30,HOST,up,mem 8682/15983MB,load 21.32
+03:16:43,droid10,running,715.7MiB/3GiB,38.38%
+03:16:43,droid9,running,701.6MiB/3GiB,41.19%
+03:16:43,droid8,running,825.2MiB/3GiB,39.98%
+03:16:43,droid7,running,694.3MiB/3GiB,39.65%
+03:16:43,droid6,running,704.7MiB/3GiB,39.80%
+03:16:43,droid5,running,701.3MiB/3GiB,41.49%
+03:16:43,droid4,running,706.2MiB/3GiB,38.71%
+03:16:43,droid3,running,696.8MiB/3GiB,39.37%
+03:16:43,droid2,running,696.4MiB/3GiB,38.89%
+03:16:43,droid1,running,643MiB/3GiB,38.71%
+03:16:43,HOST,up,mem 8690/15983MB,load 21.12
+03:16:57,droid10,running,715.9MiB/3GiB,39.67%
+03:16:57,droid9,running,701.4MiB/3GiB,40.44%
+03:16:57,droid8,running,825.2MiB/3GiB,39.84%
+03:16:57,droid7,running,694.9MiB/3GiB,39.81%
+03:16:57,droid6,running,704.8MiB/3GiB,39.14%
+03:16:57,droid5,running,701.1MiB/3GiB,39.96%
+03:16:57,droid4,running,705.8MiB/3GiB,40.42%
+03:16:57,droid3,running,697MiB/3GiB,39.27%
+03:16:57,droid2,running,696.5MiB/3GiB,36.47%
+03:16:57,droid1,running,643.1MiB/3GiB,40.13%
+03:16:57,HOST,up,mem 8706/15983MB,load 20.94
+03:17:11,droid10,running,716.3MiB/3GiB,39.26%
+03:17:11,droid9,running,702.1MiB/3GiB,38.92%
+03:17:11,droid8,running,825.7MiB/3GiB,39.50%
+03:17:11,droid7,running,694.8MiB/3GiB,39.61%
+03:17:11,droid6,running,705MiB/3GiB,38.76%
+03:17:11,droid5,running,701.3MiB/3GiB,39.79%
+03:17:11,droid4,running,706.3MiB/3GiB,40.33%
+03:17:11,droid3,running,697.8MiB/3GiB,39.47%
+03:17:11,droid2,running,696.6MiB/3GiB,40.19%
+03:17:11,droid1,running,643.5MiB/3GiB,39.87%
+03:17:11,HOST,up,mem 8698/15983MB,load 21.18
+03:17:25,droid10,running,716.6MiB/3GiB,40.81%
+03:17:25,droid9,running,702.1MiB/3GiB,39.59%
+03:17:25,droid8,running,825.5MiB/3GiB,40.07%
+03:17:25,droid7,running,694.6MiB/3GiB,39.77%
+03:17:25,droid6,running,705MiB/3GiB,37.46%
+03:17:25,droid5,running,701.6MiB/3GiB,41.20%
+03:17:25,droid4,running,706.8MiB/3GiB,39.53%
+03:17:25,droid3,running,697.6MiB/3GiB,40.58%
+03:17:25,droid2,running,696.7MiB/3GiB,37.23%
+03:17:25,droid1,running,643.8MiB/3GiB,41.73%
+03:17:25,HOST,up,mem 8700/15983MB,load 21.07
