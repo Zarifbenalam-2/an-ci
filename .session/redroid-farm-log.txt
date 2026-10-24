@@ -61,3 +61,4 @@
 14:22:10Z on the tailnet as android-rfarm at 100.64.252.113
 14:22:34Z phone-1 booted at 100.64.252.113:21001 (gsf UNKNOWN)
 14:22:35Z youtube download failed; phones stay gapps-only
+14:22:37Z FAILED: unexpected exit near line 164
