@@ -35,10 +35,11 @@ say "volumes seen: [$VOLS]"
 
 staged=0
 for pv in $(echo "$VOLS" | tr ' ' '\n' | grep '^rfarm.*-data$'); do
-  # never guess the host path: newer runner images keep docker's data-root
-  # elsewhere, so ask docker itself where this volume lives
+  # never guess the host path: ask docker where the volume lives, and test
+  # the dir with sudo -- /var/lib/docker is root-only, so a plain [ -d ]
+  # reports "not a dir" on permission denial (that was the staged-0 bug)
   psrc="$(sudo docker volume inspect "$pv" --format '{{.Mountpoint}}' 2>/dev/null)"
-  [ -d "$psrc" ] || { say "SKIP $pv: mountpoint '$psrc' not a dir"; continue; }
+  sudo test -d "$psrc" || { say "SKIP $pv: mountpoint '$psrc' not readable even via sudo"; continue; }
   sudo tar czf "$PDIR/$pv.tar.gz" \
     --exclude='./dalvik-cache' --exclude='*/cache' \
     -C "$psrc" . >/tmp/tar.err 2>&1 \
