@@ -52,14 +52,20 @@ say "staged $staged tarball(s)"
 
 [ "$staged" -gt 0 ] || { say "nothing to upload"; beacon "snapshot($LABEL): 0 tarballs"; exit 0; }
 
-prid="$(curl -fsS -H "$PA" "$PAPI/tags/profiles" 2>>"$LOG" \
-  | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null)"
+RELJSON="$(curl -fsS -H "$PA" "$PAPI/tags/profiles" 2>>"$LOG")"
+prid="$(echo "$RELJSON" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null)"
 if [ -z "$prid" ]; then
-  prid="$(curl -fsS -X POST -H "$PA" -H "Content-Type: application/json" \
-    -d '{"tag_name":"profiles","name":"phone profiles"}' "$PAPI" 2>>"$LOG" \
-    | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null)"
+  RELJSON="$(curl -fsS -X POST -H "$PA" -H "Content-Type: application/json" \
+    -d '{"tag_name":"profiles","name":"phone profiles"}' "$PAPI" 2>>"$LOG")"
+  prid="$(echo "$RELJSON" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null)"
 fi
 [ -n "$prid" ] || { say "RELEASE LOOKUP/CREATE FAILED"; beacon "snapshot($LABEL) FAILED: no release"; exit 0; }
+
+# asset uploads go to uploads.github.com (api.github.com answers 404) --
+# take the upload_url the release itself hands out, minus its {?name,label}
+# template suffix
+UPURL="$(echo "$RELJSON" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("upload_url","").split("{")[0])' 2>/dev/null)"
+[ -n "$UPURL" ] || UPURL="https://uploads.github.com/repos/Zarifbenalam-2/farm-profiles/releases/$prid/assets"
 
 uploaded=0
 for pf in "$PDIR"/*.tar.gz; do
