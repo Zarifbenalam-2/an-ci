@@ -75,7 +75,7 @@ for pf in "$PDIR"/*.tar.gz; do
     | python3 -c 'import json,sys;print(next((a["id"] for a in json.load(sys.stdin) if a["name"]==sys.argv[1]),""))' "$pn" 2>/dev/null)"
   [ -n "$aid" ] && curl -fsS -X DELETE -H "$PA" "$PAPI/$prid/assets/$aid" >/dev/null 2>&1
   if curl -fsS -X POST -H "$PA" -H "Content-Type: application/octet-stream" \
-       --data-binary "@$pf" "$PAPI/$prid/assets?name=$pn" >>"$LOG" 2>&1; then
+       --data-binary "@$pf" "$UPURL?name=$pn" >>"$LOG" 2>&1; then
     say "uploaded $pn"; uploaded=$((uploaded + 1))
   else
     say "UPLOAD FAILED $pn"
