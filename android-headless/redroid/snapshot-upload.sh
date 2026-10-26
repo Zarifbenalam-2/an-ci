@@ -35,8 +35,10 @@ say "volumes seen: [$VOLS]"
 
 staged=0
 for pv in $(echo "$VOLS" | tr ' ' '\n' | grep '^rfarm.*-data$'); do
-  psrc="/var/lib/docker/volumes/$pv/_data"
-  [ -d "$psrc" ] || { say "SKIP $pv: no dir at $psrc"; continue; }
+  # never guess the host path: newer runner images keep docker's data-root
+  # elsewhere, so ask docker itself where this volume lives
+  psrc="$(sudo docker volume inspect "$pv" --format '{{.Mountpoint}}' 2>/dev/null)"
+  [ -d "$psrc" ] || { say "SKIP $pv: mountpoint '$psrc' not a dir"; continue; }
   sudo tar czf "$PDIR/$pv.tar.gz" \
     --exclude='./dalvik-cache' --exclude='*/cache' \
     -C "$psrc" . >/tmp/tar.err 2>&1 \
