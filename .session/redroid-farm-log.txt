@@ -78,3 +78,4 @@
 15:38:51Z on the tailnet as android-rfarm at 100.92.247.69
 15:39:16Z phone-1 booted at 100.92.247.69:21001 (gsf UNKNOWN)
 15:39:18Z youtube download failed; phones stay gapps-only
+15:39:20Z webview ensured on all phones
