@@ -47,9 +47,9 @@ jobs:
           set +eE
           echo "=== attempt 1 (timeout) ===" >>"$log"
           sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname verify-eph \
-            --ephemeral --timeout 60s >>"$log" 2>&1; echo "a1 rc=$?"
+            --timeout 60s >>"$log" 2>&1; echo "a1 rc=$?"
           echo "=== attempt 2 (no timeout) ===" >>"$log"
-          sudo "$tsbin" up --authkey "$TS_AUTHKEY" --ephemeral >>"$log" 2>&1
+          sudo "$tsbin" up --authkey "$TS_AUTHKEY" >>"$log" 2>&1
           echo "a2 rc=$?" >>"$log"
           set -eE
           echo "--- FULL tailscale log:"; cat "$log"

@@ -109,8 +109,11 @@ jobs:
           else
             tsbin=$(readlink -f "$(command -v tailscale)")
           fi
+          # NOTE: newest tailscale (ubuntu 26.04 runners) dropped --ephemeral
+          # from `up` (rc=2 usage error), so nodes are persistent now; the
+          # three-attempt chain degrades gracefully on older versions too.
           sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-rfarm \
-            --ephemeral --timeout 60s >>"$log" 2>&1 \
+            --timeout 60s >>"$log" 2>&1 \
           || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname android-rfarm \
             --ephemeral >>"$log" 2>&1 \
           || sudo "$tsbin" up --authkey "$TS_AUTHKEY" >>"$log" 2>&1 \
