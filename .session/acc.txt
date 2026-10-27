@@ -1,0 +1,1 @@
+    Account {name=zarifbenalamin2005@gmail.com, type=com.google}

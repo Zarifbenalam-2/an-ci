@@ -1,0 +1,4 @@
+=== accounts on 100.114.34.94:21001 (restore proof, 13:07:08Z) ===
+    Account {name=zarifbenalamin2005@gmail.com, type=com.google}
+android 13
+gsf-id 4383080682615392424
