@@ -7,3 +7,4 @@
 12:33:58Z youtube download failed; phones stay gapps-only
 12:34:01Z webview ensured on all phones
 12:34:18Z runner ssh live at 100.114.34.94:2222 (user runner, your GitHub key)
+12:34:20Z FARM READY: 2 phones on 100.114.34.94
