@@ -324,6 +324,10 @@ jobs:
             sleep 30
           done
           echo "session window closed"
+          # clear the roster so the GUI stops showing dead phone cards
+          python3 android-headless/phone/farm_redroid_status.py 0 clear "" 0 \
+            || true
+          beacon "farm session ended; phone cards cleared"
 
           # --- end-of-session snapshot (best effort) ----------------------------
           # The baseline snapshot already ran right after provisioning; this is

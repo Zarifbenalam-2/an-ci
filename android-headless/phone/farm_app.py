@@ -12,6 +12,7 @@ phone/tools/ via launch.py. Double-click Farm.cmd.
 from __future__ import annotations
 
 import base64
+import calendar
 import json
 import queue
 import subprocess
@@ -22,8 +23,8 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 from tkinter import (BOTH, BOTTOM, LEFT, RIGHT, TOP, X, Y, BooleanVar,
-                     Button, Canvas, Checkbutton, Frame, Label, Listbox,
-                     StringVar, Text, Tk, Toplevel, messagebox)
+                     Button, Canvas, Checkbutton, Entry, Frame, Label,
+                     Listbox, StringVar, Text, Tk, Toplevel, messagebox)
 from tkinter import ttk
 
 HERE = Path(__file__).resolve().parent          # android-headless/phone
@@ -37,6 +38,12 @@ PROFILES_API = ("https://api.github.com/repos/Zarifbenalam-2/farm-profiles/"
                 "releases/tags/profiles")
 ASSETS_API = ("https://api.github.com/repos/Zarifbenalam-2/farm-profiles/"
               "releases/assets")
+RUNS_API = "https://api.github.com/repos/Zarifbenalam-2/an-ci/actions/runs"
+CANCEL_API = ("https://api.github.com/repos/Zarifbenalam-2/an-ci/actions/"
+              "runs/{rid}/cancel")
+FARM_DISPATCH = ("https://api.github.com/repos/Zarifbenalam-2/an-ci/actions/"
+                 "workflows/phone-farm-redroid.yml/dispatches")
+FARM_MAX_AGE_S = 6 * 3600      # a farm job can live at most ~6 h on GitHub
 
 # palette
 BG, PANEL, CARD, ACCENT, TEXT, MUTED, WARN = (
@@ -105,6 +112,19 @@ def delete_profile_asset(aid, token: str) -> bool:
         return False
 
 
+def gh_post(token: str, url: str, payload: dict = None) -> bool:
+    data = json.dumps(payload).encode() if payload is not None else b""
+    req = urllib.request.Request(url, method="POST", data=data, headers={
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "farm-app"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
 # --------------------------------------------------------------------- farm
 class Farm:
     def __init__(self):
@@ -128,6 +148,15 @@ class Farm:
             except json.JSONDecodeError:
                 pass
         ssh = ssh or git_show(".session/farm-ssh.txt").strip()
+        # ghost guard: a farm job lives at most ~6 h; older status files are
+        # leftovers of a dead runner and must not render as phone cards
+        if updated:
+            try:
+                t = calendar.timegm(time.strptime(updated, "%Y-%m-%d %H:%M:%S"))
+                if time.time() - t > FARM_MAX_AGE_S:
+                    phones, ssh = [], ""
+            except ValueError:
+                pass
         gsf = git_show(".session/gsf-ids.txt").strip()
         log = git_show(".session/redroid-farm-log.txt")
         with self.lock:
@@ -206,6 +235,9 @@ class App:
               fg=MUTED).pack(side=LEFT, pady=10)
         Label(bar, textvariable=self.status, bg=PANEL, fg=MUTED).pack(
             side=RIGHT, padx=12)
+        Button(bar, text="Actions", command=self.actions_dialog,
+               bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
+               padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
         Button(bar, text="Saved phones", command=self.saved_phones_dialog,
                bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
                padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
@@ -449,6 +481,123 @@ class App:
                     messagebox.showerror("Delete failed", "token / network?")
                 self._saved_fill(info)
             self.root.after(0, done)
+        threading.Thread(target=work, daemon=True).start()
+
+    # --------------------------------------------------- actions (workflows)
+    def actions_dialog(self):
+        dlg = Toplevel(self.root)
+        dlg.title("Actions — workflow runs (an-ci)")
+        dlg.configure(bg=PANEL)
+        dlg.geometry("780x520")
+        top = Frame(dlg, bg=PANEL)
+        top.pack(fill=X)
+        Label(top, text="ACTIONS", bg=PANEL, fg=TEXT,
+              font=("Segoe UI", 12, "bold")).pack(side=LEFT, padx=12, pady=8)
+        info = StringVar(value="loading …")
+        Label(top, textvariable=info, bg=PANEL, fg=MUTED).pack(side=LEFT, padx=8)
+        Button(top, text="Refresh", relief="flat", bg=CARD, fg=TEXT, padx=10,
+               command=lambda: self._runs_fill(info)).pack(
+               side=RIGHT, padx=10, pady=8)
+        dp = Frame(dlg, bg=PANEL)
+        dp.pack(fill=X, padx=12, pady=(0, 6))
+        Label(dp, text="start farm:", bg=PANEL, fg=MUTED).pack(side=LEFT)
+        keyin = Entry(dp, show="•", width=36, bg="#111216", fg=TEXT,
+                      relief="flat", insertbackground=TEXT)
+        keyin.pack(side=LEFT, padx=6)
+        ph, mi = StringVar(value="6"), StringVar(value="110")
+        Label(dp, text="phones", bg=PANEL, fg=MUTED).pack(side=LEFT, padx=(8, 2))
+        Entry(dp, textvariable=ph, width=3, bg="#111216", fg=TEXT,
+              relief="flat", insertbackground=TEXT).pack(side=LEFT)
+        Label(dp, text="minutes", bg=PANEL, fg=MUTED).pack(side=LEFT, padx=(8, 2))
+        Entry(dp, textvariable=mi, width=4, bg="#111216", fg=TEXT,
+              relief="flat", insertbackground=TEXT).pack(side=LEFT)
+        Button(dp, text="Start farm", relief="flat", bg=ACCENT, fg="#0b0f0c",
+               padx=10, font=("Segoe UI", 9, "bold"),
+               command=lambda: self._farm_dispatch(
+                   keyin.get().strip(), ph.get(), mi.get())).pack(
+               side=LEFT, padx=10)
+        body = Frame(dlg, bg=BG)
+        body.pack(fill=BOTH, expand=True, padx=10, pady=(0, 10))
+        self._runs_body = body
+        self._runs_info = info
+        self._runs_fill(info)
+
+    def _runs_fill(self, info):
+        body = getattr(self, "_runs_body", None)
+        if body is None:
+            return
+
+        def work():
+            tok = gh_token()
+            runs = gh_api(RUNS_API + "?per_page=12", tok).get(
+                "workflow_runs", []) if tok else None
+            self.root.after(
+                0, lambda: self._runs_render(info, runs if tok else None))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _runs_render(self, info, runs):
+        body = self._runs_body
+        for w in body.winfo_children():
+            w.destroy()
+        if runs is None:
+            info.set("lookup failed (token / network)")
+            return
+        running = sum(1 for r in runs if r.get("status") == "in_progress")
+        info.set(f"{len(runs)} recent runs · {running} running")
+        if not runs:
+            Label(body, text="no runs yet", bg=BG, fg=MUTED, pady=30).grid(
+                row=0, column=0)
+            return
+        for c, h in enumerate(("run", "status", "started", "")):
+            Label(body, text=h, bg=BG, fg=MUTED,
+                  font=("Segoe UI", 9, "bold")).grid(
+                  row=0, column=c, sticky="w", padx=8, pady=(6, 2))
+        for r, run in enumerate(runs, start=1):
+            Label(body, text=f"#{run.get('run_number')} {run.get('name', '?')}",
+                  bg=BG, fg=TEXT, font=("Consolas", 10)).grid(
+                  row=r, column=0, sticky="w", padx=8)
+            st = run.get("status", "?")
+            if st == "completed":
+                st = run.get("conclusion") or "completed"
+            Label(body, text=st, bg=BG,
+                  fg=(ACCENT if st in ("in_progress", "queued", "success")
+                      else WARN if st == "failure" else MUTED)).grid(
+                  row=r, column=1, sticky="w", padx=8)
+            Label(body, text=(run.get("created_at", "") or "").replace(
+                "T", " ")[:16], bg=BG, fg=MUTED).grid(
+                row=r, column=2, sticky="w", padx=8)
+            if run.get("status") in ("in_progress", "queued", "pending"):
+                Button(body, text="Stop", relief="flat", bg=CARD, fg=WARN,
+                       padx=8, command=lambda rr=run: self._runs_cancel(rr)
+                       ).grid(row=r, column=3, sticky="e", padx=8)
+
+    def _runs_cancel(self, run):
+        if not messagebox.askyesno("Stop run",
+                f"Stop run #{run.get('run_number')} ({run.get('name')})?"):
+            return
+
+        def work():
+            ok = gh_post(gh_token(), CANCEL_API.format(rid=run["id"]))
+            def done():
+                self.log(f"[actions] run #{run.get('run_number')} "
+                         f"{'cancelled' if ok else 'cancel FAILED'}")
+                if hasattr(self, "_runs_info"):
+                    self._runs_fill(self._runs_info)
+            self.root.after(0, done)
+        threading.Thread(target=work, daemon=True).start()
+
+    def _farm_dispatch(self, key, phones, minutes):
+        if not key.startswith("tskey-"):
+            messagebox.showerror(
+                "Start farm", "Paste a Tailscale auth key (starts with tskey-).")
+            return
+        self.log(f"[actions] dispatching farm: {phones} phones, {minutes} min")
+
+        def work():
+            ok = gh_post(gh_token(), FARM_DISPATCH, {"ref": "main", "inputs": {
+                "authkey": key, "phones": phones, "minutes": minutes}})
+            self.root.after(0, lambda: self.log(
+                f"[actions] farm dispatch {'sent' if ok else 'FAILED'}"))
         threading.Thread(target=work, daemon=True).start()
 
     # ------------------------------------------------------- run workflow
