@@ -4,16 +4,26 @@
 # workflow twice: once right after provisioning (the reliable moment) and
 # once more at session end (best effort -- docker can be flaky there).
 #
-#   PROFILE_TOKEN=... bash snapshot-upload.sh [beacon-label]
+#   PROFILE_TOKEN=... bash snapshot-upload.sh [beacon-label] [volume]
+#
+# [volume] (e.g. rfarm1-data) snapshots just that one phone -- used by the
+# GUI's per-phone Save button over the farm ssh. Without it: every rfarm
+# volume. If PROFILE_TOKEN is not in the env, falls back to the token file
+# the farm workflow leaves at ~/.profile_token.
 #
 # UNKILLABLE BY DESIGN: no set -e, every failure logged loudly, always exits 0.
 
 LABEL="${1:-snapshot}"
+ONLY="${2:-}"
 LOG="${FARM_LOG:-/tmp/farm.log}"
-PA="Authorization: Bearer ${PROFILE_TOKEN:?PROFILE_TOKEN not set}"
 PAPI="https://api.github.com/repos/Zarifbenalam-2/farm-profiles/releases"
 PDIR="${RUNNER_TEMP:-/tmp}/profiles"
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
+
+if [ -z "${PROFILE_TOKEN:-}" ]; then
+  PROFILE_TOKEN="$(cat "$HOME/.profile_token" 2>/dev/null)"
+fi
+PA="Authorization: Bearer ${PROFILE_TOKEN:?PROFILE_TOKEN not set}"
 
 say() { echo "[snapshot:$LABEL] $*" | tee -a "$LOG"; }
 
@@ -35,6 +45,7 @@ say "volumes seen: [$VOLS]"
 
 staged=0
 for pv in $(echo "$VOLS" | tr ' ' '\n' | grep '^rfarm.*-data$'); do
+  [ -z "$ONLY" ] || [ "$pv" = "$ONLY" ] || continue
   # never guess the host path: ask docker where the volume lives, and test
   # the dir with sudo -- /var/lib/docker is root-only, so a plain [ -d ]
   # reports "not a dir" on permission denial (that was the staged-0 bug)

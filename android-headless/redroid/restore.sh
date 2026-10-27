@@ -20,8 +20,10 @@ tars=("$IN"/rfarm*.tar.gz)
 for t in "${tars[@]}"; do
   v="$(basename "$t" .tar.gz)"              # e.g. rfarm3-data
   idx="${v%%-*}"                            # rfarm3
-  dst="/var/lib/docker/volumes/$v/_data"
-  if [ ! -d "$dst" ]; then
+  # never guess the host path, and only root can see /var/lib/docker --
+  # a plain [ -d ] reports "not a dir" on permission denial
+  dst="$(sudo docker volume inspect "$v" --format '{{.Mountpoint}}' 2>/dev/null || true)"
+  if [ -z "$dst" ] || ! sudo test -d "$dst"; then
     echo "$v: volume does not exist on this runner (phone index not running?) -- skipping"
     continue
   fi

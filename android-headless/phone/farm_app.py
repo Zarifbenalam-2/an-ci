@@ -18,6 +18,7 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.request
 import webbrowser
 from pathlib import Path
 from tkinter import (BOTH, BOTTOM, LEFT, RIGHT, TOP, X, Y, BooleanVar,
@@ -32,6 +33,10 @@ THUMB_W, THUMB_H = 180, 400                     # 720x1600 / 4
 DISPATCH_URL = ("https://github.com/Zarifbenalam-2/an-ci/actions/workflows/"
                 "phone-farm-redroid.yml")
 UNCERTIFIED_URL = "https://www.google.com/android/uncertified"
+PROFILES_API = ("https://api.github.com/repos/Zarifbenalam-2/farm-profiles/"
+                "releases/tags/profiles")
+ASSETS_API = ("https://api.github.com/repos/Zarifbenalam-2/farm-profiles/"
+              "releases/assets")
 
 # palette
 BG, PANEL, CARD, ACCENT, TEXT, MUTED, WARN = (
@@ -50,6 +55,54 @@ def run(cmd, **kw):
 def git_show(path: str) -> str:
     r = run(["git", "show", f"origin/main:{path}"], cwd=REPO)
     return r.stdout if r.returncode == 0 else ""
+
+
+def gh_token() -> str:
+    """Token for github.com from the local credential store (memory only)."""
+    r = run(["git", "credential", "fill"], cwd=REPO,
+            input="protocol=https\nhost=github.com\n\n")
+    for line in r.stdout.splitlines():
+        if line.startswith("password="):
+            return line.split("=", 1)[1]
+    return ""
+
+
+def gh_api(url: str, token: str, method: str = "GET") -> dict:
+    req = urllib.request.Request(url, method=method, headers={
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "farm-app"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode() or "{}")
+    except Exception:
+        return {}
+
+
+def fetch_saved_profiles():
+    """Profile assets in the private farm-profiles release; None = lookup failed."""
+    tok = gh_token()
+    if not tok:
+        return None
+    rel = gh_api(PROFILES_API, tok)
+    if "assets" not in rel:
+        return None
+    assets = [a for a in rel["assets"]
+              if a.get("name", "").startswith("rfarm")
+              and a.get("name", "").endswith(".tar.gz")]
+    assets.sort(key=lambda a: a.get("name", ""))
+    return assets
+
+
+def delete_profile_asset(aid, token: str) -> bool:
+    req = urllib.request.Request(f"{ASSETS_API}/{aid}", method="DELETE",
+                                 headers={"Authorization": f"Bearer {token}",
+                                          "User-Agent": "farm-app"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
 
 
 # --------------------------------------------------------------------- farm
@@ -127,6 +180,7 @@ class App:
         self.cards: dict[str, dict] = {}       # name -> {photo, label widgets}
         self.thumbq: queue.Queue = queue.Queue()
         self.images: dict[str, object] = {}    # keep PhotoImage refs alive
+        self.saved: set = set()                # profile assets that exist per slot
 
         style = ttk.Style(root)
         style.theme_use("clam")
@@ -152,6 +206,9 @@ class App:
               fg=MUTED).pack(side=LEFT, pady=10)
         Label(bar, textvariable=self.status, bg=PANEL, fg=MUTED).pack(
             side=RIGHT, padx=12)
+        Button(bar, text="Saved phones", command=self.saved_phones_dialog,
+               bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
+               padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
         Button(bar, text="Run workflow", command=self.run_workflow_dialog,
                bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
                padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
@@ -166,18 +223,6 @@ class App:
                fg="#0b0f0c", activebackground="#16a34a", relief="flat",
                padx=14, pady=5, font=("Segoe UI", 10, "bold")).pack(
                side=RIGHT, padx=6, pady=10)
-        Button(bar, text="Refresh", command=self.refresh, bg=CARD, fg=TEXT,
-               activebackground="#333845", relief="flat", padx=12,
-               pady=5).pack(side=RIGHT, padx=4, pady=10)
-        Button(bar, text="Run workflow", command=self.run_workflow_dialog,
-               bg=CARD, fg=TEXT, activebackground="#333845", relief="flat",
-               padx=12, pady=5).pack(side=RIGHT, padx=4, pady=10)
-        Button(bar, text="GSF register",
-               command=lambda: webbrowser.open(UNCERTIFIED_URL), bg=CARD,
-               fg=TEXT, activebackground="#333845", relief="flat", padx=12,
-               pady=5).pack(side=RIGHT, padx=4, pady=10)
-        Label(bar, textvariable=self.status, bg=PANEL, fg=MUTED).pack(
-            side=RIGHT, padx=12)
 
     def _grid_area(self):
         wrap = Frame(self.root, bg=BG)
@@ -217,6 +262,9 @@ class App:
 
     def _refresh_bg(self):
         self.farm.refresh()
+        sp = fetch_saved_profiles()
+        if sp is not None:
+            self.saved = {a["name"] for a in sp}
         self.root.after(0, self._redraw)
 
     def _redraw(self):
@@ -256,6 +304,8 @@ class App:
         dot.pack(side=RIGHT)
         Label(head, text=f" {state}", fg=STATE_COLOR.get(state, MUTED),
               bg=CARD).pack(side=RIGHT)
+        if f"rfarm{name.split('-')[-1]}-data.tar.gz" in self.saved:
+            Label(head, text="saved ·", fg=ACCENT, bg=CARD).pack(side=RIGHT)
 
         thumb = Label(card, text="  waiting for screen…", bg="#111216",
                       fg=MUTED, width=26, height=21)
@@ -274,6 +324,132 @@ class App:
                    relief="flat", padx=10).pack(side=LEFT)
         Button(btns, text="Connect", command=lambda a=addr: self.connect(a),
                bg="#333845", fg=TEXT, relief="flat", padx=10).pack(side=LEFT, padx=6)
+        Button(btns, text="Save", command=lambda n=name: self.save_phone(n),
+               bg="#333845", fg=ACCENT, relief="flat", padx=10).pack(side=LEFT)
+
+    # -------------------------------------------------- saved-phone profiles
+    def log(self, msg: str):
+        self.log_box.insert("end", msg.rstrip("\n") + "\n")
+        self.log_box.see("end")
+
+    def save_phone(self, name):
+        """Snapshot one phone's data volume and upload it (replaces in place)."""
+        hp = self.farm.ssh_target()
+        if not hp:
+            messagebox.showerror("Save phone", "No live runner -- farm down?")
+            return
+        try:
+            idx = int(name.split("-")[-1])
+        except ValueError:
+            return
+        vol, host, port = f"rfarm{idx}-data", hp[0], hp[1]
+        self.log(f"--- SAVE {name}: tar + upload {vol} (~600 MB, a minute or two) ---")
+        self.status.set(f"saving {name} …")
+
+        def work():
+            r = subprocess.run(
+                ["ssh", "-p", port, "-o", "StrictHostKeyChecking=accept-new",
+                 "-o", "BatchMode=yes", host,
+                 f"bash ~/work/an-ci/an-ci/android-headless/redroid/"
+                 f"snapshot-upload.sh save-{name} {vol}"],
+                capture_output=True, text=True, timeout=900)
+            out = (r.stdout + r.stderr).strip()
+            self.root.after(0, lambda: self._save_done(name, r.returncode, out))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _save_done(self, name, code, out):
+        ok = code == 0 and "uploaded" in out
+        self.log(f"[save {name}] "
+                 f"{'OK -- profile replaced in farm-profiles' if ok else 'FAILED'}\n"
+                 f"{out[-800:]}")
+        self.status.set(f"{name} saved" if ok else f"{name} save FAILED (see log)")
+        if ok:
+            self.refresh()
+
+    def saved_phones_dialog(self):
+        dlg = Toplevel(self.root)
+        dlg.title("Saved phones — farm-profiles (private repo)")
+        dlg.configure(bg=PANEL)
+        dlg.geometry("680x460")
+        top = Frame(dlg, bg=PANEL)
+        top.pack(fill=X)
+        Label(top, text="SAVED PHONES", bg=PANEL, fg=TEXT,
+              font=("Segoe UI", 12, "bold")).pack(side=LEFT, padx=12, pady=8)
+        info = StringVar(value="loading …")
+        Label(top, textvariable=info, bg=PANEL, fg=MUTED).pack(side=LEFT, padx=8)
+        Button(top, text="Refresh", relief="flat", bg=CARD, fg=TEXT, padx=10,
+               command=lambda: self._saved_fill(info)).pack(
+               side=RIGHT, padx=10, pady=8)
+        Label(dlg, text="One asset per phone-slot; every save REPLACES the old "
+              "one (storage stays bounded). At farm boot each slot auto-restores "
+              "its saved self -- delete a row to make that slot boot fresh.",
+              bg=PANEL, fg=MUTED, anchor="w", justify=LEFT,
+              wraplength=640).pack(fill=X, padx=12, pady=(0, 6))
+        body = Frame(dlg, bg=BG)
+        body.pack(fill=BOTH, expand=True, padx=10, pady=(0, 10))
+        self._sp_body = body
+        self._saved_fill(info)
+
+    def _saved_fill(self, info):
+        body = getattr(self, "_sp_body", None)
+        if body is None:
+            return
+
+        def work():
+            assets = fetch_saved_profiles()
+            self.root.after(0, lambda: self._saved_render(info, body, assets))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _saved_render(self, info, body, assets):
+        if assets is None:
+            info.set("lookup failed (token / network)")
+            assets = []
+        else:
+            total = sum(a.get("size", 0) for a in assets)
+            info.set(f"{len(assets)} profile(s) · {total / 1e9:.2f} GB total"
+                     if assets else "no profiles saved yet")
+            self.saved = {a["name"] for a in assets}
+        for w in body.winfo_children():
+            w.destroy()
+        if not assets:
+            Label(body, text="Nothing here yet.\nUse a phone card's Save "
+                  "button while a farm is live.", bg=BG, fg=MUTED,
+                  pady=40).grid(row=0, column=0)
+            return
+        for c, h in enumerate(("phone-slot", "size", "saved (UTC)", "")):
+            Label(body, text=h, bg=BG, fg=MUTED,
+                  font=("Segoe UI", 9, "bold")).grid(
+                  row=0, column=c, sticky="w", padx=8, pady=(6, 2))
+        for r, a in enumerate(assets, start=1):
+            Label(body, text=a.get("name", "?").replace("-data.tar.gz", ""),
+                  bg=BG, fg=TEXT, font=("Consolas", 10)).grid(
+                  row=r, column=0, sticky="w", padx=8)
+            Label(body, text=f"{a.get('size', 0) / 1e6:.0f} MB", bg=BG,
+                  fg=MUTED).grid(row=r, column=1, sticky="w", padx=8)
+            Label(body, text=(a.get("updated_at", "") or "").replace("T", " ")[:16],
+                  bg=BG, fg=MUTED).grid(row=r, column=2, sticky="w", padx=8)
+            Button(body, text="Delete", relief="flat", bg=CARD, fg=WARN, padx=8,
+                   command=lambda aa=a: self._saved_delete(aa, info)).grid(
+                   row=r, column=3, sticky="e", padx=8)
+
+    def _saved_delete(self, asset, info):
+        if not messagebox.askyesno(
+                "Delete profile",
+                f"Delete {asset['name']} ({asset.get('size', 0) / 1e6:.0f} MB)?\n"
+                "That phone-slot will boot FRESH at the next farm."):
+            return
+
+        def work():
+            ok = delete_profile_asset(asset["id"], gh_token())
+
+            def done():
+                if ok:
+                    messagebox.showinfo("Deleted", f"{asset['name']} deleted")
+                else:
+                    messagebox.showerror("Delete failed", "token / network?")
+                self._saved_fill(info)
+            self.root.after(0, done)
+        threading.Thread(target=work, daemon=True).start()
 
     # ------------------------------------------------------- run workflow
     def run_workflow_dialog(self):
@@ -401,7 +577,7 @@ class App:
             r = subprocess.run(
                 ["ssh", "-p", port, "-o", "StrictHostKeyChecking=accept-new",
                  "-o", "BatchMode=yes", host,
-                 "bash android-headless/redroid/add-phone.sh"],
+                 "bash ~/work/an-ci/an-ci/android-headless/redroid/add-phone.sh"],
                 capture_output=True, text=True, timeout=300)
             out = (r.stdout + r.stderr).strip()
             if r.returncode == 3:

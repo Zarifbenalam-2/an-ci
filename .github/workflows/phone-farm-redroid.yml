@@ -79,6 +79,8 @@ jobs:
           git config user.name  "an-ci bot"
           git config user.email "actions@users.noreply.github.com"
           mkdir -p .session
+          : > .session/redroid-farm-log.txt   # old runs' lines made the log
+          # show IPs from PREVIOUS farms; each run now starts a clean log
           beacon() {
             echo "$(date -u +%H:%M:%SZ) $1" >> .session/redroid-farm-log.txt
             git add .session >/dev/null 2>&1 || true
@@ -94,6 +96,7 @@ jobs:
           # any unguarded command dying under set -e must dump the log too,
           # not exit silently (that blind-death cost a whole debug cycle once)
           trap 'fail "unexpected exit near line $LINENO"' ERR
+          beacon "=== farm run ${GITHUB_RUN_NUMBER} booting (log reset) ==="
 
           echo "--- joining the tailnet ---" | tee -a "$log"
           if ! curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1; then
@@ -132,21 +135,34 @@ jobs:
               | python3 -c 'import json,sys;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)
             if [ -n "${prid:-}" ]; then
               curl -fsS -H "$PA" -H "Accept: application/vnd.github+json" \
-                "$PAPI/$prid/assets" 2>>"$log" \
+                "$PAPI/$prid/assets?per_page=100" 2>>"$log" \
                 | python3 -c 'import json,sys;[print(a["name"],a["url"]) for a in json.load(sys.stdin) if a["name"].startswith("rfarm") and a["name"].endswith(".tar.gz")]' > "$PDIR/list.txt" 2>/dev/null || true
+              nrest=0
               while read -r pname purl; do
                 [ -n "$pname" ] || continue
                 curl -fsSL -H "$PA" -H "Accept: application/octet-stream" \
                   -o "$PDIR/$pname" "$purl" 2>>"$log" || continue
                 pv="${pname%.tar.gz}"
                 sudo docker volume create "$pv" >/dev/null 2>&1 || true
-                pdst="/var/lib/docker/volumes/$pv/_data"
+                # same lesson as snapshot-upload.sh: never guess the host
+                # path (docker volume inspect), and only root can see
+                # /var/lib/docker -- a plain [ -d ] lies about root-only dirs
+                pdst=$(sudo docker volume inspect "$pv" --format '{{.Mountpoint}}' 2>/dev/null || true)
+                if [ -z "$pdst" ] || ! sudo test -d "$pdst"; then
+                  echo "restore: cannot locate volume $pv on host" | tee -a "$log"
+                  continue
+                fi
                 sudo rm -rf "$pdst"; sudo mkdir -p "$pdst"
                 if sudo tar xzf "$PDIR/$pname" -C "$pdst" 2>>"$log"; then
-                  echo "restored $pv from profile" | tee -a "$log"
+                  nrest=$((nrest + 1))
+                  beacon "restored $pv from profile"
+                  rm -f "$PDIR/$pname"
                 fi
               done < "$PDIR/list.txt"
               rm -f "$PDIR/list.txt"
+              if [ "$nrest" -gt 0 ]; then
+                beacon "restored $nrest profile(s); those phones boot as their saved selves"
+              fi
             else
               echo "no profiles release yet -- fresh phones" | tee -a "$log"
             fi
@@ -267,6 +283,12 @@ jobs:
             beacon "openssh-server install failed; add-phone over ssh unavailable this run"
           fi
           echo "ssh://runner@$tsip:2222" > .session/farm-ssh.txt
+          # on-runner token file so snapshot-upload.sh can run over ssh
+          # (the GUI Save button) without the secret crossing the wire
+          if [ -n "${PROFILE_TOKEN:-}" ]; then
+            printf '%s' "$PROFILE_TOKEN" > "$HOME/.profile_token"
+            chmod 600 "$HOME/.profile_token"
+          fi
           chmod +x android-headless/redroid/*.sh
           beacon "FARM READY: $PHONES phones on $tsip"
 
