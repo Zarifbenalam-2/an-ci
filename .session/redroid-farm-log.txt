@@ -5,3 +5,4 @@
 12:33:34Z phone-1 booted at 100.114.34.94:21001 (gsf 4383080682615392424)
 12:33:56Z phone-2 booted at 100.114.34.94:21002 (gsf UNKNOWN)
 12:33:58Z youtube download failed; phones stay gapps-only
+12:34:01Z webview ensured on all phones
