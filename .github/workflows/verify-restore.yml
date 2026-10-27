@@ -44,11 +44,15 @@ jobs:
           else
             tsbin=$(readlink -f "$(command -v tailscale)")
           fi
+          set +eE
+          echo "=== attempt 1 (timeout) ===" >>"$log"
           sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname verify-eph \
-            --ephemeral --timeout 90s >>"$log" 2>&1 \
-          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --ephemeral >>"$log" 2>&1 \
-          || true
-          echo "--- tailscale log tail:"; tail -25 "$log"
+            --ephemeral --timeout 60s >>"$log" 2>&1; echo "a1 rc=$?"
+          echo "=== attempt 2 (no timeout) ===" >>"$log"
+          sudo "$tsbin" up --authkey "$TS_AUTHKEY" --ephemeral >>"$log" 2>&1
+          echo "a2 rc=$?" >>"$log"
+          set -eE
+          echo "--- FULL tailscale log:"; cat "$log"
           tsip=$(sudo "$tsbin" ip -4 | head -1) || true
           [ -n "${tsip:-}" ] || { echo "NO TAILNET IP -- join failed"; exit 1; }
           echo "joined as $(sudo "$tsbin" status | head -1 || true)"
