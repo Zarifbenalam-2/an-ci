@@ -2,3 +2,4 @@
 12:32:56Z on the tailnet as android-rfarm at 100.114.34.94
 12:33:11Z restored rfarm1-data from profile
 12:33:12Z restored 1 profile(s); those phones boot as their saved selves
+12:33:34Z phone-1 booted at 100.114.34.94:21001 (gsf 4383080682615392424)
