@@ -46,7 +46,12 @@ jobs:
           fi
           sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname verify-eph \
             --ephemeral --timeout 90s >>"$log" 2>&1 \
-          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --ephemeral >>"$log" 2>&1
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --ephemeral >>"$log" 2>&1 \
+          || true
+          echo "--- tailscale log tail:"; tail -25 "$log"
+          tsip=$(sudo "$tsbin" ip -4 | head -1) || true
+          [ -n "${tsip:-}" ] || { echo "NO TAILNET IP -- join failed"; exit 1; }
+          echo "joined as $(sudo "$tsbin" status | head -1 || true)"
           mkdir -p "$RUNNER_TEMP/pt"
           curl -fsSL -o "$RUNNER_TEMP/pt.zip" \
             https://dl.google.com/android/repository/platform-tools-latest-linux.zip
@@ -59,7 +64,10 @@ jobs:
             [ "$v" = "1" ] && { ok=yes; break; }
             sleep 5
           done
-          [ "$ok" = yes ] || { echo "phone never booted"; exit 1; }
+          if [ "$ok" != yes ]; then
+            echo "--- adb diag:"; adb devices; tail -10 "$log"
+            echo "phone never booted"; exit 1
+          fi
           mkdir -p .session
           adb -s "$PHONE" shell dumpsys account 2>/dev/null | grep 'Account {' \
             > .session/acc.txt || true
