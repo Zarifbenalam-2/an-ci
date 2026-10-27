@@ -1,0 +1,88 @@
+name: verify-restore
+
+# Joins the tailnet from a throwaway runner and inspects a FARM phone over
+# adb: which accounts are signed in, a screenshot, and a path check (direct
+# vs DERP relay) back to the PC. Proof of profile restore, no PC needed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      authkey:
+        description: Tailscale auth key (ephemeral)
+        required: true
+      phone:
+        description: phone adb address on the tailnet
+        required: false
+        default: "100.114.34.94:21001"
+
+permissions:
+  contents: write   # proof is committed into .session/
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: join tailnet and inspect the phone
+        env:
+          TS_AUTHKEY: ${{ inputs.authkey }}
+          PHONE: ${{ inputs.phone }}
+        run: |
+          set -Eeuo pipefail
+          echo "::add-mask::$TS_AUTHKEY"
+          log="$RUNNER_TEMP/v.log"; : > "$log"
+          if ! curl -fsSL https://tailscale.com/install.sh | sh >>"$log" 2>&1; then
+            ver=$(curl -fsSL https://pkgs.tailscale.com/stable/ \
+              | grep -oE 'tailscale_[0-9]+\.[0-9]+\.[0-9]+_amd64\.tgz' | head -1 | cut -d_ -f2)
+            curl -fsSL -o /tmp/ts.tgz "https://pkgs.tailscale.com/stable/tailscale_${ver}_amd64.tgz"
+            tar -xzf /tmp/ts.tgz -C /tmp
+            sudo /tmp/tailscale_${ver}/tailscaled --statedir=/tmp/ts-state >>"$log" 2>&1 &
+            sleep 3; tsbin="/tmp/tailscale_${ver}/tailscale"
+          else
+            tsbin=$(readlink -f "$(command -v tailscale)")
+          fi
+          sudo "$tsbin" up --authkey "$TS_AUTHKEY" --hostname verify-eph \
+            --ephemeral --timeout 90s >>"$log" 2>&1 \
+          || sudo "$tsbin" up --authkey "$TS_AUTHKEY" --ephemeral >>"$log" 2>&1
+          mkdir -p "$RUNNER_TEMP/pt"
+          curl -fsSL -o "$RUNNER_TEMP/pt.zip" \
+            https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+          unzip -q -o "$RUNNER_TEMP/pt.zip" -d "$RUNNER_TEMP/pt"
+          export PATH="$RUNNER_TEMP/pt/platform-tools:$PATH"
+          adb connect "$PHONE" >>"$log" 2>&1 || true
+          ok=no
+          for w in $(seq 1 20); do
+            v=$(adb -s "$PHONE" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+            [ "$v" = "1" ] && { ok=yes; break; }
+            sleep 5
+          done
+          [ "$ok" = yes ] || { echo "phone never booted"; exit 1; }
+          mkdir -p .session
+          adb -s "$PHONE" shell dumpsys account 2>/dev/null | grep 'Account {' \
+            > .session/acc.txt || true
+          echo "=== accounts on $PHONE (restore proof, $(date -u +%H:%M:%SZ)) ===" \
+            > .session/restore-proof.txt
+          cat .session/acc.txt >> .session/restore-proof.txt
+          if [ ! -s .session/acc.txt ]; then
+            echo "(NO ACCOUNT -- restore did not bring the login back)" \
+              >> .session/restore-proof.txt
+          fi
+          adb -s "$PHONE" exec-out screencap -p > .session/restore-proof.png
+          {
+            echo "android $(adb -s "$PHONE" shell getprop ro.build.version.release | tr -d '\r')"
+            g=$(python3 android-headless/phone/gsf_id.py adb "$PHONE" 2>/dev/null | tr -d '\r' || true)
+            echo "gsf-id ${g:-unknown}"
+          } >> .session/restore-proof.txt
+          git config user.name  "an-ci bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add .session
+          git -c commit.gpgsign=false commit -q -m "restore proof: $PHONE"
+          for a in 1 2 3; do
+            git fetch -q origin main && git rebase -q --autostash origin/main \
+              && git push -q origin HEAD:main && break
+            sleep 3
+          done
+          echo "VERIFY DONE:"; cat .session/restore-proof.txt
